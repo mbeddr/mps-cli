@@ -1,0 +1,14 @@
+**/.idea/
+**/.gradle/
+**/build/
+**/buildSrc/.gradle
+**/buildSrc/build
+**/out/
+*.iml
+**/.gradletasknamecache
+**/.classpath
+**/.settings/
+**/bin/
+**/.project
+**/workspace.xml
+**/*_gen*/
