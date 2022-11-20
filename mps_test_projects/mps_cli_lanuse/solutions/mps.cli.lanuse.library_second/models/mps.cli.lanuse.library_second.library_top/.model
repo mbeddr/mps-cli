@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model ref="r:0222d3a9-d52b-48bb-87fb-d0c32a597c38(mps.cli.lanuse.library_second.library_top)" content="header">
+  <persistence version="9" />
+  <attribute name="doNotGenerate" value="false" />
+  <attribute name="content" value="header" />
+  <languages>
+    <use id="53fdadc6-a07c-4398-b66b-c9af1071186c" name="mps.cli.landefs.library" version="0" />
+    <use id="a7aaae55-aa5e-4a05-b2d0-013745658efa" name="mps.cli.landefs.people" version="0" />
+  </languages>
+  <imports>
+    <import index="q0v6" ref="r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed(mps.cli.lanuse.library_top.authors_top)" />
+  </imports>
+</model>
+
