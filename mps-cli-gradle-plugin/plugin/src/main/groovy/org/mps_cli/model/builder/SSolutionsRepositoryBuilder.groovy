@@ -2,11 +2,11 @@ package org.mps_cli.model.builder
 
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
-import org.mps_cli.model.SSolutionsUniverse
+import org.mps_cli.model.SRepository
 
 import static groovy.io.FileType.FILES
 
-class SSolutionsUniverseBuilder {
+class SSolutionsRepositoryBuilder {
 
     def build(path) {
         Date start = new Date()
@@ -18,20 +18,20 @@ class SSolutionsUniverseBuilder {
             solutionsDirectories.add(it.parentFile)
         }
 
-        def sSolutionsUniverse = new SSolutionsUniverse()
-        sSolutionsUniverse.name = path
+        def sSolutionsRepository = new SRepository()
+        sSolutionsRepository.name = path
 
         solutionsDirectories.each {
             def solutionBuilder = new SSolutionBuilder()
             def solution = solutionBuilder.build(it.absolutePath)
-            sSolutionsUniverse.solutions.add(solution)
+            sSolutionsRepository.solutions.add(solution)
         }
 
         Date stop = new Date()
         TimeDuration td = TimeCategory.minus( stop, start )
         println "${td} for handling ${path}"
 
-        sSolutionsUniverse
+        sSolutionsRepository
     }
 
 }

@@ -1,16 +1,19 @@
 package org.mps_cli.model
 
 class SNode {
-    def SNode parentNode
+    SModel myModel
+    SNode parentNode
     def roleInParent
     def concept = ""
     def id
     def properties = [:]
     def List<SNode> children = []
+    def Map<String,SNodeRef> refs = [:]
 
-    SNode(parent, role) {
+    SNode(parent, role, model) {
         parentNode = parent
         roleInParent = role
+        myModel = model
         if (parent != null)
             parent.children.add(this)
     }

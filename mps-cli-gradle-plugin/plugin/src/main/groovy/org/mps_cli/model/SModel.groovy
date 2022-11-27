@@ -7,4 +7,8 @@ class SModel {
 
     // caching
     def List<SNode> allNodes = new ArrayList<>(1024)
+
+    Map<String, SNode> nodeId2Node() {
+        allNodes.collectEntries {[it.id, it] }
+    }
 }
