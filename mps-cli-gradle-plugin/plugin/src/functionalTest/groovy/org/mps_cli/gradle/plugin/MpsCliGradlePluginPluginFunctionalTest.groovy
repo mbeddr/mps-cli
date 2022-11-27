@@ -30,8 +30,8 @@ plugins {
     id('org.mps_cli.gradle.plugin.greeting')
 }
 
-printLanguageDefinition {
-   sourcesDir = 'c:\\\\work\\\\E3_2.0_Solution\\\\solutions'
+buildModel {
+   sourcesDir = '..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\mps_test_projects\\\\mps_cli_lanuse'
 }
 """
 
@@ -39,12 +39,13 @@ printLanguageDefinition {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("printLanguageDefinition")
+        runner.withArguments("buildModel")
         runner.withProjectDir(projectDir)
         def result = runner.build()
         print(result.output)
 
         then:
-        result.output.contains("c:\\testSourcesDir")
+        result.output.contains("mps_test_projects\\mps_cli_lanuse")
+        result.output.contains("number of solutions: 2")
     }
 }
