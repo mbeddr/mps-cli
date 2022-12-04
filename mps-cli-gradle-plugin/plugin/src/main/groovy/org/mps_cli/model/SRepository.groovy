@@ -25,7 +25,7 @@ class SRepository {
         nodes
     }
 
-    def nodesWithConcept(conceptName) {
+    def nodesOfConcept(conceptName) {
         allNodes().findAll { it.concept != null && it.concept.endsWith("." + conceptName)}
     }
 }

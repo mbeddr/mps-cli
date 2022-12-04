@@ -12,10 +12,12 @@ plugins {
 
     // Apply the Groovy plugin to add support for Groovy
     id 'groovy'
+
+    id 'maven-publish'
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
+    mavenLocal()
     mavenCentral()
 }
 
@@ -27,8 +29,8 @@ dependencies {
 gradlePlugin {
     // Define the plugin
     plugins {
-        greeting {
-            id = 'org.mps_cli.gradle.plugin.greeting'
+        mps_cli {
+            id = 'org.mps_cli.gradle.plugin'
             implementationClass = 'org.mps_cli.gradle.plugin.MpsCliGradlePluginPlugin'
         }
     }
@@ -59,4 +61,16 @@ tasks.named('check') {
 tasks.named('test') {
     // Use JUnit Jupiter for unit tests.
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'org.mps_cli'
+            artifactId = 'gradle.plugin'
+            version = '0.1'
+
+            from components.java
+        }
+    }
 }
