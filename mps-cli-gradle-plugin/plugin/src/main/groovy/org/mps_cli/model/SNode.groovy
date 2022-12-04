@@ -30,4 +30,12 @@ class SNode {
         if (includeSelf) res.add(this)
         res
     }
+
+    def propertyMissing( name ) {
+        def val = properties[name]
+        if (val != null) return val
+        val = children.findAll( {it.roleInParent.equals(name) })
+        if (val != null && !val.isEmpty()) return val
+        refs[name]
+    }
 }

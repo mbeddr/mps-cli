@@ -16,12 +16,19 @@ task printSolutionsInfo {
         def repo = buildModel.repository
         def models = repo.allModels()
         println "all models: ${models.collect { it.name }}"
+        println "repo.id2Models() ${repo.id2models()}"
         
         def allNodes = repo.allNodes()
         println "concepts: ${allNodes.collect { it.concept }}"
         
         def authors = repo.nodesOfConcept("mps.cli.landefs.people.structure.Person")
-        println "all authors: ${authors.collect { it.name }}"
+        println "authors: ${authors.collect { it.name }}"
+        
+        def books = repo.nodesOfConcept("mps.cli.landefs.library.structure.Book")
+        println "books: ${books.collect { it.name }}"
+        
+        def theMysteriousIsland = books.find { it.name.equals("The Mysterious Island") }
+        println "mysterious island authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
     }
 }
 
@@ -39,6 +46,13 @@ task printSolutionsInfo {
         result.output.contains "mps.cli.lanuse.library_second.library_top"
 
         // check nodes by name
+        // persons
         result.output.contains "Mark Twain"
+        result.output.contains "Jules Verne"
+        // book
+        result.output.contains "Tom Sawyer"
+        result.output.contains "The Mysterious Island"
+        result.output.contains "mysterious island authors: [Jules Verne"
+
     }
 }

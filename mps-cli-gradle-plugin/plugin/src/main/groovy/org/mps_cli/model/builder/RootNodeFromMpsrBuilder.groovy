@@ -17,7 +17,8 @@ class RootNodeFromMpsrBuilder {
     def build(File mpsrFile, SModel sModel) {
         def model = new XmlParser().parse(mpsrFile)
         collectRegistryInfo(model)
-        def res = collectNodes(model.node, null, sModel)
+        Node xmlNode = model.node.get(0)
+        def res = collectNodes(xmlNode, null, sModel)
         res
     }
 
@@ -27,8 +28,8 @@ class RootNodeFromMpsrBuilder {
         sNode.concept = conceptsIds2Names[xmlNode.'@concept']
         sNode.id = xmlNode.'@id'
 
-        xmlNode.node.each { sNode.children.add(collectNodes(it, sNode, sModel))  }
         xmlNode.property.each { sNode.properties[propertyIds2Names[it.'@role']] = it.'@value' }
+        xmlNode.node.each { sNode.children.add(collectNodes(it, sNode, sModel))  }
         xmlNode.ref.each {
             String[] parts = it.'@to'.split(":")
             def targetModelId = importsIndex2ImportedModelIds[parts[0]]
@@ -57,7 +58,7 @@ class RootNodeFromMpsrBuilder {
         model.imports.import.each { _import ->
             // e.g. <import index="q0v6" ref="r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed(mps.cli.lanuse.library_top.authors_top)" implicit="true" />
             String importedModelIdAndName = _import.'@ref'
-            importsIndex2ImportedModelIds[_import.'@index'] = importedModelIdAndName.substring(importedModelIdAndName.indexOf("("))
+            importsIndex2ImportedModelIds[_import.'@index'] = importedModelIdAndName.substring(0, importedModelIdAndName.indexOf("("))
         }
     }
 }

@@ -5,7 +5,7 @@ class SNodeRef {
     String referencedNodeId
 
     SNode resolve(SRepository repo) {
-        SModel model = repo.id2models[referencedModelId]
-        model.nodeId2Node[referencedNodeId]
+        SModel model = repo.id2models()[referencedModelId]
+        model.nodeId2Node()[referencedNodeId]
     }
 }
