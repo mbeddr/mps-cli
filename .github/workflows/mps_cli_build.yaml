@@ -1,0 +1,35 @@
+name: MPS-CLI_CI
+
+on: [push, pull_request]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.MPSQA_GITHUB_PKG_REGISTRY }}
+
+jobs:
+  build_mps_cli:
+    runs-on: ubuntu-latest
+    env:
+      DISPLAY: ':99'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup headless environment
+      run: |
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        cd mps-cli-gradle-plugin
+       
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11  
+        
+    - name: Build MPS-CLI and Publish to Github Maven
+      uses: gradle/gradle-build-action@v2
+      with: 
+        arguments: :plugin:functionalTest 
+        wrapper-cache-enabled: true
+        dependencies-cache-enabled: true
+        dependencies-cache-key: gradle/dependency-locks/**
+        dependencies-cache-exact: true
+        configuration-cache-enabled: true

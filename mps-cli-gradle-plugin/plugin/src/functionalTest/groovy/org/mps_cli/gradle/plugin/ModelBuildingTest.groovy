@@ -5,7 +5,7 @@ package org.mps_cli.gradle.plugin
 
 class ModelBuildingTest extends TestBase {
 
-    def "solutions build test"() {
+    def "model extraction test"() {
         given:
         settingsFile << ""
         buildFile << "$buildPreamble" + '''
@@ -65,6 +65,6 @@ task printSolutionsInfo {
 
         // magazine
         result.output.contains "magazines definitions: [Der Spiegel]"
-        result.output.contains "'Der Spiegel' periodicity: WEEKLY"
+        result.output.contains "'Der Spiegel' periodicity: 4Yb5JA31wzt/WEEKLY"
     }
 }
