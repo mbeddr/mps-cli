@@ -33,3 +33,4 @@ jobs:
         dependencies-cache-key: gradle/dependency-locks/**
         dependencies-cache-exact: true
         configuration-cache-enabled: true
+        build-root-directory: mps-cli-gradle-plugin
