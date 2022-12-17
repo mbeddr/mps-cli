@@ -3,11 +3,12 @@ package org.mps_cli.model.builder
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import groovy.xml.XmlParser
+import org.mps_cli.model.SRepository
 import org.mps_cli.model.SSolution
 
 class SSolutionBuilder {
 
-    def build(path) {
+    def build(String path) {
         Date start = new Date()
 
         def filePath = new File(path)

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model ref="r:a96b23f6-56db-490c-a218-d40d11be7f1e(mps.cli.lanuse.library_top.library_top)" content="header">
   <persistence version="9" />
+  <attribute name="content" value="header" />
   <languages>
     <use id="53fdadc6-a07c-4398-b66b-c9af1071186c" name="mps.cli.landefs.library" version="0" />
     <use id="a7aaae55-aa5e-4a05-b2d0-013745658efa" name="mps.cli.landefs.people" version="0" />

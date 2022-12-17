@@ -136,5 +136,10 @@
       <property role="TrG5h" value="QUATERLY" />
     </node>
   </node>
+  <node concept="1TIwiD" id="ST9rMmXyEE">
+    <property role="EcuMT" value="1024891882120293034" />
+    <property role="TrG5h" value="NotInstantiatedLibraryEntity" />
+    <ref role="1TJDcQ" node="4Yb5JA31wzl" resolve="LibraryEntityBase" />
+  </node>
 </model>
 

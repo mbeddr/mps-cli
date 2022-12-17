@@ -6,6 +6,9 @@
   </imports>
   <registry>
     <language id="53fdadc6-a07c-4398-b66b-c9af1071186c" name="mps.cli.landefs.library">
+      <concept id="5731700211659966680" name="mps.cli.landefs.library.structure.Magazine" flags="ng" index="3czhSx">
+        <property id="5731700211659966689" name="periodicity" index="3czhSo" />
+      </concept>
       <concept id="5731700211659966675" name="mps.cli.landefs.library.structure.Library" flags="ng" index="3czhSE">
         <child id="5731700211660029142" name="entities" index="3czuCJ" />
       </concept>
@@ -41,7 +44,7 @@
       </node>
     </node>
     <node concept="3czhSI" id="4Yb5JA31NUO" role="3czuCJ">
-      <property role="TrG5h" value="The Mysterios Island" />
+      <property role="TrG5h" value="The Mysterious Island" />
       <property role="3czhSy" value="1875" />
       <property role="3czhSw" value="4323r3" />
       <property role="3czhSz" value="true" />
@@ -57,6 +60,11 @@
       <node concept="3cz0NE" id="4Yb5JA31NV5" role="3cz2VL">
         <ref role="3cz0NH" to="q0v6:4Yb5JA31NUx" resolve="Jules Verne" />
       </node>
+    </node>
+    <node concept="3czhSx" id="ST9rMmXyEN" role="3czuCJ">
+      <property role="TrG5h" value="Der Spiegel" />
+      <property role="3czhSo" value="4Yb5JA31wzt/WEEKLY" />
+      <property role="3czhSw" value="34223" />
     </node>
   </node>
 </model>

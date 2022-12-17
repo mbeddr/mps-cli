@@ -3,19 +3,17 @@ package org.mps_cli.model
 class SNode {
     SModel myModel
     SNode parentNode
-    def roleInParent
-    def concept = ""
-    def id
+    String roleInParent
+    SConcept concept
+    String id
     def properties = [:]
-    def List<SNode> children = []
-    def Map<String,SNodeRef> refs = [:]
+    List<SNode> children = []
+    Map<String,SNodeRef> refs = [:]
 
-    SNode(parent, role, model) {
+    SNode(SNode parent, String role, SModel model) {
         parentNode = parent
         roleInParent = role
         myModel = model
-        if (parent != null)
-            parent.children.add(this)
     }
 
     def descendants(includeSelf = false) {
@@ -35,7 +33,10 @@ class SNode {
         def val = properties[name]
         if (val != null) return val
         val = children.findAll( {it.roleInParent.equals(name) })
-        if (val != null && !val.isEmpty()) return val
+        if (val != null && !val.isEmpty()) {
+            if (val.size() > 1) return val
+            return val.first()
+        }
         refs[name]
     }
 }

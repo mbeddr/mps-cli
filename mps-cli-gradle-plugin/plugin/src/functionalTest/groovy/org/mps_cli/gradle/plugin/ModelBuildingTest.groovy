@@ -14,21 +14,29 @@ task printSolutionsInfo {
     dependsOn buildModel
     doLast {
         def repo = buildModel.repository
+        
         def models = repo.allModels()
         println "all models: ${models.collect { it.name }}"
-        println "repo.id2Models() ${repo.id2models()}"
         
         def allNodes = repo.allNodes()
-        println "concepts: ${allNodes.collect { it.concept }}"
+        println "concepts: ${allNodes.collect { it.concept.name }}"
         
         def authors = repo.nodesOfConcept("mps.cli.landefs.people.structure.Person")
-        println "authors: ${authors.collect { it.name }}"
+        println "persons definitions: ${authors.collect { it.name }}"
         
         def books = repo.nodesOfConcept("mps.cli.landefs.library.structure.Book")
-        println "books: ${books.collect { it.name }}"
+        println "books definitions: ${books.collect { it.name }}"
         
         def theMysteriousIsland = books.find { it.name.equals("The Mysterious Island") }
-        println "mysterious island authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
+        println "'Mysterious Island' authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
+        println "'Mysterious Island' publication date: ${theMysteriousIsland.publicationDate}"
+        println "'Mysterious Island' available: ${theMysteriousIsland.available}"
+        
+        def magazines = repo.nodesOfConcept("mps.cli.landefs.library.structure.Magazine")
+        println "magazines definitions: ${magazines.collect { it.name }}"
+        
+        def derSpiegel = magazines.find { it.name.equals("Der Spiegel") }
+        println "'Der Spiegel' periodicity: ${derSpiegel.periodicity}"
     }
 }
 
@@ -47,12 +55,16 @@ task printSolutionsInfo {
 
         // check nodes by name
         // persons
-        result.output.contains "Mark Twain"
-        result.output.contains "Jules Verne"
-        // book
-        result.output.contains "Tom Sawyer"
-        result.output.contains "The Mysterious Island"
-        result.output.contains "mysterious island authors: [Jules Verne"
+        result.output.contains "persons definitions: [Mark Twain, Jules Verne]"
 
+        // book
+        result.output.contains "books definitions: [Tom Sawyer, Tom Sawyer, The Mysterious Island, Five Weeks in Baloon]"
+        result.output.contains "'Mysterious Island' authors: [Jules Verne]"
+        result.output.contains "'Mysterious Island' publication date: 1875"
+        result.output.contains "'Mysterious Island' available: true"
+
+        // magazine
+        result.output.contains "magazines definitions: [Der Spiegel]"
+        result.output.contains "'Der Spiegel' periodicity: WEEKLY"
     }
 }

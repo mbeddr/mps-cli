@@ -4,12 +4,13 @@ import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import groovy.xml.XmlParser
 import org.mps_cli.model.SModel
+import org.mps_cli.model.SRepository
 
 import static groovy.io.FileType.FILES
 
 class SModelBuilder {
 
-    def build(path) {
+    def build(String path) {
         Date start = new Date()
 
         def pathToModelFile = path + File.separator + ".model"
