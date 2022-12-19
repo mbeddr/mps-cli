@@ -63,6 +63,8 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+version = 0.1
+
 publishing {
     publications {
         maven(MavenPublication) {

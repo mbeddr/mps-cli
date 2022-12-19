@@ -1,0 +1,18 @@
+
+plugins {
+    id 'org.mps_cli.gradle.plugin' version '0.1'
+}
+
+
+buildModel {
+    // the full path to the directory containing the MPS project with models in FILE-PER-ROOT persistency
+    sourcesDir = 'C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse'
+}
+
+task printSolutionsInfo {
+    dependsOn buildModel
+    doLast {
+        def repo = buildModel.repository
+        println "all languages: ${repo.languages.collect { it.name }}"
+    }
+}
