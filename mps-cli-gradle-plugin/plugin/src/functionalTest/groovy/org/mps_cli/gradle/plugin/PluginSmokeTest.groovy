@@ -14,7 +14,7 @@ class PluginSmokeTest extends TestBase {
         runTask("buildModel")
 
         then:
-        result.output.contains("mps_test_projects\\mps_cli_lanuse")
+        result.output.contains("mps_test_projects" + File.separator + "mps_cli_lanuse")
         result.output.contains("number of solutions: 2")
     }
 }

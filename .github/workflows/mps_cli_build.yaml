@@ -3,7 +3,7 @@ name: MPS-CLI_CI
 on: [push, pull_request]
 
 env:
-  GITHUB_TOKEN: ${{ secrets.MPSQA_GITHUB_PKG_REGISTRY }}
+  GITHUB_TOKEN: ${{ secrets.MPSCLI_GITHUB_PKG_REGISTRY }}
 
 jobs:
   build_mps_cli:
@@ -27,7 +27,17 @@ jobs:
     - name: Build MPS-CLI
       uses: gradle/gradle-build-action@v2
       with: 
-        arguments: :plugin:functionalTest --debug
+        arguments: :plugin:functionalTest 
+        wrapper-cache-enabled: true
+        dependencies-cache-enabled: true
+        dependencies-cache-key: gradle/dependency-locks/**
+        dependencies-cache-exact: true
+        configuration-cache-enabled: true
+        build-root-directory: mps-cli-gradle-plugin
+    - name: Publish
+      uses: gradle/gradle-build-action@v2
+      with: 
+        arguments: :plugin:publish -Pgpr.user=${{github.actor}} -Pgpr.token=${{ secrets.GITHUB_TOKEN }}
         wrapper-cache-enabled: true
         dependencies-cache-enabled: true
         dependencies-cache-key: gradle/dependency-locks/**

@@ -23,7 +23,7 @@ plugins {
 }
 
 buildModel {
-   sourcesDir = '..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\mps_test_projects\\\\mps_cli_lanuse'   
+   sourcesDir = '../../../../../../../../../mps_test_projects/mps_cli_lanuse'   
 }"""
 
     def result

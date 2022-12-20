@@ -42,8 +42,6 @@ task printSolutionsInfo {
         runTask("printSolutionsInfo")
 
         then:
-        result.output.contains("mps_test_projects\\mps_cli_lanuse")
-
         // check that we have the languages
         result.output.contains "all languages: [mps.cli.landefs.library, jetbrains.mps.lang.core, mps.cli.landefs.people]"
 

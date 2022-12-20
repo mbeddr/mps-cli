@@ -22,10 +22,10 @@ task printSolutionsInfo {
         println "concepts: ${allNodes.collect { it.concept.name }}"
         
         def authors = repo.nodesOfConcept("mps.cli.landefs.people.structure.Person")
-        println "persons definitions: ${authors.collect { it.name }}"
+        println "persons definitions: ${authors.collect { it.name }.sort()}"
         
         def books = repo.nodesOfConcept("mps.cli.landefs.library.structure.Book")
-        println "books definitions: ${books.collect { it.name }}"
+        println "books definitions: ${books.collect { it.name }.sort()}"
         
         def theMysteriousIsland = books.find { it.name.equals("The Mysterious Island") }
         println "'Mysterious Island' authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
@@ -46,8 +46,6 @@ task printSolutionsInfo {
         runTask("printSolutionsInfo")
 
         then:
-        result.output.contains("mps_test_projects\\mps_cli_lanuse")
-
         // check that we have models
         result.output.contains "mps.cli.lanuse.library_top.library_top"
         result.output.contains "mps.cli.lanuse.library_top.authors_top"
@@ -55,10 +53,10 @@ task printSolutionsInfo {
 
         // check nodes by name
         // persons
-        result.output.contains "persons definitions: [Mark Twain, Jules Verne]"
+        result.output.contains "persons definitions: [Jules Verne, Mark Twain]"
 
         // book
-        result.output.contains "books definitions: [Tom Sawyer, Tom Sawyer, The Mysterious Island, Five Weeks in Baloon]"
+        result.output.contains "books definitions: [Five Weeks in Baloon, The Mysterious Island, Tom Sawyer, Tom Sawyer]"
         result.output.contains "'Mysterious Island' authors: [Jules Verne]"
         result.output.contains "'Mysterious Island' publication date: 1875"
         result.output.contains "'Mysterious Island' available: true"
