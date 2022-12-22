@@ -9,10 +9,52 @@ buildModel {
     sourcesDir = 'C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse'
 }
 
-task printSolutionsInfo {
+task printModelInfo {
     dependsOn buildModel
     doLast {
         def repo = buildModel.repository
+
+        println '''***************************************
+Language Information
+***************************************'''
         println "all languages: ${repo.languages.collect { it.name }}"
+        def allConcepts = repo.languages.collectMany { it.concepts }
+        println "all concepts: ${allConcepts.collect { it.name }}"
+        def book = allConcepts.find { it.shortName() == "Book" }
+        println "Book"
+        println "  - super-concepts: ${book.superConcepts.collect { it.shortName() }}"
+        println "  - properties: ${book.properties}"
+        println "  - children: ${book.children}"
+        println "  - references: ${book.references}"
+
+        println '''
+***************************************
+Models and Solutions
+***************************************'''
+        println "all solutions: ${repo.solutions.collect { it.name }}"
+        def models = repo.allModels()
+        println "all models: ${models.collect { it.name + " (" + it.modelId + ")" }}"
+
+        println '''
+***************************************
+Nodes Querying
+***************************************'''
+        def authors = repo.nodesOfConcept("mps.cli.landefs.people.structure.Person")
+        println "persons definitions: ${authors.collect { it.name }.sort()}"
+
+        // we can use also "short concept names" (not only fully-qualified names)
+        def books = repo.nodesOfShortConceptName("Book")
+        println "books definitions: ${books.collect { it.name + " (" + it.id + ")" }.sort()}"
+        println "books and models: ${books.collect { it.name + " (" + it.myModel.name + ")" }.sort()}"
+
+        println '''
+***************************************
+Accessing Nodes 
+***************************************'''
+        def theMysteriousIsland = books.find { it.name.equals("The Mysterious Island") }
+        println "'Mysterious Island'"
+        println "  - authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
+        println "  - publication date: ${theMysteriousIsland.publicationDate}"
+        println "  - available: ${theMysteriousIsland.available}"
     }
 }
