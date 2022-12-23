@@ -63,7 +63,19 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-version = 0.1
+// Project versions
+ext.major = '0'
+ext.minor = '1'
+
+if (System.env.CI != null && System.env.CI.toBoolean()) {
+    def buildNumber = System.env.GITHUB_RUN_NUMBER != null ? System.env.GITHUB_RUN_NUMBER.toInteger() : System.env.BUILD_NUMBER.toInteger()
+    def shortCommitHash = System.env.GITHUB_SHA.substring(0, 7)
+    version = "$major.$minor.$buildNumber.$shortCommitHash"
+    println "##CI computed version='${version}'"
+} else {
+    println "Local build detected, version will be SNAPSHOT"
+    version = "$major.$minor-SNAPSHOT"
+}
 
 publishing {
     repositories {
@@ -82,8 +94,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'org.mps_cli'
             artifactId = 'gradle.plugin'
-            version = '0.1'
-
+            
             from components.java
         }
     }
