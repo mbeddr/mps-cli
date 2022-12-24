@@ -7,7 +7,7 @@ class SConcept {
     Set<String> children = new HashSet<>()
     Set<String> references = new HashSet<>()
 
-    String shortName() {
+    String getShortName() {
         name.substring(name.lastIndexOf(".") + 1)
     }
 }

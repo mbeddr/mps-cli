@@ -17,13 +17,13 @@ task printSolutionsInfo {
         println "all languages: ${repo.languages.collect { it.name }}"
         
         // concepts of a language
-        println "jetbrains.mps.lang.core concepts: ${repo.conceptsOfLanguage("jetbrains.mps.lang.core").collect { it.shortName() }.sort()}"
-        println "library language concepts: ${repo.conceptsOfLanguage("mps.cli.landefs.library").collect { it.shortName() }.sort()}"
-        println "library language concept NotInstantiatedLibraryEntity is NOT found: ${!repo.conceptsOfLanguage("mps.cli.landefs.library").collect { it.shortName() }.contains("NotInstantiatedLibraryEntity")}"
-        println "people language concepts: ${repo.conceptsOfLanguage("mps.cli.landefs.people").collect { it.shortName() }.sort()}"
+        println "jetbrains.mps.lang.core concepts: ${repo.conceptsOfLanguage("jetbrains.mps.lang.core").collect { it.shortName }.sort()}"
+        println "library language concepts: ${repo.conceptsOfLanguage("mps.cli.landefs.library").collect { it.shortName }.sort()}"
+        println "library language concept NotInstantiatedLibraryEntity is NOT found: ${!repo.conceptsOfLanguage("mps.cli.landefs.library").collect { it.shortName }.contains("NotInstantiatedLibraryEntity")}"
+        println "people language concepts: ${repo.conceptsOfLanguage("mps.cli.landefs.people").collect { it.shortName }.sort()}"
         
         // super-concepts
-        println "super-concepts of Book: ${repo.findConceptByShortName("Book").superConcepts.collect {it.shortName()}.sort()}"
+        println "super-concepts of Book: ${repo.findConceptByShortName("Book").superConcepts.collect {it.shortName}.sort()}"
         
         // properties of a concept
         println "properties of INamedConcept concept: ${repo.findConceptByShortName("INamedConcept").properties.sort()}"

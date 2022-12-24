@@ -9,5 +9,6 @@ import org.gradle.api.Plugin
 class MpsCliGradlePluginPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.tasks.register('buildModel', ModelBuilderTask);
+        project.tasks.register('printLanguageInfo', PrintLanguageInfoTask);
     }
 }

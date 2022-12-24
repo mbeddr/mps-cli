@@ -16,6 +16,11 @@ class ModelBuilderTask extends DefaultTask {
     @Internal
     SRepository repository;
 
+    ModelBuilderTask() {
+        group("MPS-CLI")
+        description("build the object model based on MPS files from 'sourceDir'")
+    }
+
     @TaskAction
     def buildModel() {
         def dir = new File(sourcesDir).getAbsoluteFile().canonicalPath

@@ -31,8 +31,10 @@ class RootNodeFromMpsrBuilder {
         sNode.concept = concept
         sNode.id = xmlNode.'@id'
 
-        def conceptOwnerOfChildRole = membersIds2SConcept[xmlNode.'@role']
-        if (conceptOwnerOfChildRole != concept) concept.superConcepts.add(conceptOwnerOfChildRole)
+        if (xmlNode.'@role' != null) {
+            def conceptOwnerOfChildRole = membersIds2SConcept[xmlNode.'@role']
+            if (conceptOwnerOfChildRole != concept) concept.superConcepts.add(conceptOwnerOfChildRole)
+        }
 
         xmlNode.property.each {
             def propertyName = propertyIds2Names[it.'@role']
