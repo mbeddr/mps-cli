@@ -1,6 +1,12 @@
 pluginManagement {
     repositories {
-        mavenLocal()
-        mavenCentral()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/mbeddr/mps-cli")
+            credentials {
+                username = github_username
+                password = github_token
+            }
+        }
     }
 }

@@ -10,6 +10,8 @@ The object model is then used in `printModelInfo` which prints relevant informat
 - find nodes by concept, 
 - access properties of nodes.
 
+The information about the extracted languages and concepts are saved to html using the task `printLanguageInfo`
+
 ### Limitations
 
 Limitations are documented [here](./../../mps-cli-gradle-plugin/Readme.md).

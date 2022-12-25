@@ -1,6 +1,6 @@
 
 plugins {
-    id 'org.mps_cli.gradle.plugin' version '0.1'
+    id 'org.mps_cli.gradle.plugin' version '0.1.+'
 }
 
 
@@ -56,5 +56,10 @@ Accessing Nodes
         println "  - authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
         println "  - publication date: ${theMysteriousIsland.publicationDate}"
         println "  - available: ${theMysteriousIsland.available}"
+    }
+
+    printLanguageInfo {
+        // the path to the directory where language info is to be written
+        destinationDir = 'C:\\work\\mps-cli\\'
     }
 }

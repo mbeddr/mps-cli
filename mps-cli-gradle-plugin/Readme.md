@@ -4,6 +4,11 @@ This project provides a Gradle plugin developed with Groovy which parses MPS fil
 
 A demo about using the MPS CLI Gradle plugin is provided [here](../demos/gradle-plugin-use/Readme.md).
 
+### Tasks
+This Gradle plugin contributes the following tasks:
+- `buildModel` builds the object model based on the MPS files from `sourcesDir`
+- `printLanguageInfo` prints the information about the languages in a file specified by `destinationDir`
+
 ### Features
 The following features are available:
 - load MPS files and expose their content as Groovy object model 
