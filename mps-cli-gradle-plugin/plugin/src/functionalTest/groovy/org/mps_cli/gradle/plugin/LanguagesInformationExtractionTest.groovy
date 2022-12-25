@@ -24,6 +24,7 @@ task printSolutionsInfo {
         
         // super-concepts
         println "super-concepts of Book: ${repo.findConceptByShortName("Book").superConcepts.collect {it.shortName}.sort()}"
+        println "super-concepts of Person: ${repo.findConceptByShortName("Person").superConcepts.collect {it.shortName}.sort()}"
         
         // properties of a concept
         println "properties of INamedConcept concept: ${repo.findConceptByShortName("INamedConcept").properties.sort()}"
@@ -52,7 +53,8 @@ task printSolutionsInfo {
         result.output.contains "people language concepts: [Person, PersonRef, PersonsContainer]"
 
         // check that we properly set the super-concepts hierarchy
-        result.output.contains "super-concepts of Book: [INamedConcept, Library, LibraryEntityBase]"
+        result.output.contains "super-concepts of Book: [INamedConcept, LibraryEntityBase]"
+        result.output.contains "super-concepts of Person: [INamedConcept]"
 
         // check that we have properties of concepts
         result.output.contains "properties of INamedConcept concept: [name]"
