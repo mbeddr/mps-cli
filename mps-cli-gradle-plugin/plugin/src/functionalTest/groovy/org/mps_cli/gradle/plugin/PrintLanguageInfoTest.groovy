@@ -18,8 +18,7 @@ buildModel {
 }
 
 printLanguageInfo {
-   destinationDir = 'c:\\\\work\\\\' 
-   // './../../../../../../../'   
+   destinationDir = './../../../../../../' 
 }"""
 
         when:

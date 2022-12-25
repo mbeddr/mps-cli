@@ -28,7 +28,8 @@ class PrintLanguageInfoTask extends DefaultTask {
     }
 
     def doPrintToHTML(SRepository repo) {
-        def languageInfoFile = new File(destinationDir + File.separator + "language_info.html")
+        def dir = new File(destinationDir).getAbsoluteFile().canonicalPath
+        def languageInfoFile = new File(dir + File.separator + "language_info.html")
         println "language info saved to ${languageInfoFile.canonicalPath}"
 
         languageInfoFile.withWriter { w ->
