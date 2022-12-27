@@ -7,8 +7,9 @@ class ModelBuildingTest extends TestBase {
 
     def "model extraction test"() {
         given:
+        projectName = proj
         settingsFile << ""
-        buildFile << "$buildPreamble" + '''
+        buildFile << "${buildPreamble()}" + '''
 
 task printSolutionsInfo {
     dependsOn buildModel
@@ -47,9 +48,9 @@ task printSolutionsInfo {
 
         then:
         // check that we have models
-        result.output.contains "mps.cli.lanuse.library_top.library_top"
-        result.output.contains "mps.cli.lanuse.library_top.authors_top"
-        result.output.contains "mps.cli.lanuse.library_second.library_top"
+        result.output.contains library_top_dot_library_top
+        result.output.contains library_top_dot_authors_top
+        result.output.contains library_second_dot_library_top
 
         // check nodes by name
         // persons
@@ -64,5 +65,11 @@ task printSolutionsInfo {
         // magazine
         result.output.contains "magazines definitions: [Der Spiegel]"
         result.output.contains "'Der Spiegel' periodicity: 4Yb5JA31wzt/WEEKLY"
+
+        where:
+        proj                                 | library_top_dot_library_top                                  | library_top_dot_authors_top                                  | library_second_dot_library_top
+        "mps_cli_lanuse_file_per_root"       | "mps.cli.lanuse.library_top.library_top"                     | "mps.cli.lanuse.library_top.authors_top"                     | "mps.cli.lanuse.library_second.library_top"
+        "mps_cli_lanuse_default_persistency" | "mps.cli.lanuse.library_top.default_persistency.library_top" | "mps.cli.lanuse.library_top.default_persistency.authors_top" | "mps.cli.lanuse.library_second.default_persistency.library_top"
+
     }
 }

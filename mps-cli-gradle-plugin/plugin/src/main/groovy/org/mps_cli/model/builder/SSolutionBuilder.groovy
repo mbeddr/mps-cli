@@ -3,8 +3,9 @@ package org.mps_cli.model.builder
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import groovy.xml.XmlParser
-import org.mps_cli.model.SRepository
 import org.mps_cli.model.SSolution
+import org.mps_cli.model.builder.default_persistency.SModelBuilderForDefaultPersistency
+import org.mps_cli.model.builder.file_per_root_persistency.SModelBuilderForFilePerRootPersistency
 
 class SSolutionBuilder {
 
@@ -20,7 +21,12 @@ class SSolutionBuilder {
 
         def modelFiles = new File(filePath, "models").listFiles()
         modelFiles.findAll {it.isDirectory() }.each {
-            def modelBuilder = new SModelBuilder()
+            def modelBuilder = new SModelBuilderForFilePerRootPersistency()
+            def model = modelBuilder.build(it.absolutePath)
+            sSolution.models.add(model)
+        }
+        modelFiles.findAll {it.name.endsWith(".mps") }.each {
+            def modelBuilder = new SModelBuilderForDefaultPersistency()
             def model = modelBuilder.build(it.absolutePath)
             sSolution.models.add(model)
         }

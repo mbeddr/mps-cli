@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MPSProject">
+    <projectModules>
+      <modulePath path="$PROJECT_DIR$/solutions/mps.cli.lanuse.library_second.default_persistency/mps.cli.lanuse.library_second.default_persistency.msd" folder="" />
+      <modulePath path="$PROJECT_DIR$/solutions/mps.cli.lanuse.library_top.default_persistency/mps.cli.lanuse.library_top.default_persistency.msd" folder="" />
+    </projectModules>
+  </component>
+</project>

@@ -1,13 +1,12 @@
 package org.mps_cli.model.builder
 
-import groovy.xml.XmlParser
 import org.mps_cli.model.SConcept
 import org.mps_cli.model.SLanguage
 import org.mps_cli.model.SModel
 import org.mps_cli.model.SNode
 import org.mps_cli.model.SNodeRef
 
-class RootNodeFromMpsrBuilder {
+abstract class AbstractRootNodeBuilder {
 
     Map<String, SConcept> conceptsIds2SConcept = [:]
     Map<String, SConcept> membersIds2SConcept = [:]
@@ -15,14 +14,6 @@ class RootNodeFromMpsrBuilder {
     Map<String, String> referenceIds2Names = [:]
     Map<String, String> propertyIds2Names = [:]
     Map<String, String> importsIndex2ImportedModelIds = [:]
-
-    def build(File mpsrFile, SModel sModel) {
-        def model = new XmlParser().parse(mpsrFile)
-        collectRegistryInfo(model)
-        Node xmlNode = model.node.get(0)
-        def res = collectNodes(xmlNode, null, sModel)
-        res
-    }
 
     def collectNodes(Node xmlNode, SNode parent, SModel sModel) {
         SNode sNode = new SNode(parent, childrenIds2Names[xmlNode.'@role'], sModel)

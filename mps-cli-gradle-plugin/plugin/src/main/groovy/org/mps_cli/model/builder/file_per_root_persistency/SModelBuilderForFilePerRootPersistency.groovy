@@ -1,24 +1,21 @@
-package org.mps_cli.model.builder
+package org.mps_cli.model.builder.file_per_root_persistency
 
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import groovy.xml.XmlParser
 import org.mps_cli.model.SModel
-import org.mps_cli.model.SRepository
+import org.mps_cli.model.builder.AbstractModelBuilder
 
 import static groovy.io.FileType.FILES
 
-class SModelBuilder {
+class SModelBuilderForFilePerRootPersistency extends AbstractModelBuilder {
 
     def build(String path) {
         Date start = new Date()
 
         def pathToModelFile = path + File.separator + ".model"
         def modelXML = new XmlParser().parse(pathToModelFile)
-        def sModel = new SModel()
-        def ref = modelXML.'@ref'
-        sModel.modelId = ref.substring(0, ref.indexOf('('))
-        sModel.name = ref.substring(ref.indexOf('(') + 1, ref.indexOf(')'))
+        def sModel = buildModelFromXML(modelXML)
 
         def filePath = new File(path)
         def filterFilePerRoot = ~/.*\.mpsr$/

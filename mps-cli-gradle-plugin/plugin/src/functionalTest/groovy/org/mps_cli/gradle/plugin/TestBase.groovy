@@ -17,14 +17,19 @@ class TestBase extends Specification {
         new File(projectDir, "settings.gradle")
     }
 
-    def buildPreamble = """ 
+    def projectName;
+
+    def buildPreamble()
+    {
+        """ 
 plugins {
     id('org.mps_cli.gradle.plugin')
 }
 
 buildModel {
-   sourcesDir = '../../../../../../../../../mps_test_projects/mps_cli_lanuse'   
+   sourcesDir = '../../../../../../../../../mps_test_projects/$projectName'   
 }"""
+    }
 
     def result
 

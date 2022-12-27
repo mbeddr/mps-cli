@@ -7,8 +7,9 @@ class LanguagesInformationExtractionTest extends TestBase {
 
     def "languages information extraction test"() {
         given:
+        projectName = proj
         settingsFile << ""
-        buildFile << "$buildPreamble" + '''
+        buildFile << "${buildPreamble()}" + '''
 
 task printSolutionsInfo {
     dependsOn buildModel
@@ -64,5 +65,10 @@ task printSolutionsInfo {
 
         // check that we have children of concepts
         result.output.contains "children of Library concept: [entities]"
+
+        where:
+        proj                                 | _
+        "mps_cli_lanuse_file_per_root"       | _
+        "mps_cli_lanuse_default_persistency" | _
     }
 }
