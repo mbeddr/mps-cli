@@ -40,7 +40,7 @@ class PrintLanguageInfoTask extends DefaultTask {
                     title: "Language Info"
                 }
                 body {
-                    p "Language Info Extracted from: ${new File(project.buildModel.sourcesDir).canonicalPath}"
+                    p "Language Info Extracted from: ${project.buildModel.sourcesDir.collect { new File(it).canonicalPath }}"
                     br()
                     br()
 

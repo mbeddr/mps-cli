@@ -5,8 +5,8 @@ plugins {
 
 
 buildModel {
-    // the full path to the directory containing the MPS project with models in FILE-PER-ROOT persistency
-    sourcesDir = 'C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse'
+    // the full path to the directory containing the MPS project with models
+    sourcesDir = ['C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse']
 }
 
 task printModelInfo {

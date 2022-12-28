@@ -6,7 +6,8 @@ A demo about using the MPS CLI Gradle plugin is provided [here](../demos/gradle-
 
 ### Tasks
 This Gradle plugin contributes the following tasks:
-- `buildModel` builds the object model based on the MPS files from `sourcesDir`
+- `buildModel` builds the object model based on the MPS files from `sourcesDir` 
+  - `sourcesDir`is a list with directories containing solutions
 - `printLanguageInfo` prints the information about the languages in a file specified by `destinationDir`
 
 ### Features

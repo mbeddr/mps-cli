@@ -1,7 +1,6 @@
 package org.mps_cli.model
 
 class SRepository {
-    def String name
     def List<SSolution> solutions = []
     def List<SLanguage> languages = []
 

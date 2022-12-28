@@ -8,6 +8,8 @@ import static groovy.io.FileType.FILES
 
 class SSolutionsRepositoryBuilder {
 
+    def repo = new SRepository()
+
     def build(String path) {
         Date start = new Date()
 
@@ -17,9 +19,6 @@ class SSolutionsRepositoryBuilder {
         filePath.traverse type : FILES, nameFilter : filterSolutionDefinitions, {
             solutionsDirectories.add(it.parentFile)
         }
-
-        def repo = new SRepository()
-        repo.name = path
 
         solutionsDirectories.each {
             def solutionBuilder = new SSolutionBuilder()
@@ -32,8 +31,6 @@ class SSolutionsRepositoryBuilder {
         Date stop = new Date()
         TimeDuration td = TimeCategory.minus( stop, start )
         println "${td} for handling ${path}"
-
-        repo
     }
 
 }

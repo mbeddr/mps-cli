@@ -14,7 +14,7 @@ plugins {
 }
 
 buildModel {
-   sourcesDir = '../../../../../../../../../mps_test_projects/mps_cli_lanuse_file_per_root'   
+   sourcesDir = ['../../../../../../../../../mps_test_projects/mps_cli_lanuse_file_per_root']   
 }
 
 printLanguageInfo {

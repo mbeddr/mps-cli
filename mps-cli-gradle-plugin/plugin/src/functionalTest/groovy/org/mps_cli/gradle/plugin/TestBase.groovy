@@ -27,7 +27,7 @@ plugins {
 }
 
 buildModel {
-   sourcesDir = '../../../../../../../../../mps_test_projects/$projectName'   
+   sourcesDir = ['../../../../../../../../../mps_test_projects/$projectName']   
 }"""
     }
 

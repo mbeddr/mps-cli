@@ -11,7 +11,7 @@ import org.mps_cli.model.builder.SSolutionsRepositoryBuilder
 class ModelBuilderTask extends DefaultTask {
 
     @Input
-    String sourcesDir;
+    List<String> sourcesDir;
 
     @Internal
     SRepository repository;
@@ -23,12 +23,14 @@ class ModelBuilderTask extends DefaultTask {
 
     @TaskAction
     def buildModel() {
-        def dir = new File(sourcesDir).getAbsoluteFile().canonicalPath
-        println("loading models from directory: " + dir)
-
         def builder = new SSolutionsRepositoryBuilder()
-        repository = builder.build(dir)
+        sourcesDir.each {
+            def dir = new File(it).getAbsoluteFile().canonicalPath
+            println("loading models from directory: " + dir)
+            builder.build(dir)
+        }
         //setProperty("repository", repository)
+        repository = builder.repo
 
         println("number of solutions: " + repository.solutions.size)
     }
