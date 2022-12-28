@@ -65,7 +65,7 @@ tasks.named('test') {
 
 // Project versions
 ext.major = '0'
-ext.minor = '1'
+ext.minor = '2'
 
 if (System.env.CI != null && System.env.CI.toBoolean()) {
     def buildNumber = System.env.GITHUB_RUN_NUMBER != null ? System.env.GITHUB_RUN_NUMBER.toInteger() : System.env.BUILD_NUMBER.toInteger()

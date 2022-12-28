@@ -23,7 +23,8 @@ class SSolutionBuilder {
         modelFiles.findAll {it.isDirectory() }.each {
             def modelBuilder = new SModelBuilderForFilePerRootPersistency()
             def model = modelBuilder.build(it.absolutePath)
-            sSolution.models.add(model)
+            if (model != null)
+                sSolution.models.add(model)
         }
         modelFiles.findAll {it.name.endsWith(".mps") }.each {
             def modelBuilder = new SModelBuilderForDefaultPersistency()

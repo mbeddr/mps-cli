@@ -11,8 +11,8 @@ This Gradle plugin contributes the following tasks:
 
 ### Features
 The following features are available:
-- load MPS files and expose their content as Groovy object model 
-  - solutions, models, root nodes, nodes
+- load MPS files (*.mps, *.mpsr) and expose their content as Groovy object model 
+  - solutions, models, root nodes, nodes, children, references, properties
 - extract the meta-information and expose it as Groovy object model
   - concepts with information about properties, references, children
 
@@ -24,5 +24,4 @@ The core of the Groovy object model is given by the following classes:
 
 ### Limitations
 The plugin has currently the following limitations:
-- we support only MPS models saved in *file-per-root persistency*
 - we do not load models available as *binaries* (jar) 

@@ -1,6 +1,6 @@
 
 plugins {
-    id 'org.mps_cli.gradle.plugin' version '0.1.+'
+    id 'org.mps_cli.gradle.plugin' version '0.2.+'
 }
 
 

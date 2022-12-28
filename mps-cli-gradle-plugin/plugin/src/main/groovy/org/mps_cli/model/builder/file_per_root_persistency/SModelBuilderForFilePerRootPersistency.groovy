@@ -14,6 +14,8 @@ class SModelBuilderForFilePerRootPersistency extends AbstractModelBuilder {
         Date start = new Date()
 
         def pathToModelFile = path + File.separator + ".model"
+        if (!new File(pathToModelFile).exists())
+            return null;
         def modelXML = new XmlParser().parse(pathToModelFile)
         def sModel = buildModelFromXML(modelXML)
 
