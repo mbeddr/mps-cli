@@ -31,4 +31,9 @@ class SLanguageBuilder {
         concept
     }
 
+    static def clear() {
+        languageMap.clear()
+        conceptMap.clear()
+    }
+
 }

@@ -6,6 +6,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.plugins.ide.eclipse.model.Output
 import org.mps_cli.model.SRepository
+import org.mps_cli.model.builder.SLanguageBuilder
 import org.mps_cli.model.builder.SSolutionsRepositoryBuilder
 
 class ModelBuilderTask extends DefaultTask {
@@ -24,6 +25,7 @@ class ModelBuilderTask extends DefaultTask {
     @TaskAction
     def buildModel() {
         def builder = new SSolutionsRepositoryBuilder()
+        SLanguageBuilder.clear()
         sourcesDir.each {
             def dir = new File(it).getAbsoluteFile().canonicalPath
             println("loading models from directory: " + dir)

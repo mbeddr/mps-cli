@@ -70,6 +70,6 @@ task printSolutionsInfo {
         proj                                 | library_top_dot_library_top                                  | library_top_dot_authors_top                                  | library_second_dot_library_top
         "mps_cli_lanuse_file_per_root"       | "mps.cli.lanuse.library_top.library_top"                     | "mps.cli.lanuse.library_top.authors_top"                     | "mps.cli.lanuse.library_second.library_top"
         "mps_cli_lanuse_default_persistency" | "mps.cli.lanuse.library_top.default_persistency.library_top" | "mps.cli.lanuse.library_top.default_persistency.authors_top" | "mps.cli.lanuse.library_second.default_persistency.library_top"
-
+        "mps_cli_lanuse_binary"              | "mps.cli.lanuse.library_top.library_top"                     | "mps.cli.lanuse.library_top.authors_top"                     | "mps.cli.lanuse.library_second.library_top"
     }
 }

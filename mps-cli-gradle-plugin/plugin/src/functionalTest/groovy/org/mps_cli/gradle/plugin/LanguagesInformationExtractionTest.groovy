@@ -3,6 +3,8 @@
  */
 package org.mps_cli.gradle.plugin
 
+import org.gradle.internal.impldep.org.glassfish.jaxb.runtime.v2.runtime.property.StructureLoaderBuilder
+
 class LanguagesInformationExtractionTest extends TestBase {
 
     def "languages information extraction test"() {
@@ -66,9 +68,11 @@ task printSolutionsInfo {
         // check that we have children of concepts
         result.output.contains "children of Library concept: [entities]"
 
+
         where:
         proj                                 | _
         "mps_cli_lanuse_file_per_root"       | _
         "mps_cli_lanuse_default_persistency" | _
+        "mps_cli_lanuse_binary" | _
     }
 }
