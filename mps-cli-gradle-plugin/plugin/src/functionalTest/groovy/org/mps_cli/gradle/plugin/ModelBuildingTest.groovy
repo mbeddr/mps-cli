@@ -16,6 +16,12 @@ task printSolutionsInfo {
     doLast {
         def repo = buildModel.repository
         
+        def modules = repo.solutions
+        println "all modules: ${modules.collect { it.name }}"
+        def solutionWithDependencies = modules.find { it.name.equals("mps.cli.lanuse.library_second") || 
+                                                        it.name.equals("mps.cli.lanuse.library_second.default_persistency") }
+        println "all modules on which 'mps.cli.lanuse.library_second' is dependent on: ${solutionWithDependencies.dependencies.collect { it.resolve(repo).name }}"
+        
         def models = repo.allModels()
         println "all models: ${models.collect { it.name }}"
         
@@ -51,6 +57,10 @@ task printSolutionsInfo {
         runTask("printSolutionsInfo")
 
         then:
+        // check dependencies between solutions
+        result.output.contains("all modules on which 'mps.cli.lanuse.library_second' is dependent on: [mps.cli.lanuse.library_top]") ||
+            result.output.contains("all modules on which 'mps.cli.lanuse.library_second' is dependent on: [mps.cli.lanuse.library_top.default_persistency]")
+
         // check that we have models
         result.output.contains library_top_dot_library_top
         result.output.contains library_top_dot_authors_top

@@ -16,6 +16,10 @@ class SRepository {
         allModels().collectEntries {[it.modelId, it]}
     }
 
+    Map<String, SSolution> id2solutions() {
+        solutions.collectEntries {[it.solutionId, it]}
+    }
+
     List<SNode> allNodes() {
         def nodes = []
         allModels().each { mod ->
