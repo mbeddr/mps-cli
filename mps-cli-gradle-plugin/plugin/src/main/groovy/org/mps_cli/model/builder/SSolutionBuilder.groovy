@@ -11,6 +11,8 @@ import org.mps_cli.model.builder.file_per_root_persistency.SModelBuilderForFileP
 
 class SSolutionBuilder {
 
+    BuildingDepthEnum buildingStrategy = BuildingDepthEnum.COMPLETE_MODEL;
+
     def build(String path) {
         Date start = new Date()
 
@@ -27,17 +29,19 @@ class SSolutionBuilder {
             sSolution.dependencies.add(new SModuleRef(referencedModuleId : moduleIdRefString))
         }
 
-        def modelFiles = new File(filePath, "models").listFiles()
-        modelFiles.findAll {it.isDirectory() }.each {
-            def modelBuilder = new SModelBuilderForFilePerRootPersistency()
-            def model = modelBuilder.build(it.absolutePath)
-            if (model != null)
+        if (buildingStrategy != BuildingDepthEnum.MODULE_DEPENDENCIES_ONLY) {
+            def modelFiles = new File(filePath, "models").listFiles()
+            modelFiles.findAll {it.isDirectory() }.each {
+                def modelBuilder = new SModelBuilderForFilePerRootPersistency(buildingStrategy: buildingStrategy)
+                def model = modelBuilder.build(it.absolutePath)
+                if (model != null)
+                    sSolution.models.add(model)
+            }
+            modelFiles.findAll {it.name.endsWith(".mps") }.each {
+                def modelBuilder = new SModelBuilderForDefaultPersistency(buildingStrategy: buildingStrategy)
+                def model = modelBuilder.build(it.absolutePath)
                 sSolution.models.add(model)
-        }
-        modelFiles.findAll {it.name.endsWith(".mps") }.each {
-            def modelBuilder = new SModelBuilderForDefaultPersistency()
-            def model = modelBuilder.build(it.absolutePath)
-            sSolution.models.add(model)
+            }
         }
 
         Date stop = new Date()

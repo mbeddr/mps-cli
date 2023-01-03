@@ -12,6 +12,8 @@ import static groovy.io.FileType.FILES
 
 class SSolutionsRepositoryBuilder {
 
+    BuildingDepthEnum buildingStrategy = BuildingDepthEnum.COMPLETE_MODEL
+
     def repo = new SRepository()
 
     def build(String path) {
@@ -37,7 +39,7 @@ class SSolutionsRepositoryBuilder {
         }
 
         solutionsDirectories.each {
-            def solutionBuilder = new SSolutionBuilder()
+            def solutionBuilder = new SSolutionBuilder(buildingStrategy : buildingStrategy)
             def solution = solutionBuilder.build(it.absolutePath)
             repo.solutions.add(solution)
         }

@@ -5,6 +5,8 @@ import org.mps_cli.model.SModelRef
 
 class AbstractModelBuilder {
 
+    BuildingDepthEnum buildingStrategy;
+
     SModel buildModelFromXML(Node modelXMLNode) {
         def sModel = new SModel()
         def ref = modelXMLNode.'@ref'
