@@ -4,6 +4,7 @@ class SModel {
     def String name
     def String modelId
     def List<SNode> rootNodes = []
+    List<SModelRef> imports = []
 
     // caching
     def List<SNode> allNodes = new ArrayList<>(1024)

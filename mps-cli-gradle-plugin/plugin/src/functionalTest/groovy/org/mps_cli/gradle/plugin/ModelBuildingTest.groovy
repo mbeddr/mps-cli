@@ -19,6 +19,10 @@ task printSolutionsInfo {
         def models = repo.allModels()
         println "all models: ${models.collect { it.name }}"
         
+        def modelWithImports = models.find { it.name.equals("mps.cli.lanuse.library_second.library_top") ||
+                                             it.name.equals("mps.cli.lanuse.library_second.default_persistency.library_top") }
+        println "all models imported by 'mps.cli.lanuse.library_second.library_top': ${modelWithImports.imports.collect { it.resolve(repo).name }}"
+        
         def allNodes = repo.allNodes()
         println "concepts: ${allNodes.collect { it.concept.name }}"
         
@@ -51,6 +55,10 @@ task printSolutionsInfo {
         result.output.contains library_top_dot_library_top
         result.output.contains library_top_dot_authors_top
         result.output.contains library_second_dot_library_top
+
+        // check dependencies between models
+        result.output.contains("all models imported by 'mps.cli.lanuse.library_second.library_top': [mps.cli.lanuse.library_top.authors_top]") ||
+            result.output.contains("all models imported by 'mps.cli.lanuse.library_second.library_top': [mps.cli.lanuse.library_top.default_persistency.authors_top]")
 
         // check nodes by name
         // persons
