@@ -9,6 +9,8 @@ This Gradle plugin contributes the following tasks:
 - `buildModel` builds the object model based on the MPS files from `sourcesDir` 
   - `sourcesDir`is a list with directories containing solutions
 - `printLanguageInfo` prints the information about the languages in a file specified by `destinationDir`
+- `buildModuleDependencies` builds the dependencies between solutions (extracts solution "dependency" information and builds upstream/downstream dependencies graphs) based on the MPS files from `sourcesDir` 
+- `buildModelDependencies` builds the dependencies between models (extracts model import information and builds upstream/downstream dependencies graphs) based on the MPS files from `sourcesDir` 
 
 ### Features
 The following features are available:

@@ -3,10 +3,12 @@ plugins {
     id 'org.mps_cli.gradle.plugin' version '0.2.+'
 }
 
+def directoryWithSources = ['C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse_file_per_root',
+                      'C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse_default_persistency']
 
 buildModel {
     // the full path to the directory containing the MPS project with models
-    sourcesDir = ['C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse']
+    sourcesDir = directoryWithSources
 }
 
 task printModelInfo {
@@ -20,9 +22,9 @@ Language Information
         println "all languages: ${repo.languages.collect { it.name }}"
         def allConcepts = repo.languages.collectMany { it.concepts }
         println "all concepts: ${allConcepts.collect { it.name }}"
-        def book = allConcepts.find { it.shortName() == "Book" }
+        def book = allConcepts.find { it.shortName == "Book" }
         println "Book"
-        println "  - super-concepts: ${book.superConcepts.collect { it.shortName() }}"
+        println "  - super-concepts: ${book.superConcepts.collect { it.shortName }}"
         println "  - properties: ${book.properties}"
         println "  - children: ${book.children}"
         println "  - references: ${book.references}"
@@ -58,8 +60,53 @@ Accessing Nodes
         println "  - available: ${theMysteriousIsland.available}"
     }
 
-    printLanguageInfo {
-        // the path to the directory where language info is to be written
-        destinationDir = 'C:\\work\\mps-cli\\'
+}
+
+printLanguageInfo {
+    // the path to the directory where language info is to be written
+    destinationDir = 'C:\\work\\mps-cli\\'
+}
+
+buildModuleDependencies {
+    sourcesDir = directoryWithSources
+}
+
+// uses "buildModuleDependencies" which is an optimized model parser only for extracting dependencies
+task printModuleDependencies {
+    dependsOn buildModuleDependencies
+
+    doLast {
+        def solution2AllDownstreamDependencies = buildModuleDependencies.solution2AllDownstreamDependencies
+        def solution2AllUpstreamDependencies = buildModuleDependencies.solution2AllUpstreamDependencies
+
+        for (Object sol : solution2AllDownstreamDependencies.keySet()) {
+            println "downstream dependencies for ${sol.name} are: ${solution2AllDownstreamDependencies[sol].collect { it.name }}"
+        }
+
+        for (Object sol : solution2AllUpstreamDependencies.keySet()) {
+            println "upstream dependencies for ${sol.name} are: ${solution2AllUpstreamDependencies[sol].collect { it.name }}"
+        }
+    }
+}
+
+buildModelDependencies {
+    sourcesDir = directoryWithSources
+}
+
+// uses "buildModelDependencies" which is an optimized model parser only for extracting dependencies
+task printModelDependencies {
+    dependsOn buildModelDependencies
+
+    doLast {
+        def model2AllDownstreamDependencies = buildModelDependencies.model2AllDownstreamDependencies
+        def model2AllUpstreamDependencies = buildModelDependencies.model2AllUpstreamDependencies
+
+        for (Object model : model2AllDownstreamDependencies.keySet()) {
+            println "downstream dependencies for ${model.name} are: ${model2AllDownstreamDependencies[model].collect { it.name }.sort()}"
+        }
+
+        for (Object model : model2AllUpstreamDependencies.keySet()) {
+            println "upstream dependencies for ${model.name} are: ${model2AllUpstreamDependencies[model].collect { it.name }.sort()}"
+        }
     }
 }
