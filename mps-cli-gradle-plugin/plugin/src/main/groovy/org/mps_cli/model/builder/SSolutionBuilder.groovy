@@ -13,15 +13,14 @@ class SSolutionBuilder {
 
     BuildingDepthEnum buildingStrategy = BuildingDepthEnum.COMPLETE_MODEL;
 
+    private Node solutionXML;
+
     def build(String path) {
         Date start = new Date()
 
         def filePath = new File(path)
         def solutionFile = filePath.listFiles().find {it.name.endsWith(".msd")}
-        def solutionXML = new XmlParser().parse(solutionFile)
-        def sSolution = new SSolution()
-        sSolution.name = solutionXML.'@name'
-        sSolution.solutionId = solutionXML.'@uuid'
+        SSolution sSolution = extractSolutionCoreInfo(solutionFile)
 
         for(Node dep : solutionXML.dependencies.dependency) {
             def moduleRefString = dep.text()
@@ -48,6 +47,14 @@ class SSolutionBuilder {
         TimeDuration td = TimeCategory.minus( stop, start )
         println "${td} for handling ${path}"
 
+        sSolution
+    }
+
+    public SSolution extractSolutionCoreInfo(File solutionFile) {
+        solutionXML = new XmlParser().parse(solutionFile)
+        def sSolution = new SSolution()
+        sSolution.name = solutionXML.'@name'
+        sSolution.solutionId = solutionXML.'@uuid'
         sSolution
     }
 }

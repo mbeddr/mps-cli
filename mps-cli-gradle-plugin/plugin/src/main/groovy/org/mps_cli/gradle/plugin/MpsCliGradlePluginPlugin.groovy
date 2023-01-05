@@ -12,5 +12,6 @@ class MpsCliGradlePluginPlugin implements Plugin<Project> {
         project.tasks.register('printLanguageInfo', PrintLanguageInfoTask);
         project.tasks.register('buildModuleDependencies', ModuleDependenciesBuilderTask);
         project.tasks.register('buildModelDependencies', ModelDependenciesBuilderTask);
+        project.tasks.register('computeConeOfInfluence', ConeOfInfluenceComputerTask);
     }
 }
