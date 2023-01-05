@@ -5,16 +5,17 @@ import static groovy.io.FileType.FILES
 class Filesystem2SSolutionBridge {
 
     static List<File> computeModulesWhichAreDifferentFromBranch(String gitRepoRootLocation, String branchName) {
-        def differentFiles = GitFacade.computeFilesWhichAreDifferentFromBranch(gitRepoRootLocation, branchName)
+        def gitRepoLocation = new File(gitRepoRootLocation).canonicalPath
+        def differentFiles = GitFacade.computeFilesWhichAreDifferentFromBranch(gitRepoLocation, branchName)
 
         List<File> affectedModulesFiles = []
         def allAffectedFilesAreInsideSolutions = true
         differentFiles.each {
             if (it.endsWith('.msd'))
-                affectedModulesFiles.add(new File(gitRepoRootLocation + File.separator + it))
+                affectedModulesFiles.add(new File(gitRepoLocation + File.separator + it))
             else {
                 def filterSolutionFiles = ~/.*\.msd$/
-                def myFile = new File(gitRepoRootLocation + File.separator + it).parentFile
+                def myFile = new File(gitRepoLocation + File.separator + it).parentFile
                 def affectedModuleFound = false
                 while (myFile != null) {
                     myFile.traverse(type: FILES, maxDepth: 0, nameFilter: filterSolutionFiles) {
