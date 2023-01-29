@@ -9,12 +9,14 @@ class SSolutionBuilder:
     def build_solution(self, path_to_msd_file):
         solution = self.extract_solution_core_info(path_to_msd_file)
         path_to_solution_dir = path_to_msd_file.parent
+        print("building from:", path_to_solution_dir)
         path_to_models_dir = path_to_solution_dir / 'models'
 
         for path_to_model in path_to_models_dir.iterdir():
             if path_to_model.is_dir():
                 file_per_root_builder = SModelBuilderFilePerRootPersistency()
-                file_per_root_builder.build(path_to_model)
+                model = file_per_root_builder.build(path_to_model)
+                solution.models.append(model)
 
         return solution
 

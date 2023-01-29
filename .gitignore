@@ -12,5 +12,6 @@
 **/.project
 **/workspace.xml
 **/*_gen*/
+**/venv/
 
 gradle.properties
