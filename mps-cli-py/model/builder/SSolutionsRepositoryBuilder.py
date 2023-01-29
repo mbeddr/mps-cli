@@ -8,7 +8,9 @@ from model.builder.SLanguageBuilder import SLanguageBuilder
 from model.builder.SSolutionBuilder import SSolutionBuilder
 
 class SSolutionsRepositoryBuilder:
-    repo = SRepository()
+
+    def __init__(self):
+        self.repo = SRepository()
 
     def build(self, path):
         if not os.path.exists(path):
