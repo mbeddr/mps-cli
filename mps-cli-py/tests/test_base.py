@@ -14,5 +14,5 @@ class TestBase(unittest.TestCase):
         Builds the object model based on the file-per-root MPS models
         """
         builder = SSolutionsRepositoryBuilder()
-        path = os.path.abspath('..\\mps_test_projects\\mps_cli_lanuse_file_per_root')
+        path = os.path.abspath('../mps_test_projects/mps_cli_lanuse_file_per_root')
         self.repo = builder.build(path)
