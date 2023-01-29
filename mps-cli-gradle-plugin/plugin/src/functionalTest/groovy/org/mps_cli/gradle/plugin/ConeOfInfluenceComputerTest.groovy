@@ -19,7 +19,7 @@ buildModuleDependencies {
 }
 
 computeConeOfInfluence {
-   referenceBranchName = "testing/do_not_delete/cone_of_influence_test" 
+   referenceBranchName = "origin/testing/do_not_delete/cone_of_influence_test" 
    gitRepoRootLocation = '../../../../../../../../../'
 }
 
