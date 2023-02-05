@@ -8,9 +8,9 @@ from parameterized import parameterized
 
 class TestLanguageExtraction(TestBase):
 
-    @parameterized.expand([('mps_cli_lanuse_file_per_root'),
-
-                           ('mps_cli_lanuse_default_persistency')])
+    @parameterized.expand(['mps_cli_lanuse_file_per_root',
+                           'mps_cli_lanuse_default_persistency',
+                           'mps_cli_lanuse_binary'])
     def test_languages_and_concepts(self, test_data_location):
         """
         Test the building of languages and concepts
