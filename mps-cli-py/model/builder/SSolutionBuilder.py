@@ -1,6 +1,7 @@
 
 import xml.etree.ElementTree as ET
 from model.SSolution import SSolution
+from model.builder.SModelBuilderDefaultPersistency import SModelBuilderDefaultPersistency
 from model.builder.SModelBuilderFilePerRootPersistency import SModelBuilderFilePerRootPersistency
 
 
@@ -14,9 +15,11 @@ class SSolutionBuilder:
 
         for path_to_model in path_to_models_dir.iterdir():
             if path_to_model.is_dir():
-                file_per_root_builder = SModelBuilderFilePerRootPersistency()
-                model = file_per_root_builder.build(path_to_model)
-                solution.models.append(model)
+                builder = SModelBuilderFilePerRootPersistency()
+            else:
+                builder = SModelBuilderDefaultPersistency()
+            model = builder.build(path_to_model)
+            solution.models.append(model)
 
         return solution
 

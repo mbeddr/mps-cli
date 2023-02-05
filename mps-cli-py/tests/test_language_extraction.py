@@ -3,14 +3,19 @@ import os
 
 from model.builder.SSolutionsRepositoryBuilder import SSolutionsRepositoryBuilder
 from tests.test_base import TestBase
+from parameterized import parameterized
 
 
 class TestLanguageExtraction(TestBase):
 
-    def test_languages_and_concepts(self):
+    @parameterized.expand([('mps_cli_lanuse_file_per_root'),
+
+                           ('mps_cli_lanuse_default_persistency')])
+    def test_languages_and_concepts(self, test_data_location):
         """
         Test the building of languages and concepts
         """
+        self.doSetUp(test_data_location)
         self.assertEqual(3, len(self.repo.languages))
         mps_lang_core = self.repo.find_language_by_name("jetbrains.mps.lang.core")
         self.assertIsNotNone(mps_lang_core)

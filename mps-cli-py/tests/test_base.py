@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from model.builder.SLanguageBuilder import SLanguageBuilder
 from model.builder.SSolutionsRepositoryBuilder import SSolutionsRepositoryBuilder
 
 
@@ -9,10 +10,13 @@ class TestBase(unittest.TestCase):
     def __init__(self, methodName='runTest'):
         super(TestBase, self).__init__(methodName)
 
-    def setUp(self):
+    def doSetUp(self, test_data_location):
         """
-        Builds the object model based on the file-per-root MPS models
+        Builds the object model based on MPS models
         """
+        SLanguageBuilder.languages = {}
         builder = SSolutionsRepositoryBuilder()
-        path = os.path.abspath('../mps_test_projects/mps_cli_lanuse_file_per_root')
+        test_data_location = '../mps_test_projects/' + test_data_location
+        print("test data location ", test_data_location)
+        path = os.path.abspath(test_data_location)
         self.repo = builder.build(path)

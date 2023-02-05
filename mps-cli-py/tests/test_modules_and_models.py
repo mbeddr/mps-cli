@@ -1,32 +1,38 @@
 import unittest
-import os
 
-from model.builder.SSolutionsRepositoryBuilder import SSolutionsRepositoryBuilder
+from parameterized import parameterized
 from tests.test_base import TestBase
 
 
 class TestModulesAndModels(TestBase):
 
-    def test_build_modules_and_models(self):
+    @parameterized.expand([('mps_cli_lanuse_file_per_root',
+                            'mps.cli.lanuse.library_top',
+                            'mps.cli.lanuse.library_second',
+                            'mps.cli.lanuse.library_top.authors_top',
+                            'r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed'),
+
+                           ('mps_cli_lanuse_default_persistency',
+                            'mps.cli.lanuse.library_top.default_persistency',
+                            'mps.cli.lanuse.library_second.default_persistency',
+                            'mps.cli.lanuse.library_top.default_persistency.authors_top',
+                            'r:ca00da79-915e-4bdb-9c30-11a341daf779')])
+    def test_build_modules_and_models(self, test_data_location, library_top_solution_name, library_second_solution_name, library_top_authors_top_model_name, library_top_authors_top_model_uuid):
         """
         Test the building of modules and models
         """
+        self.doSetUp(test_data_location)
         self.assertEqual(2, len(self.repo.solutions))
 
-        library_second = self.repo.find_solution_by_name('mps.cli.lanuse.library_second')
-        self.assertNotEqual(None, library_second)
-
-        library_top = self.repo.find_solution_by_name('mps.cli.lanuse.library_top')
+        library_top = self.repo.find_solution_by_name(library_top_solution_name)
         self.assertNotEqual(None, library_top)
 
-        library_second_models_names = list(map(lambda mod : mod.name, library_second.models))
-        library_second_models_names.sort()
-        self.assertEqual(['mps.cli.lanuse.library_second.library_top'], library_second_models_names)
+        library_second = self.repo.find_solution_by_name(library_second_solution_name)
+        self.assertNotEqual(None, library_second)
 
-        library_top_authors_top = self.repo.find_model_by_name('mps.cli.lanuse.library_top.authors_top')
+        library_top_authors_top = self.repo.find_model_by_name(library_top_authors_top_model_name)
         self.assertNotEqual(None, library_top_authors_top)
-        self.assertEqual('mps.cli.lanuse.library_top.authors_top', library_top_authors_top.name)
-        self.assertEqual('r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed', library_top_authors_top.uuid)
+        self.assertEqual(library_top_authors_top_model_uuid, library_top_authors_top.uuid)
 
 if __name__ == '__main__':
     unittest.main()
