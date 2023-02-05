@@ -8,8 +8,8 @@ This repository contains tooling for reading MPS models from command line - with
 - A Python library for reading MPS files and building an object model - [here](mps-cli-py/Readme.md).
 
 ### Repository Structure
-- `mps-cli-gradle-plugin` - the gradle plugin project
-- `mps-cli-py` - a Python library to parse MPS models
+- `mps-cli-gradle-plugin` - the gradle plugin to read MPS models
+- `mps-cli-py` - a Python library to read MPS models
 - `demos` - examples for the use of the MPS-CLI tooling 
   - `gradle-plugin-use` - example of the use of the `mps-cli-gradle-plugin` 
 - `mps_test_projects` - MPS project containing language definitions and models used as test-data for the MPS-cli tools
