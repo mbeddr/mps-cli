@@ -1,13 +1,15 @@
 package org.mps_cli.model
 
 class SModel {
-    def String name
-    def String modelId
-    def List<SNode> rootNodes = []
+    String name
+    String modelId
+    String pathToModelFile
+    boolean isFilePerRootPersistency
+    List<SNode> rootNodes = []
     List<SModelRef> imports = []
 
     // caching
-    def List<SNode> allNodes = new ArrayList<>(1024)
+    List<SNode> allNodes = new ArrayList<>(1024)
 
     Map<String, SNode> nodeId2Node() {
         allNodes.collectEntries {[it.id, it] }

@@ -21,6 +21,7 @@ class SSolutionBuilder {
         def filePath = new File(path)
         def solutionFile = filePath.listFiles().find {it.name.endsWith(".msd")}
         SSolution sSolution = extractSolutionCoreInfo(solutionFile)
+        sSolution.pathToSolutionFile = solutionFile.absolutePath
 
         for(Node dep : solutionXML.dependencies.dependency) {
             def moduleRefString = dep.text()

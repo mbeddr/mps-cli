@@ -12,6 +12,10 @@ class SRepository {
         models
     }
 
+    List<SModel> findModelByName(String modelName) {
+        allModels().findAll {it.name.equals(modelName) }
+    }
+
     Map<String, SModel> id2models() {
         allModels().collectEntries {[it.modelId, it]}
     }
@@ -52,5 +56,9 @@ class SRepository {
     SConcept findConceptByShortName(String conceptShortName) {
         def ending = "." + conceptShortName
         languages.collectMany {it.concepts }.find { it.name.endsWith(ending) }
+    }
+
+    SSolution findSolutionByName(String solutionName) {
+        solutions.find {it.name.equals(solutionName) }
     }
 }

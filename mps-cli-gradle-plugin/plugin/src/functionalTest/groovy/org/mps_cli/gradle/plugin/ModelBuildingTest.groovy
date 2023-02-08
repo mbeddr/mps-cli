@@ -16,6 +16,10 @@ task printSolutionsInfo {
     doLast {
         def repo = buildModel.repository
         
+        def library_second = repo.solutions.find { it.name.equals("mps.cli.lanuse.library_second") ||
+                                                it.name.equals("mps.cli.lanuse.library_second.default_persistency") }
+        println "solution $library_second.name is saved in directory $library_second.pathToSolutionFile"
+        
         def modules = repo.solutions
         println "all modules: ${modules.collect { it.name }}"
         def solutionWithDependencies = modules.find { it.name.equals("mps.cli.lanuse.library_second") || 
@@ -27,6 +31,7 @@ task printSolutionsInfo {
         
         def modelWithImports = models.find { it.name.equals("mps.cli.lanuse.library_second.library_top") ||
                                              it.name.equals("mps.cli.lanuse.library_second.default_persistency.library_top") }
+        println "path to model $modelWithImports.name is $modelWithImports.pathToModelFile"
         println "all models imported by 'mps.cli.lanuse.library_second.library_top': ${modelWithImports.imports.collect { it.resolve(repo).name }}"
         
         def allNodes = repo.allNodes()
@@ -57,6 +62,15 @@ task printSolutionsInfo {
         runTask("printSolutionsInfo")
 
         then:
+        // check paths of solutions
+        result.output.split("\n").any { it.contains("solution mps.cli.lanuse.library_second is saved in directory") &&
+                it.contains("solutions\\mps.cli.lanuse.library_second\\mps.cli.lanuse.library_second.msd") ||
+                it.contains("solution mps.cli.lanuse.library_second.default_persistency is saved in directory") &&
+                it.contains("solutions\\mps.cli.lanuse.library_second.default_persistency\\mps.cli.lanuse.library_second.default_persistency.msd") ||
+                it.contains("solution mps.cli.lanuse.library_second is saved in directory") &&
+                it.contains("mps_cli_lanuse_binary\\mps_cli_lanuse_file_per_root.jar_tmp\\mps.cli.lanuse.library_second\\mps.cli.lanuse.library_second.msd")
+        }
+
         // check dependencies between solutions
         result.output.contains("all modules on which 'mps.cli.lanuse.library_second' is dependent on: [mps.cli.lanuse.library_top]") ||
             result.output.contains("all modules on which 'mps.cli.lanuse.library_second' is dependent on: [mps.cli.lanuse.library_top.default_persistency]")
@@ -65,6 +79,14 @@ task printSolutionsInfo {
         result.output.contains library_top_dot_library_top
         result.output.contains library_top_dot_authors_top
         result.output.contains library_second_dot_library_top
+
+        // check paths of models
+        result.output.split("\n").any { it.contains("path to model mps.cli.lanuse.library_second.library_top is") &&
+                                            it.contains("solutions\\mps.cli.lanuse.library_second\\models\\mps.cli.lanuse.library_second.library_top\\.model") ||
+                                            it.contains("path to model mps.cli.lanuse.library_second.default_persistency.library_top is") &&
+                                            it.contains("solutions\\mps.cli.lanuse.library_second.default_persistency\\models\\mps.cli.lanuse.library_second.default_persistency.library_top.mps") ||
+                                            it.contains("path to model mps.cli.lanuse.library_second.library_top is") &&
+                                            it.contains("mps_cli_lanuse_binary\\mps_cli_lanuse_file_per_root.jar_tmp\\mps.cli.lanuse.library_second\\models\\mps.cli.lanuse.library_second.library_top\\.model") }
 
         // check dependencies between models
         result.output.contains("all models imported by 'mps.cli.lanuse.library_second.library_top': [mps.cli.lanuse.library_top.authors_top]") ||

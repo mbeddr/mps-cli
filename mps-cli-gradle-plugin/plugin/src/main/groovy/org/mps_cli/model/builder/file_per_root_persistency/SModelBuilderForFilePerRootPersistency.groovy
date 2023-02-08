@@ -19,6 +19,8 @@ class SModelBuilderForFilePerRootPersistency extends AbstractModelBuilder {
             return null;
         def modelXML = new XmlParser().parse(pathToModelFile)
         def sModel = buildModelFromXML(modelXML)
+        sModel.isFilePerRootPersistency = true
+        sModel.pathToModelFile = pathToModelFile
 
         if (buildingStrategy != BuildingDepthEnum.MODEL_DEPENDENCIES_ONLY) {
             def filePath = new File(path)

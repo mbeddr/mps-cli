@@ -56,6 +56,9 @@ class SSolutionsRepositoryBuilder {
         jarFiles.each {
             def destinationDirectoryToUnpackJar = new File(it.parent, it.name + "_tmp")
             Date start = new Date()
+            if (destinationDirectoryToUnpackJar.exists()) {
+                destinationDirectoryToUnpackJar.deleteDir()
+            }
             unpackJar(it, destinationDirectoryToUnpackJar)
             Date stop = new Date()
             TimeDuration td = TimeCategory.minus(stop, start)

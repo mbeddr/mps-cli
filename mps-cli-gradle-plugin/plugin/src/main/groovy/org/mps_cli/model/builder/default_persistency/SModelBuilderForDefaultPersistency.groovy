@@ -17,6 +17,8 @@ class SModelBuilderForDefaultPersistency extends AbstractModelBuilder {
 
         def modelXML = new XmlParser().parse(pathToMsdFile)
         def sModel = buildModelFromXML(modelXML)
+        sModel.isFilePerRootPersistency = false
+        sModel.pathToModelFile = pathToMsdFile
 
         if (buildingStrategy != BuildingDepthEnum.MODEL_DEPENDENCIES_ONLY) {
             def builder = new RootNodeFromMsdBuilder()
