@@ -18,7 +18,8 @@ task printSolutionsInfo {
         
         def library_second = repo.solutions.find { it.name.equals("mps.cli.lanuse.library_second") ||
                                                 it.name.equals("mps.cli.lanuse.library_second.default_persistency") }
-        println "solution $library_second.name is saved in directory $library_second.pathToSolutionFile"
+        def normalizedSolutionPath = library_second.pathToSolutionFile.replace("/", "\\\\")
+        println "solution $library_second.name is saved in directory $normalizedSolutionPath"
         
         def modules = repo.solutions
         println "all modules: ${modules.collect { it.name }}"
@@ -31,7 +32,8 @@ task printSolutionsInfo {
         
         def modelWithImports = models.find { it.name.equals("mps.cli.lanuse.library_second.library_top") ||
                                              it.name.equals("mps.cli.lanuse.library_second.default_persistency.library_top") }
-        println "path to model $modelWithImports.name is $modelWithImports.pathToModelFile"
+        def normalizedModelPath = modelWithImports.pathToModelFile.replace("/", "\\\\")
+        println "path to model $modelWithImports.name is $normalizedModelPath"
         println "all models imported by 'mps.cli.lanuse.library_second.library_top': ${modelWithImports.imports.collect { it.resolve(repo).name }}"
         
         def allNodes = repo.allNodes()
