@@ -34,13 +34,16 @@ class SSolutionBuilder {
             modelFiles.findAll {it.isDirectory() }.each {
                 def modelBuilder = new SModelBuilderForFilePerRootPersistency(buildingStrategy: buildingStrategy)
                 def model = modelBuilder.build(it.absolutePath)
-                if (model != null)
+                if (model != null) {
+                    model.mySolution = sSolution
                     sSolution.models.add(model)
+                }
             }
             modelFiles.findAll {it.name.endsWith(".mps") }.each {
                 def modelBuilder = new SModelBuilderForDefaultPersistency(buildingStrategy: buildingStrategy)
                 def model = modelBuilder.build(it.absolutePath)
                 sSolution.models.add(model)
+                model.mySolution = sSolution
             }
         }
 

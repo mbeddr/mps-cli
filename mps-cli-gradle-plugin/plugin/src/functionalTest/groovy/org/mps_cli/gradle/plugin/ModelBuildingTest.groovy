@@ -49,6 +49,8 @@ task printSolutionsInfo {
         println "'Mysterious Island' authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
         println "'Mysterious Island' publication date: ${theMysteriousIsland.publicationDate}"
         println "'Mysterious Island' available: ${theMysteriousIsland.available}"
+        println "the solution containing the 'Mysterious Island' is: ${theMysteriousIsland.myModel.mySolution.name}"
+        
         
         def magazines = repo.nodesOfConcept("mps.cli.landefs.library.structure.Magazine")
         println "magazines definitions: ${magazines.collect { it.name }}"
@@ -103,6 +105,8 @@ task printSolutionsInfo {
         result.output.contains "'Mysterious Island' authors: [Jules Verne]"
         result.output.contains "'Mysterious Island' publication date: 1875"
         result.output.contains "'Mysterious Island' available: true"
+        result.output.split("\n").any { it.startsWith("the solution containing the 'Mysterious Island' is: mps.cli.lanuse.library_top.default_persistency") ||
+                it.startsWith("the solution containing the 'Mysterious Island' is: mps.cli.lanuse.library_top") }
 
         // magazine
         result.output.contains "magazines definitions: [Der Spiegel]"

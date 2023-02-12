@@ -4,6 +4,7 @@ class SModel {
     String name
     String modelId
     String pathToModelFile
+    SSolution mySolution
     boolean isFilePerRootPersistency
     List<SNode> rootNodes = []
     List<SModelRef> imports = []
