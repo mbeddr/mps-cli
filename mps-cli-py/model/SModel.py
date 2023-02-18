@@ -6,6 +6,7 @@ class SModel:
         self.name = name
         self.uuid = uuid
         self.root_nodes = []
+        self.path_to_model_file = ""
 
     def get_nodes(self):
         res = []

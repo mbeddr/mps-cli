@@ -11,6 +11,7 @@ class SModelBuilderFilePerRootPersistency(SModelBuilderBase):
         tree = ET.parse(model_file)
         model_xml_node = tree.getroot()
         model = self.extract_model_core_info(model_xml_node)
+        model.path_to_model_file = model_file
 
         for file in path.iterdir():
             if file.suffix == '.mpsr':

@@ -10,6 +10,7 @@ class SSolutionBuilder:
     def build_solution(self, path_to_msd_file):
         solution = self.extract_solution_core_info(path_to_msd_file)
         path_to_solution_dir = path_to_msd_file.parent
+        solution.path_to_solution_file = path_to_msd_file
         print("building from:", path_to_solution_dir)
         path_to_models_dir = path_to_solution_dir / 'models'
 

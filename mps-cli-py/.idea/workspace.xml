@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/SConcept.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/SLanguage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/SModel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/SNode.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/SRepository.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/SSolution.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/builder/SLanguageBuilder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/builder/SModelBuilderFilePerRootPersistency.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/builder/SSolutionBuilder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/builder/SSolutionsRepositoryBuilder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/builder/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../mps_test_projects/mps_cli_lanuse/.mps/vcs.xml" beforeDir="false" />
+    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="Readme.md: updated to reflect mps_cli_py improvements">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/SModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/SModel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/SSolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/SSolution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/builder/SModelBuilderDefaultPersistency.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/builder/SModelBuilderDefaultPersistency.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/builder/SModelBuilderFilePerRootPersistency.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/builder/SModelBuilderFilePerRootPersistency.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/builder/SSolutionBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/builder/SSolutionBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_modules_and_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_modules_and_models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,8 +41,14 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/model/builder" />
   </component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\work\mps-cli\mps-cli-py\model\builder" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python tests.Unittests for test_modules_and_models.TestModulesAndModels">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -69,6 +70,85 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="Unittests for test_language_extraction.TestLanguageExtraction" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_language_extraction.TestLanguageExtraction&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for test_modules_and_models.TestModulesAndModels" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_modules_and_models.TestModulesAndModels&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for test_modules_and_models.TestModulesAndModels.test_build_modules_and_models" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_modules_and_models.TestModulesAndModels.test_build_modules_and_models&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for test_nodes.TestNodes" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_nodes.TestNodes&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests in tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Unittests for test_modules_and_models.TestModulesAndModels" />
+        <item itemvalue="Python tests.Unittests for test_modules_and_models.TestModulesAndModels.test_build_modules_and_models" />
+        <item itemvalue="Python tests.Unittests for test_nodes.TestNodes" />
+        <item itemvalue="Python tests.Unittests for test_language_extraction.TestLanguageExtraction" />
+        <item itemvalue="Python tests.Unittests in tests" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -79,6 +159,35 @@
       <option name="presentableId" value="Default" />
       <updated>1674343220733</updated>
     </task>
+    <task id="LOCAL-00001" summary="python.cli: added support for handling default persistency">
+      <created>1675598288388</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1675598288388</updated>
+    </task>
+    <task id="LOCAL-00002" summary="mps_cli_py_build.yaml: install 'parametrized' unittest python package via pip">
+      <created>1675599518044</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1675599518044</updated>
+    </task>
+    <task id="LOCAL-00003" summary="mps_cli_py: added support for handling solutions packaged as jars">
+      <created>1675619198053</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1675619198053</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Readme.md: updated to reflect mps_cli_py improvements">
+      <created>1675619485049</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1675619485049</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -91,5 +200,24 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="python.cli: added support for handling default persistency" />
+    <MESSAGE value="mps_cli_py_build.yaml: install 'parametrized' unittest python package via pip" />
+    <MESSAGE value="mps_cli_py: added support for handling solutions packaged as jars" />
+    <MESSAGE value="Readme.md: updated to reflect mps_cli_py improvements" />
+    <option name="LAST_COMMIT_MESSAGE" value="Readme.md: updated to reflect mps_cli_py improvements" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/model/builder/SModelBuilderDefaultPersistency.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
