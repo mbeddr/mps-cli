@@ -1,6 +1,6 @@
 
-from model.SLanguage import SLanguage
-from model.SConcept import SConcept
+from mpscli.model.SLanguage import SLanguage
+from mpscli.model.SConcept import SConcept
 
 class SLanguageBuilder:
     languages = {}

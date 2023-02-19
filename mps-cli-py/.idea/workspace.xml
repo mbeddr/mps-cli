@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="Readme.md: updated to reflect mps_cli_py improvements">
+    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="py: restructured to enable PIP packaging">
+      <change afterPath="$PROJECT_DIR$/tests/context.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/mps-cli-py.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/mps-cli-py.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/SModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/SModel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/SSolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/SSolution.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/builder/SModelBuilderDefaultPersistency.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/builder/SModelBuilderDefaultPersistency.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/builder/SModelBuilderFilePerRootPersistency.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/builder/SModelBuilderFilePerRootPersistency.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/builder/SSolutionBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/builder/SSolutionBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SLanguageBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SLanguageBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderBase.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderBase.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderDefaultPersistency.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderDefaultPersistency.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderFilePerRootPersistency.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderFilePerRootPersistency.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionsRepositoryBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionsRepositoryBuilder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_modules_and_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_modules_and_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_language_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_language_extraction.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -187,7 +194,21 @@
       <option name="project" value="LOCAL" />
       <updated>1675619485049</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="py: added information about path (location on harddisk) to SSolution and SModel objects">
+      <created>1676760187896</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1676760187896</updated>
+    </task>
+    <task id="LOCAL-00006" summary="py: restructured to enable PIP packaging">
+      <created>1676825289577</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1676825289577</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -207,7 +228,9 @@
     <MESSAGE value="mps_cli_py_build.yaml: install 'parametrized' unittest python package via pip" />
     <MESSAGE value="mps_cli_py: added support for handling solutions packaged as jars" />
     <MESSAGE value="Readme.md: updated to reflect mps_cli_py improvements" />
-    <option name="LAST_COMMIT_MESSAGE" value="Readme.md: updated to reflect mps_cli_py improvements" />
+    <MESSAGE value="py: added information about path (location on harddisk) to SSolution and SModel objects" />
+    <MESSAGE value="py: restructured to enable PIP packaging" />
+    <option name="LAST_COMMIT_MESSAGE" value="py: restructured to enable PIP packaging" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

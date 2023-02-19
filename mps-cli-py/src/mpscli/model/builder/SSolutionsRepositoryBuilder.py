@@ -5,9 +5,9 @@ import zipfile
 import shutil
 
 from pathlib import Path
-from model.SRepository import SRepository
-from model.builder.SLanguageBuilder import SLanguageBuilder
-from model.builder.SSolutionBuilder import SSolutionBuilder
+from mpscli.model.SRepository import SRepository
+from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
+from mpscli.model.builder.SSolutionBuilder import SSolutionBuilder
 
 class SSolutionsRepositoryBuilder:
 

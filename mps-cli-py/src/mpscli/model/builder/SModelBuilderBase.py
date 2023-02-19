@@ -1,8 +1,7 @@
-from model.SNodeRef import SNodeRef
-import xml.etree.ElementTree as ET
-from model.SModel import SModel
-from model.SNode import SNode
-from model.builder.SLanguageBuilder import SLanguageBuilder
+from mpscli.model.SNodeRef import SNodeRef
+from mpscli.model.SModel import SModel
+from mpscli.model.SNode import SNode
+from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 
 
 class SModelBuilderBase:

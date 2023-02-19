@@ -1,8 +1,12 @@
 import os
 import unittest
 
-from model.builder.SLanguageBuilder import SLanguageBuilder
-from model.builder.SSolutionsRepositoryBuilder import SSolutionsRepositoryBuilder
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+
+from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
+from mpscli.model.builder.SSolutionsRepositoryBuilder import SSolutionsRepositoryBuilder
 
 
 class TestBase(unittest.TestCase):

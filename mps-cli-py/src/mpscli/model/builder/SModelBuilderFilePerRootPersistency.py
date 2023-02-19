@@ -1,6 +1,5 @@
 
-from model.builder.SLanguageBuilder import SLanguageBuilder
-from model.builder.SModelBuilderBase import SModelBuilderBase
+from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
 import xml.etree.ElementTree as ET
 
 

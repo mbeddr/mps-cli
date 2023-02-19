@@ -1,8 +1,8 @@
 
 import xml.etree.ElementTree as ET
-from model.SSolution import SSolution
-from model.builder.SModelBuilderDefaultPersistency import SModelBuilderDefaultPersistency
-from model.builder.SModelBuilderFilePerRootPersistency import SModelBuilderFilePerRootPersistency
+from mpscli.model.SSolution import SSolution
+from mpscli.model.builder.SModelBuilderDefaultPersistency import SModelBuilderDefaultPersistency
+from mpscli.model.builder.SModelBuilderFilePerRootPersistency import SModelBuilderFilePerRootPersistency
 
 
 class SSolutionBuilder:

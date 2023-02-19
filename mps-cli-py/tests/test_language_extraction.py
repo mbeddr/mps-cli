@@ -1,7 +1,5 @@
 import unittest
-import os
 
-from model.builder.SSolutionsRepositoryBuilder import SSolutionsRepositoryBuilder
 from tests.test_base import TestBase
 from parameterized import parameterized
 
@@ -33,7 +31,6 @@ class TestLanguageExtraction(TestBase):
         book_concept = landefs_library.find_concept_by_name('mps.cli.landefs.library.structure.Book')
         self.assertEqual(['publicationDate'], book_concept.properties)
         self.assertEqual(['authors'], book_concept.children)
-
 
 
 if __name__ == '__main__':

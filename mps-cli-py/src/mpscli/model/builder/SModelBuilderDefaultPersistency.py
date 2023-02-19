@@ -1,6 +1,6 @@
 
 import xml.etree.ElementTree as ET
-from model.builder.SModelBuilderBase import SModelBuilderBase
+from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
 
 
 class SModelBuilderDefaultPersistency(SModelBuilderBase):

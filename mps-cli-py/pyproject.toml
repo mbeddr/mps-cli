@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mps-cli"
+version = "0.1.0"
+authors = [
+  { name="Daniel Ratiu", email="ratiud@googlemail.com" },
+]
+description = "MPS Command Line Interface (MPS-CLI) is a library to parse MPS files and build the model as Python objects."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/mbeddr/mps-cli"
+"Bug Tracker" = "https://github.com/mbeddr/mps-cli/issues"
