@@ -14,6 +14,7 @@ plugins {
     id 'groovy'
 
     id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '1.1.0'
 }
 
 repositories {
@@ -27,10 +28,16 @@ dependencies {
 }
 
 gradlePlugin {
+    website = 'https://github.com/mbeddr/mps-cli'
+    vcsUrl = 'https://github.com/mbeddr/mps-cli'
+
     // Define the plugin
     plugins {
         mps_cli {
-            id = 'org.mps_cli.gradle.plugin'
+            id = 'com.mbeddr.mps_cli'
+            displayName = 'MPS-CLI'
+            description = 'This plugin parses JetBrains Meta-Programming System (MPS) files (.mpsr, .mps) and builds an object model.'
+            tags.set(['jetbrains mps'])
             implementationClass = 'org.mps_cli.gradle.plugin.MpsCliGradlePluginPlugin'
         }
     }
@@ -63,9 +70,11 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+group = 'com.mbeddr'
+
 // Project versions
 ext.major = '0'
-ext.minor = '2'
+ext.minor = '3'
 
 if (System.env.CI != null && System.env.CI.toBoolean()) {
     def buildNumber = System.env.GITHUB_RUN_NUMBER != null ? System.env.GITHUB_RUN_NUMBER.toInteger() : System.env.BUILD_NUMBER.toInteger()
@@ -74,12 +83,12 @@ if (System.env.CI != null && System.env.CI.toBoolean()) {
     println "##CI computed version='${version}'"
 } else {
     println "Local build detected, version will be SNAPSHOT"
-    version = "$major.$minor-SNAPSHOT"
+    version = "$major.$minor"
 }
 
 publishing {
     repositories {
-		maven {
+        maven {
 			name = "GitHubPackages"
 			url = uri("https://maven.pkg.github.com/mbeddr/mps-cli")
 			if(project.hasProperty("gpr.token")) {
@@ -89,10 +98,12 @@ publishing {
 				}
 			}
 		}
+
+
     }
     publications {
         maven(MavenPublication) {
-            groupId = 'org.mps_cli'
+            groupId = 'com.mbeddr.mps_cli'
             artifactId = 'gradle.plugin'
             
             from components.java
