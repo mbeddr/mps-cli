@@ -1,6 +1,6 @@
 
 plugins {
-    id 'org.mps_cli.gradle.plugin' version '0.2.+'
+    id 'com.mbeddr.mps_cli' version '0.3.+'
 }
 
 def directoryWithSources = ['C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse_file_per_root',
