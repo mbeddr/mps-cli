@@ -56,7 +56,7 @@ task extractModuleDependencies {
     {
         """ 
 plugins {
-    id('org.mps_cli.gradle.plugin')
+    id('com.mbeddr.mps_cli')
 }
 
 buildModuleDependencies {

@@ -8,7 +8,7 @@ import org.gradle.api.Project
 import spock.lang.Specification
 
 /**
- * A simple unit test for the 'org.mps_cli.gradle.plugin.greeting' plugin.
+ * A simple unit test for the 'com.mbeddr.mps_cli.greeting' plugin.
  */
 class MpsCliGradlePluginPluginTest extends Specification {
     def "plugin registers task"() {
@@ -16,7 +16,7 @@ class MpsCliGradlePluginPluginTest extends Specification {
         def project = ProjectBuilder.builder().build()
 
         when:
-        project.plugins.apply("org.mps_cli.gradle.plugin.greeting")
+        project.plugins.apply("com.mbeddr.mps_cli.greeting")
 
         then:
         project.tasks.findByName("greeting") != null
