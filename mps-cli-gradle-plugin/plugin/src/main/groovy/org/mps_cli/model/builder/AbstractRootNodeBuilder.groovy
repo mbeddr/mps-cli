@@ -29,6 +29,8 @@ abstract class AbstractRootNodeBuilder {
 
         xmlNode.property.each {
             def propertyName = propertyIds2Names[it.'@role']
+            if (propertyName.equals("metaClass"))
+                propertyName = "metaClass_"
             sNode.properties[propertyName] = it.'@value'
 
             def conceptOwnerOfProperty = membersIds2SConcept[it.'@role']

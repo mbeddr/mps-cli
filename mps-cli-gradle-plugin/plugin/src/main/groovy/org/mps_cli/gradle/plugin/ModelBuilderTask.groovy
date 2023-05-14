@@ -4,10 +4,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.gradle.plugins.ide.eclipse.model.Output
 import org.mps_cli.model.SRepository
 import org.mps_cli.model.builder.SLanguageBuilder
-import org.mps_cli.model.builder.SSolutionsRepositoryBuilder
+import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
 class ModelBuilderTask extends DefaultTask {
 
@@ -24,7 +23,7 @@ class ModelBuilderTask extends DefaultTask {
 
     @TaskAction
     def buildModel() {
-        def builder = new SSolutionsRepositoryBuilder()
+        def builder = new SModulesRepositoryBuilder()
         SLanguageBuilder.clear()
         sourcesDir.each {
             def dir = new File(it).getAbsoluteFile().canonicalPath
@@ -34,7 +33,7 @@ class ModelBuilderTask extends DefaultTask {
         //setProperty("repository", repository)
         repository = builder.repo
 
-        println("number of solutions: " + repository.solutions.size)
+        println("number of solutions: " + repository.modules.size)
     }
 
 }
