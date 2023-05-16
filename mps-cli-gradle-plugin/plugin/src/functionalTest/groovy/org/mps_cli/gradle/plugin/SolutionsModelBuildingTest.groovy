@@ -46,7 +46,7 @@ task printSolutionsInfo {
         println "'Mysterious Island' authors: ${theMysteriousIsland.authors.collect {it.person.resolve(repo).name }}"
         println "'Mysterious Island' publication date: ${theMysteriousIsland.publicationDate}"
         println "'Mysterious Island' available: ${theMysteriousIsland.available}"
-        println "the solution containing the 'Mysterious Island' is: ${theMysteriousIsland.myModel.mySolution.name}"
+        println "the solution containing the 'Mysterious Island' is: ${theMysteriousIsland.myModel.myModule.name}"
         
         
         def magazines = repo.nodesOfConcept("mps.cli.landefs.library.structure.Magazine")

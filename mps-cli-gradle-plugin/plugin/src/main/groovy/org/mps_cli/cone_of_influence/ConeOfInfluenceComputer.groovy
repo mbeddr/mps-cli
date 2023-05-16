@@ -14,7 +14,7 @@ class ConeOfInfluenceComputer {
 
         List<String> differentModulesIds = differentModulesFiles.collect {
             SSolutionModuleBuilder builder = new SSolutionModuleBuilder()
-            SSolutionModule sol = builder.extractSolutionCoreInfo(it)
+            SSolutionModule sol = builder.extractModuleCoreInfo(it)
             sol.moduleId
         }
 
