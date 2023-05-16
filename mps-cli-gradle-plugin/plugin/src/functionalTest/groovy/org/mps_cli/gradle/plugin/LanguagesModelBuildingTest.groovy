@@ -25,8 +25,8 @@ task printSolutionsInfo {
         println "library language $library_lan.namespace is saved in directory $normalizedModulePath"
         
         def modules = repo.modules
-        println "all modules: ${modules.collect { it.name() }}"
-
+        println "all modules: ${modules.collect { it.name() }.sort()}"
+        println "library language models: ${library_lan.models.collect { it.name }.sort()}"
     }
 }
 
@@ -42,6 +42,9 @@ task printSolutionsInfo {
                 it.contains("languages\\mps.cli.landefs.library\\mps.cli.landefs.library.mpl") }
 
         // check modules
-        result.output.contains("all modules: [mps.cli.landefs.library, mps.cli.landefs.people, mps.cli.landefs.library.sandbox]")
+        result.output.contains("all modules: [mps.cli.landefs.library, mps.cli.landefs.library.sandbox, mps.cli.landefs.people]")
+
+        // check models of library language
+        result.output.contains("library language models: [mps.cli.landefs.library.behavior, mps.cli.landefs.library.constraints, mps.cli.landefs.library.editor, mps.cli.landefs.library.structure, mps.cli.landefs.library.typesystem]")
     }
 }
