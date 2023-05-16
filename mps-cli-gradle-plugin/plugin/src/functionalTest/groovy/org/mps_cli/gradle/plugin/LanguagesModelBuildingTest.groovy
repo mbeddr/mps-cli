@@ -36,6 +36,7 @@ task printSolutionsInfo {
         runTask("printSolutionsInfo")
 
         then:
+        println(">>>>>>>>>>\n" + result.output + "\n<<<<<<<<<<<<<<")
         // check paths of languages
         result.output.split("\n").any { it.contains("library language mps.cli.landefs.library is saved in directory") &&
                 it.contains("languages\\mps.cli.landefs.library\\mps.cli.landefs.library.mpl") }
