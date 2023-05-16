@@ -14,15 +14,15 @@ class ModuleDependenciesBuildingTest extends TestBase {
 task extractModuleDependencies {
     dependsOn buildModuleDependencies
     doLast {
-        def solution2AllDownstreamDependencies = buildModuleDependencies.solution2AllDownstreamDependencies
-        def solution2AllUpstreamDependencies = buildModuleDependencies.solution2AllUpstreamDependencies
+        def module2AllDownstreamDependencies = buildModuleDependencies.module2AllDownstreamDependencies
+        def module2AllUpstreamDependencies = buildModuleDependencies.module2AllUpstreamDependencies
         
-        for (Object sol : solution2AllDownstreamDependencies.keySet()) {
-            println "downstream dependencies for ${sol.name} are: ${solution2AllDownstreamDependencies[sol].collect { it.name }}"
+        for (Object sol : module2AllDownstreamDependencies.keySet()) {
+            println "downstream dependencies for ${sol.name} are: ${module2AllDownstreamDependencies[sol].collect { it.name }}"
         }
 
-        for (Object sol : solution2AllUpstreamDependencies.keySet()) {
-            println "upstream dependencies for ${sol.name} are: ${solution2AllUpstreamDependencies[sol].collect { it.name }}"
+        for (Object sol : module2AllUpstreamDependencies.keySet()) {
+            println "upstream dependencies for ${sol.name} are: ${module2AllUpstreamDependencies[sol].collect { it.name }}"
         }
     }
 }

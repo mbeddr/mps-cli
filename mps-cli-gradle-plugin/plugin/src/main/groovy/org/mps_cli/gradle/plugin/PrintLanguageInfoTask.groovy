@@ -2,11 +2,8 @@ package org.mps_cli.gradle.plugin
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.gradle.plugins.ide.eclipse.model.Output
 import org.mps_cli.model.SRepository
-import org.mps_cli.model.builder.SSolutionsRepositoryBuilder
 import groovy.xml.MarkupBuilder
 
 class PrintLanguageInfoTask extends DefaultTask {

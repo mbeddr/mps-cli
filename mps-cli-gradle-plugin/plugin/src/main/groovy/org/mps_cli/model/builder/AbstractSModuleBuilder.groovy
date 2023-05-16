@@ -2,48 +2,48 @@ package org.mps_cli.model.builder
 
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
-import groovy.xml.XmlParser
-import org.mps_cli.model.SModelRef
+import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.SModuleRef
-import org.mps_cli.model.SSolution
 import org.mps_cli.model.builder.default_persistency.SModelBuilderForDefaultPersistency
 import org.mps_cli.model.builder.file_per_root_persistency.SModelBuilderForFilePerRootPersistency
 
-class SSolutionBuilder {
+abstract class AbstractSModuleBuilder {
 
     BuildingDepthEnum buildingStrategy = BuildingDepthEnum.COMPLETE_MODEL;
 
-    private Node solutionXML;
+    protected Node moduleXML;
+
+    def abstract File moduleFile(File pathToModuleDirectory);
 
     def build(String path) {
         Date start = new Date()
 
-        def filePath = new File(path)
-        def solutionFile = filePath.listFiles().find {it.name.endsWith(".msd")}
-        SSolution sSolution = extractSolutionCoreInfo(solutionFile)
-        sSolution.pathToSolutionFile = solutionFile.absolutePath
+        def pathToModuleDirectory = new File(path)
+        def solutionFile = moduleFile(pathToModuleDirectory)
+        SModuleBase sModuleBase = extractModuleCoreInfo(solutionFile)
+        sModuleBase.pathToModuleFile = solutionFile.absolutePath
 
-        for(Node dep : solutionXML.dependencies.dependency) {
+        for(Node dep : moduleXML.dependencies.dependency) {
             def moduleRefString = dep.text()
             def moduleIdRefString = moduleRefString.substring(0, moduleRefString.indexOf('('))
-            sSolution.dependencies.add(new SModuleRef(referencedModuleId : moduleIdRefString))
+            sModuleBase.dependencies.add(new SModuleRef(referencedModuleId : moduleIdRefString))
         }
 
         if (buildingStrategy != BuildingDepthEnum.MODULE_DEPENDENCIES_ONLY) {
-            def modelFiles = new File(filePath, "models").listFiles()
+            def modelFiles = new File(pathToModuleDirectory, "models").listFiles()
             modelFiles.findAll {it.isDirectory() }.each {
                 def modelBuilder = new SModelBuilderForFilePerRootPersistency(buildingStrategy: buildingStrategy)
                 def model = modelBuilder.build(it.absolutePath)
                 if (model != null) {
-                    model.mySolution = sSolution
-                    sSolution.models.add(model)
+                    model.myModule = sModuleBase
+                    sModuleBase.models.add(model)
                 }
             }
             modelFiles.findAll {it.name.endsWith(".mps") }.each {
                 def modelBuilder = new SModelBuilderForDefaultPersistency(buildingStrategy: buildingStrategy)
                 def model = modelBuilder.build(it.absolutePath)
-                sSolution.models.add(model)
-                model.mySolution = sSolution
+                sModuleBase.models.add(model)
+                model.myModule = sModuleBase
             }
         }
 
@@ -51,14 +51,8 @@ class SSolutionBuilder {
         TimeDuration td = TimeCategory.minus( stop, start )
         println "${td} for handling ${path}"
 
-        sSolution
+        sModuleBase
     }
 
-    public SSolution extractSolutionCoreInfo(File solutionFile) {
-        solutionXML = new XmlParser().parse(solutionFile)
-        def sSolution = new SSolution()
-        sSolution.name = solutionXML.'@name'
-        sSolution.solutionId = solutionXML.'@uuid'
-        sSolution
-    }
+    def abstract SModuleBase extractModuleCoreInfo(File solutionFile);
 }

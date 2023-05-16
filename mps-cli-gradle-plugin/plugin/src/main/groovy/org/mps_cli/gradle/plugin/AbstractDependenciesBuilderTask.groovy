@@ -2,17 +2,13 @@ package org.mps_cli.gradle.plugin
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.TaskAction
 import org.mps_cli.model.SRepository
-import org.mps_cli.model.SSolution
-import org.mps_cli.model.builder.BuildingDepthEnum
 import org.mps_cli.model.builder.SLanguageBuilder
-import org.mps_cli.model.builder.SSolutionsRepositoryBuilder
+import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
 abstract class AbstractDependenciesBuilderTask extends DefaultTask {
 
-    protected SSolutionsRepositoryBuilder builder;
+    protected SModulesRepositoryBuilder builder;
 
     @Input
     List<String> sourcesDir;

@@ -28,8 +28,8 @@ class ConeOfInfluenceComputerTask extends DefaultTask{
 
     @TaskAction
     def computeConeOfInfluence() {
-        def solution2AllUpstreamDependencies = project.buildModuleDependencies.solution2AllUpstreamDependencies
-        def solution2AllDownstreamDependencies = project.buildModuleDependencies.solution2AllDownstreamDependencies
+        def solution2AllUpstreamDependencies = project.buildModuleDependencies.module2AllUpstreamDependencies
+        def solution2AllDownstreamDependencies = project.buildModuleDependencies.module2AllDownstreamDependencies
 
         ConeOfInfluenceComputer coiComputer = new ConeOfInfluenceComputer()
         def res = coiComputer.computeConeOfInfluence(gitRepoRootLocation, referenceBranchName,

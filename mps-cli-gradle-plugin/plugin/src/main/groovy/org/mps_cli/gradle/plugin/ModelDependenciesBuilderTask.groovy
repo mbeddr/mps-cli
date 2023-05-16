@@ -4,9 +4,8 @@ package org.mps_cli.gradle.plugin
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.mps_cli.model.SModel
-import org.mps_cli.model.SSolution
 import org.mps_cli.model.builder.BuildingDepthEnum
-import org.mps_cli.model.builder.SSolutionsRepositoryBuilder
+import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
 class ModelDependenciesBuilderTask extends AbstractDependenciesBuilderTask {
 
@@ -23,7 +22,7 @@ class ModelDependenciesBuilderTask extends AbstractDependenciesBuilderTask {
 
     @TaskAction
     def buildModelDependencies() {
-        builder = new SSolutionsRepositoryBuilder(buildingStrategy: BuildingDepthEnum.MODEL_DEPENDENCIES_ONLY)
+        builder = new SModulesRepositoryBuilder(buildingStrategy: BuildingDepthEnum.MODEL_DEPENDENCIES_ONLY)
         buildEntityDependencies(model2AllUpstreamDependencies, model2AllDownstreamDependencies)
     }
 

@@ -1,12 +1,12 @@
 package org.mps_cli.model
 
 class SRepository {
-    def List<SSolution> solutions = []
+    def List<SModuleBase> modules = []
     def List<SLanguage> languages = []
 
     List<SModel> allModels() {
         def models = []
-        solutions.each { sol ->
+        modules.each { sol ->
             models.addAll(sol.models)
         }
         models
@@ -20,8 +20,8 @@ class SRepository {
         allModels().collectEntries {[it.modelId, it]}
     }
 
-    Map<String, SSolution> id2solutions() {
-        solutions.collectEntries {[it.solutionId, it]}
+    Map<String, SModuleBase> id2modules() {
+        modules.collectEntries {[it.moduleId, it]}
     }
 
     List<SNode> allNodes() {
@@ -58,7 +58,7 @@ class SRepository {
         languages.collectMany {it.concepts }.find { it.name.endsWith(ending) }
     }
 
-    SSolution findSolutionByName(String solutionName) {
-        solutions.find {it.name.equals(solutionName) }
+    SModuleBase findModuleByName(String moduleName) {
+        modules.find {it.name.equals(moduleName) }
     }
 }
