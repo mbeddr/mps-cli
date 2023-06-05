@@ -17,6 +17,13 @@ plugins {
     id 'com.gradle.plugin-publish' version '1.1.0'
 }
 
+// Project versions
+ext.major = '0'
+ext.minor = '5'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -71,10 +78,6 @@ tasks.named('test') {
 }
 
 group = 'com.mbeddr'
-
-// Project versions
-ext.major = '0'
-ext.minor = '4'
 
 if (System.env.CI != null && System.env.CI.toBoolean()) {
     def buildNumber = System.env.GITHUB_RUN_NUMBER != null ? System.env.GITHUB_RUN_NUMBER.toInteger() : System.env.BUILD_NUMBER.toInteger()
