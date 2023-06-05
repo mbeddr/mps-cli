@@ -10,7 +10,7 @@ class ConeOfInfluenceComputer {
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies) {
 
-        List<File> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreDifferentFromBranch(gitRepoLocation, branchName)
+        List<File> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName)
 
         List<String> differentModulesIds = differentModulesFiles.collect {
             SSolutionModuleBuilder builder = new SSolutionModuleBuilder()

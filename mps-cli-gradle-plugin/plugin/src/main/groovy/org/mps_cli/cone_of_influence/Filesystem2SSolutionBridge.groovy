@@ -4,9 +4,9 @@ import static groovy.io.FileType.FILES
 
 class Filesystem2SSolutionBridge {
 
-    static List<File> computeModulesWhichAreDifferentFromBranch(String gitRepoRootLocation, String branchName) {
+    static List<File> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, String branchName) {
         def gitRepoLocation = new File(gitRepoRootLocation).canonicalPath
-        def differentFiles = GitFacade.computeFilesWhichAreDifferentFromBranch(gitRepoLocation, branchName)
+        def differentFiles = GitFacade.computeFilesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName)
 
         List<File> affectedModulesFiles = []
         def allAffectedFilesAreInsideSolutions = true
