@@ -1,6 +1,6 @@
 
 plugins {
-    id 'com.mbeddr.mps_cli' version '0.3.+'
+    id 'com.mbeddr.mps_cli' version '0.4'
 }
 
 def directoryWithSources = ['C:\\work\\mps-cli\\mps_test_projects\\mps_cli_lanuse_file_per_root',
@@ -33,7 +33,7 @@ Language Information
 ***************************************
 Models and Solutions
 ***************************************'''
-        println "all solutions: ${repo.solutions.collect { it.name }}"
+        println "all solutions: ${repo.modules.collect { it.name }}"
         def models = repo.allModels()
         println "all models: ${models.collect { it.name + " (" + it.modelId + ")" }}"
 
