@@ -23,9 +23,6 @@
     <node concept="3cz0NO" id="4Yb5JA31NUx" role="3cz0ND">
       <property role="TrG5h" value="Jules Verne" />
     </node>
-    <node concept="3cz0NO" id="7mrGlczwUeL" role="3cz0ND">
-      <property role="TrG5h" value="William Shakespeare" />
-    </node>
   </node>
 </model>
 
