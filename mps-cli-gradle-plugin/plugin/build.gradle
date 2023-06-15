@@ -101,9 +101,8 @@ publishing {
 				}
 			}
 		}
-
-
     }
+
     publications {
         maven(MavenPublication) {
             groupId = 'com.mbeddr.mps_cli'

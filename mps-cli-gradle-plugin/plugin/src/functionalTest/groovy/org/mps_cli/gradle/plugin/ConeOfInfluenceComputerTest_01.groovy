@@ -3,7 +3,7 @@
  */
 package org.mps_cli.gradle.plugin
 
-class ConeOfInfluenceComputerTest extends TestBase {
+class ConeOfInfluenceComputerTest_01 extends TestBase {
 
     def "cone of influence computer test"() {
         given:
@@ -19,7 +19,7 @@ buildModuleDependencies {
 }
 
 computeConeOfInfluence {
-   referenceBranchName = "origin/testing/do_not_delete/cone_of_influence_test" 
+   referenceBranchName = "origin/testing/do_not_delete/cone_of_influence_test_01" 
    gitRepoRootLocation = '../../../../../../../../../'
 }
 
@@ -37,6 +37,6 @@ task printConeOfInfluence {
 
         then:
         println "temporary commented out to make the build green on the CI"
-        // result.output.contains "all affected solutions: [mps.cli.lanuse.library_second, mps.cli.lanuse.library_top]"
+        result.output.contains "all affected solutions: [mps.cli.lanuse.library_second, mps.cli.lanuse.library_top]"
     }
 }
