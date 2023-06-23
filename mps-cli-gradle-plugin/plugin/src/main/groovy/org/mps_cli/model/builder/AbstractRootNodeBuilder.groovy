@@ -41,16 +41,21 @@ abstract class AbstractRootNodeBuilder {
             sNode.children.add(childNode)
         }
         xmlNode.ref.each {
-            if (it.'@to' != null) {
+            if (it.'@to' != null) { // the referenced node is in different model
                 String[] parts = it.'@to'.split(":")
                 def targetModelId = importsIndex2ImportedModelIds[parts[0]]
                 def targetNodeId = parts[1]
                 def referenceName = referenceIds2Names[it.'@role']
                 sNode.refs[referenceName] = new SNodeRef(referencedModelId : targetModelId, referencedNodeId : targetNodeId)
-
-                def conceptOwnerOfReference = membersIds2SConcept[it.'@role']
-                if (conceptOwnerOfReference != concept) concept.superConcepts.add(conceptOwnerOfReference)
+            } else if (it.'@node' != null) { // the referenced node is in the same model
+                def targetModelId = sModel.modelId
+                def targetNodeId = it.'@node'
+                def referenceName = referenceIds2Names[it.'@role']
+                sNode.refs[referenceName] = new SNodeRef(referencedModelId : targetModelId, referencedNodeId : targetNodeId)
             }
+
+            def conceptOwnerOfReference = membersIds2SConcept[it.'@role']
+            if (conceptOwnerOfReference != concept) concept.superConcepts.add(conceptOwnerOfReference)
         }
 
         sNode
