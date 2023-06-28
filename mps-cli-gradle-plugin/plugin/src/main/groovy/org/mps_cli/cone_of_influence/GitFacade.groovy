@@ -4,7 +4,7 @@ class GitFacade {
 
     static List<String> computeFilesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName) {
         def sout = new StringBuilder(), serr = new StringBuilder()
-        def gitCommand = "git diff --name-only --merge-base $branchName --"
+        def gitCommand = "git diff --name-only $branchName... --"
         println ("Running git command '$gitCommand'")
         def proc = gitCommand.execute([], new File(gitRepoLocation))
         proc.consumeProcessOutput(sout, serr)
