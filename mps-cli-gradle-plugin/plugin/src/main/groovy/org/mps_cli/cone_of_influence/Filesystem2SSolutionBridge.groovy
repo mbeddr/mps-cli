@@ -18,8 +18,10 @@ class Filesystem2SSolutionBridge {
                 def myFile = new File(gitRepoLocation + File.separator + it).parentFile
                 def affectedModuleFound = false
                 while (myFile != null) {
-                    myFile.traverse(type: FILES, maxDepth: 0, nameFilter: filterSolutionFiles) {
-                        affectedModuleFound = true; affectedModulesFiles.add(it) }
+                    if (myFile.exists()) {
+                        myFile.traverse(type: FILES, maxDepth: 0, nameFilter: filterSolutionFiles) {
+                            affectedModuleFound = true; affectedModulesFiles.add(it) }
+                    }
                     if (affectedModuleFound) break
                     myFile = myFile.parentFile
                 }
