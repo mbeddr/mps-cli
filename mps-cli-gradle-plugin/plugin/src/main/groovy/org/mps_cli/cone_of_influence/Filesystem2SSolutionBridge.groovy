@@ -4,13 +4,12 @@ import static groovy.io.FileType.FILES
 
 class Filesystem2SSolutionBridge {
 
-    static List<File> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, String branchName) {
+    static List<File> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, List<String> allModifiedFiles) {
         def gitRepoLocation = new File(gitRepoRootLocation).canonicalPath
-        def differentFiles = GitFacade.computeFilesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName)
 
         List<File> affectedModulesFiles = []
         def allAffectedFilesAreInsideSolutions = true
-        differentFiles.each {
+        allModifiedFiles.each {
             if (it.endsWith('.msd'))
                 affectedModulesFiles.add(new File(gitRepoLocation + File.separator + it))
             else {
