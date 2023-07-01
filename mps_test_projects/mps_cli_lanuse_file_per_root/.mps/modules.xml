@@ -4,7 +4,6 @@
     <projectModules>
       <modulePath path="$PROJECT_DIR$/solutions/mps.cli.lanuse.library_second/mps.cli.lanuse.library_second.msd" folder="" />
       <modulePath path="$PROJECT_DIR$/solutions/mps.cli.lanuse.library_top/mps.cli.lanuse.library_top.msd" folder="" />
-      <modulePath path="$PROJECT_DIR$/solutions/mps.cli.lanuse.library_top2/mps.cli.lanuse.library_top2.msd" folder="" />
     </projectModules>
   </component>
 </project>
