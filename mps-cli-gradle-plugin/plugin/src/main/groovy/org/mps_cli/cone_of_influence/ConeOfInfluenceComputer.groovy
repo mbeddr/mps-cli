@@ -10,7 +10,17 @@ class ConeOfInfluenceComputer {
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies) {
 
+        def modulesUniverse = module2AllUpstreamDependencies.keySet()
+
         List<File> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName)
+        println("all different modules files: " + differentModulesFiles)
+
+        // if any module is deleted (.msd file not available) then COI is the entire universe
+        if (differentModulesFiles.any {!it.exists() }) {
+            File notExistingSolution = differentModulesFiles.find {!it.exists() }
+            print("Solution ${notExistingSolution.name} does not exist on current branch. COI cannot be computed and is the entire universe of solutions.")
+            return new Tuple2(modulesUniverse.toList(), modulesUniverse.toList())
+        }
 
         List<String> differentModulesIds = differentModulesFiles.collect {
             SSolutionModuleBuilder builder = new SSolutionModuleBuilder()
@@ -19,7 +29,7 @@ class ConeOfInfluenceComputer {
         }
 
         // directly affected modules
-        def differentModulesFromBranch = module2AllUpstreamDependencies.keySet().findAll {differentModulesIds.contains(it.moduleId) }
+        def differentModulesFromBranch = modulesUniverse.findAll {differentModulesIds.contains(it.moduleId) }
         // indirectly potentially affected modules
         def downstreamDependenciesOfDirectlyAffectedModules = differentModulesFromBranch.collectMany {module2AllDownstreamDependencies[it] }
 

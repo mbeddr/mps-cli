@@ -4,6 +4,7 @@ import static groovy.io.FileType.FILES
 
 class Filesystem2SSolutionBridge {
 
+    /** Returns a list of .msd Files representing the modified modules. **/
     static List<File> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, String branchName) {
         def gitRepoLocation = new File(gitRepoRootLocation).canonicalPath
         def differentFiles = GitFacade.computeFilesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName)
