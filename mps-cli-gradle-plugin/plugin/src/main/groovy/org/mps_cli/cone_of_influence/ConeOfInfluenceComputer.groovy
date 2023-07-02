@@ -18,7 +18,7 @@ class ConeOfInfluenceComputer {
         // if any module is deleted (.msd file not available) then COI is the entire universe
         if (differentModulesFiles.any {!it.exists() }) {
             File notExistingSolution = differentModulesFiles.find {!it.exists() }
-            print("Solution ${notExistingSolution.name} does not exist on current branch. COI cannot be computed and is the entire universe of solutions.")
+            print("Solution ${notExistingSolution.name} does not exist on current branch. The cone of influence is the entire set of solutions.")
             return new Tuple2(modulesUniverse.toList(), modulesUniverse.toList())
         }
 

@@ -36,7 +36,7 @@ task printConeOfInfluence {
         runTask("printConeOfInfluence")
 
         then:
-        println "temporary commented out to make the build green on the CI"
+        result.output.contains "Solution mps.cli.lanuse.library_top2.msd does not exist on current branch. COI cannot be computed and is the entire universe of solutions."
         result.output.contains "all affected solutions: [mps.cli.lanuse.library_second, mps.cli.lanuse.library_top]"
     }
 }
