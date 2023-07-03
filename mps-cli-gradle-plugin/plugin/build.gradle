@@ -19,7 +19,7 @@ plugins {
 
 // Project versions
 ext.major = '0'
-ext.minor = '10'
+ext.minor = '11'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
