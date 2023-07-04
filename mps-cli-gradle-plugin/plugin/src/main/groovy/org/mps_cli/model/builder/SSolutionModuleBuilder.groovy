@@ -13,7 +13,7 @@ class SSolutionModuleBuilder extends AbstractSModuleBuilder {
     }
 
     @Override
-    SModuleBase extractModuleCoreInfo(File solutionFile) {
+    SSolutionModule extractModuleCoreInfo(File solutionFile) {
         moduleXML = new XmlParser().parse(solutionFile)
         def sSolution = new SSolutionModule()
         sSolution.name = moduleXML.'@name'

@@ -1,32 +1,34 @@
 package org.mps_cli.cone_of_influence
 
+import java.nio.file.Paths
+
 class GitFacade {
 
     static List<String> computeFilesWhichAreModifiedInCurrentBranch(String gitRepoLocation, String branchName) {
+        def absoluteGitRepoLocation = Paths.get(gitRepoLocation).toAbsolutePath().normalize().toFile()
 
-        Closure<String> standardAndErrorOutputOfCommand = { String... command ->
+        Closure<String> standardOutputOfCommand = { String... command ->
             def commandString = command.join(' ')
 
             def sout = new StringBuilder(), serr = new StringBuilder()
             println("Running command '$commandString'")
-            def proc = command.execute([], new File(gitRepoLocation))
+            def proc = command.execute([], absoluteGitRepoLocation)
             proc.consumeProcessOutput(sout, serr)
             proc.waitForOrKill(5000)
 
             def errorString = serr.toString()
             if (errorString?.trim()) {
-                println ("Error running command '$commandString'")
-                println (">>>>>>>>>>>>")
-                print(errorString)
-                println ("<<<<<<<<<<<<")
+                throw new RuntimeException(
+                        """Error running command '$commandString': 
+                           $errorString""".stripIndent())
             }
 
             sout.toString()
         }
 
-        def mergeBase = standardAndErrorOutputOfCommand('git', 'merge-base', branchName, 'HEAD').trim()
+        def mergeBase = standardOutputOfCommand('git', 'merge-base', branchName, 'HEAD').trim()
 
-        def differencesString = standardAndErrorOutputOfCommand('git', 'diff', '--name-only', mergeBase)
+        def differencesString = standardOutputOfCommand('git', 'diff', '--name-only', mergeBase)
         def differences = differencesString.split('\n')
 
         println("Differences:")
