@@ -11,11 +11,11 @@ This Gradle plugin contributes the following tasks:
 - `printLanguageInfo` prints the information about the languages in a file specified by `destinationDir`
 - `buildModuleDependencies` builds the dependencies between solutions (extracts solution "dependency" information and builds upstream/downstream dependencies graphs) based on the MPS files from `sourcesDir` 
 - `buildModelDependencies` builds the dependencies between models (extracts model import information and builds upstream/downstream dependencies graphs) based on the MPS files from `sourcesDir`
-- `computeConeOfInfluence` computes modules dependent on the modified modules and their dependencies
+- `computeConeOfInfluence` computes the set of modules which are (directly and indirectly) affected by changes on the current branch
   - Inputs:
     - `gitRepoRootLocation` - working directory and the base for all paths
-    - `modifiedFiles` - list of paths to modified models, modules, etc.
-    - `referenceBranchName` - the current git working tree and the commits since branching off this branch will be considered
+    - `modifiedFiles` - list of paths to modified files - models, modules, root nodes, etc. (either set this input or 'referenceBranchName')
+    - `referenceBranchName` - the current git working tree and the commits since branching off this branch will be considered (either set this input or 'modifiedFiles')
   - Outputs:
     - `affectedSolutions` - list of modules affected by the modified files. This contains the modules of the modified models and the modules dependent on them
     - `affectedSolutionsAndUpstreamDependencies` - list of affected modules and all their dependencies

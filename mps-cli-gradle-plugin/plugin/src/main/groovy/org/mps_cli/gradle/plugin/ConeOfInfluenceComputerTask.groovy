@@ -36,7 +36,8 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
 
     @TaskAction
     def computeConeOfInfluence() {
-        if (modifiedFiles == null && referenceBranchName == null) {
+        if (modifiedFiles == null && referenceBranchName == null ||
+                modifiedFiles != null && referenceBranchName != null) {
             throw new RuntimeException("You must specify 'modifiedFiles' or 'referenceBranchName' input parameter")
         }
 
