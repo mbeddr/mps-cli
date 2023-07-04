@@ -24,10 +24,10 @@ task printModelsInfo {
         println "all the models: ${models.collect { it.name }}"
         
         def generatedModels = models.findAll { it.isDoNotGenerate == false }
-        println "all models enabled for generation: ${generatedModels.collect { it.name }}}"
+        println "all models enabled for generation: ${generatedModels.collect { it.name }.sort()}}"
         
         def notGeneratedModels = models.find { it.isDoNotGenerate == true }
-        println "all models disabled for generation: ${notGeneratedModels.collect { it.name }}}"
+        println "all models disabled for generation: ${notGeneratedModels.collect { it.name }.sort()}}"
     }
 }
 
