@@ -39,12 +39,19 @@ class SModelBuilderBase:
             s_node.children.append(child_node)
 
         return s_node
+    @staticmethod
+    def is_model_generatable(model_xml_node):
+        for attribute in model_xml_node.findall("attribute"):
+            if attribute.get("name") == "doNotGenerate" and attribute.get("value") == "true":
+                return True
+        return False
 
     def extract_model_core_info(self, model_xml_node):
         model_ref = model_xml_node.get("ref")
         model_name = model_ref[model_ref.find("(") + 1 : len(model_ref) - 1]
         model_uuid = model_ref[0 : model_ref.find("(")]
-        model = SModel(model_name, model_uuid)
+        model_is_do_not_generate = self.is_model_generatable(model_xml_node)
+        model = SModel(model_name, model_uuid, model_is_do_not_generate)
         return model
 
     def extract_imports_and_registry(self, model_xml_node):
