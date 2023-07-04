@@ -24,7 +24,6 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11  
-
     - name: Build MPS-CLI and Test
       uses: gradle/gradle-build-action@v2
       with: 
@@ -35,6 +34,10 @@ jobs:
         dependencies-cache-exact: true
         configuration-cache-enabled: true
         build-root-directory: mps-cli-gradle-plugin
+    - uses: actions/upload-artifact@v3
+      with:
+        name: gradle-test-report
+        path: ./mps-cli-gradle-plugin/plugin/build/reports/tests/functionalTest/index.html
     - name: Publish
       uses: gradle/gradle-build-action@v2
       if: github.event_name == 'push' && github.ref_name == 'main'
