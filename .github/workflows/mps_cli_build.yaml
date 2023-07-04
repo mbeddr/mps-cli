@@ -27,13 +27,18 @@ jobs:
     - name: Build MPS-CLI and Test
       uses: gradle/gradle-build-action@v2
       with: 
-        arguments: :plugin:functionalTest --debug --stacktrace
+        arguments: :plugin:functionalTest --debug
         wrapper-cache-enabled: true
         dependencies-cache-enabled: true
         dependencies-cache-key: gradle/dependency-locks/**
         dependencies-cache-exact: true
         configuration-cache-enabled: true
         build-root-directory: mps-cli-gradle-plugin
+    - uses: actions/upload-artifact@v3
+      if: ${{ failure() }}
+      with:
+        name: gradle-test-report
+        path: ./mps-cli-gradle-plugin/plugin/build/reports/
     - name: Publish
       uses: gradle/gradle-build-action@v2
       if: github.event_name == 'push' && github.ref_name == 'main'
