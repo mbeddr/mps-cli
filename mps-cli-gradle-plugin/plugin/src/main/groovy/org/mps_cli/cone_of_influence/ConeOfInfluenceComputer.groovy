@@ -6,11 +6,11 @@ import org.mps_cli.model.builder.SSolutionModuleBuilder
 
 class ConeOfInfluenceComputer {
 
-    Tuple2<List<SModuleBase>, List<SModuleBase>> computeConeOfInfluence(String gitRepoLocation, String branchName,
+    Tuple2<List<SModuleBase>, List<SModuleBase>> computeConeOfInfluence(String gitRepoLocation, List<String> allModifiedFiles,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies) {
 
-        List<File> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName)
+        List<File> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
 
         List<String> differentModulesIds = differentModulesFiles.collect {
             SSolutionModuleBuilder builder = new SSolutionModuleBuilder()
@@ -23,12 +23,12 @@ class ConeOfInfluenceComputer {
         // indirectly potentially affected modules
         def downstreamDependenciesOfDirectlyAffectedModules = differentModulesFromBranch.collectMany {module2AllDownstreamDependencies[it] }
 
-        def allAffectedModuless = (differentModulesFromBranch + downstreamDependenciesOfDirectlyAffectedModules).unique().toList()
+        def allAffectedModules = (differentModulesFromBranch + downstreamDependenciesOfDirectlyAffectedModules).unique().toList()
         // compute upstream dependencies
-        def upstreamAffectedModules = allAffectedModuless.collectMany { module2AllUpstreamDependencies[it] }
+        def upstreamAffectedModules = allAffectedModules.collectMany { module2AllUpstreamDependencies[it] }
 
-        def allAffectedModulesAndUpstreamDependencies = (allAffectedModuless + upstreamAffectedModules).unique().toList()
+        def allAffectedModulesAndUpstreamDependencies = (allAffectedModules + upstreamAffectedModules).unique().toList()
 
-        new Tuple2(allAffectedModuless, allAffectedModulesAndUpstreamDependencies)
+        new Tuple2(allAffectedModules, allAffectedModulesAndUpstreamDependencies)
     }
 }
