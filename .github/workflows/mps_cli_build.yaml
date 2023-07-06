@@ -35,7 +35,7 @@ jobs:
         configuration-cache-enabled: true
         build-root-directory: mps-cli-gradle-plugin
     - uses: actions/upload-artifact@v3
-      if: ${{ failure() }}
+      if: failure()
       with:
         name: gradle-test-report
         path: ./mps-cli-gradle-plugin/plugin/build/reports/

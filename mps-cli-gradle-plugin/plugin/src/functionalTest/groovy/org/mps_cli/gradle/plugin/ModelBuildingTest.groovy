@@ -6,14 +6,14 @@ class ModelBuildingTest extends TestBase {
         given:
         projectName = "mps_cli_lanuse_model_attributes"
         settingsFile << ""
-        buildFile << """ 
+        buildFile << '''
 plugins {
     id('com.mbeddr.mps_cli')
 }
 
 buildModel {
    sourcesDir = ['../../../../../../../../../mps_test_projects/mps_cli_lanuse_model_attributes']   
-}""" + '''
+}
 
 task printModelsInfo {
     dependsOn buildModel
@@ -29,19 +29,12 @@ task printModelsInfo {
         def notGeneratedModels = models.find { it.isDoNotGenerate == true }
         println "all models disabled for generation: ${notGeneratedModels.collect { it.name }.sort()}}"
     }
-}
-
-'''
+}'''
 
         when:
         runTask("printModelsInfo")
 
         then:
-        // check the models
-        result.output.contains "mps_cli_lanuse_model_attributes.default_generation"
-        result.output.contains "mps_cli_lanuse_model_attributes.enable_generation"
-        result.output.contains "mps_cli_lanuse_model_attributes.disable_generation"
-
         // check models that are generated
         result.output.contains "all models enabled for generation: [mps_cli_lanuse_model_attributes.default_generation, mps_cli_lanuse_model_attributes.enable_generation]"
 

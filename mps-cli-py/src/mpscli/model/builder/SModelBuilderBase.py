@@ -41,10 +41,10 @@ class SModelBuilderBase:
         return s_node
     @staticmethod
     def is_model_generatable(model_xml_node):
-        for attribute in model_xml_node.findall("attribute"):
-            if attribute.get("name") == "doNotGenerate" and attribute.get("value") == "true":
-                return True
-        return False
+        return any(
+            attribute.get("name") == "doNotGenerate" and attribute.get("value") == "true"
+            for attribute in model_xml_node.findall("attribute")
+        )
 
     def extract_model_core_info(self, model_xml_node):
         model_ref = model_xml_node.get("ref")
