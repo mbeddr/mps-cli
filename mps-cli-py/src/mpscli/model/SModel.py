@@ -2,12 +2,11 @@
 
 class SModel:
 
-    def __init__(self, name, uuid, is_do_not_generate):
+    def __init__(self, name, uuid):
         self.name = name
         self.uuid = uuid
         self.root_nodes = []
         self.path_to_model_file = ""
-        self.is_do_not_generate = is_do_not_generate
 
     def get_nodes(self):
         res = []

@@ -6,7 +6,6 @@ class SModel {
     String pathToModelFile
     SModuleBase myModule
     boolean isFilePerRootPersistency
-    boolean isDoNotGenerate
     List<SNode> rootNodes = []
     List<SModelRef> imports = []
 
