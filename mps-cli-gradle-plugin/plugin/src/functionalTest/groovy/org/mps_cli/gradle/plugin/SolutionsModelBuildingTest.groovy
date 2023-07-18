@@ -15,8 +15,12 @@ task printSolutionsInfo {
         
         def library_second = repo.modules.find { it.name.equals("mps.cli.lanuse.library_second") ||
                                                 it.name.equals("mps.cli.lanuse.library_second.default_persistency") }
-        def normalizedSolutionPath = library_second.pathToModuleFile.replace("/", "\\\\")
-        println "solution $library_second.name is saved in directory $normalizedSolutionPath"
+        if (library_second.uriToModuleFileInJar != null) {
+            println "solution $library_second.name is saved in JAR with URI $library_second.uriToModuleFileInJar"
+        } else {
+            def normalizedSolutionPath = library_second.pathToModuleFile.replace("/", "\\\\")
+            println "solution $library_second.name is saved in directory $normalizedSolutionPath"
+        }
         
         def modules = repo.modules
         println "all modules: ${modules.collect { it.name }}"
@@ -29,8 +33,13 @@ task printSolutionsInfo {
         
         def modelWithImports = models.find { it.name.equals("mps.cli.lanuse.library_second.library_top") ||
                                              it.name.equals("mps.cli.lanuse.library_second.default_persistency.library_top") }
-        def normalizedModelPath = modelWithImports.pathToModelFile.replace("/", "\\\\")
-        println "path to model $modelWithImports.name is $normalizedModelPath"
+        if (modelWithImports.uriToModelFileInJar != null) {
+            println "URI to model $modelWithImports.name in JAR is $modelWithImports.uriToModelFileInJar"
+        } else {
+            def normalizedModelPath = modelWithImports.pathToModelFile.replace("/", "\\\\")
+            println "path to model $modelWithImports.name is $normalizedModelPath"
+        }
+        
         println "all models imported by 'mps.cli.lanuse.library_second.library_top': ${modelWithImports.imports.collect { it.resolve(repo).name }}"
         
         def allNodes = repo.allNodes()
@@ -68,8 +77,8 @@ task printSolutionsInfo {
                 it.contains("solutions\\mps.cli.lanuse.library_second\\mps.cli.lanuse.library_second.msd") ||
                 it.contains("solution mps.cli.lanuse.library_second.default_persistency is saved in directory") &&
                 it.contains("solutions\\mps.cli.lanuse.library_second.default_persistency\\mps.cli.lanuse.library_second.default_persistency.msd") ||
-                it.contains("solution mps.cli.lanuse.library_second is saved in directory") &&
-                it.contains("mps_cli_lanuse_binary\\mps_cli_lanuse_file_per_root.jar!\\mps.cli.lanuse.library_second\\mps.cli.lanuse.library_second.msd")
+                it.contains("solution mps.cli.lanuse.library_second is saved in JAR with URI jar:file:") &&
+                it.contains("mps_cli_lanuse_binary/mps_cli_lanuse_file_per_root.jar!/mps.cli.lanuse.library_second/mps.cli.lanuse.library_second.msd")
         }
 
         // check dependencies between solutions
@@ -86,8 +95,8 @@ task printSolutionsInfo {
                                             it.contains("solutions\\mps.cli.lanuse.library_second\\models\\mps.cli.lanuse.library_second.library_top\\.model") ||
                                             it.contains("path to model mps.cli.lanuse.library_second.default_persistency.library_top is") &&
                                             it.contains("solutions\\mps.cli.lanuse.library_second.default_persistency\\models\\mps.cli.lanuse.library_second.default_persistency.library_top.mps") ||
-                                            it.contains("path to model mps.cli.lanuse.library_second.library_top is") &&
-                                            it.contains("mps_cli_lanuse_binary\\mps_cli_lanuse_file_per_root.jar!\\mps.cli.lanuse.library_second\\models\\mps.cli.lanuse.library_second.library_top\\.model") }
+                                            it.contains("URI to model mps.cli.lanuse.library_second.library_top in JAR is jar:file:") &&
+                                            it.contains("mps_cli_lanuse_binary/mps_cli_lanuse_file_per_root.jar!/mps.cli.lanuse.library_second/models/mps.cli.lanuse.library_second.library_top/.model") }
 
         // check dependencies between models
         result.output.contains("all models imported by 'mps.cli.lanuse.library_second.library_top': [mps.cli.lanuse.library_top.authors_top]") ||
