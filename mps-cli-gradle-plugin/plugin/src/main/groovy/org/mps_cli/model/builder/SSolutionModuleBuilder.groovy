@@ -1,20 +1,22 @@
 package org.mps_cli.model.builder
 
-
-import groovy.xml.XmlParser
-import org.mps_cli.model.SModuleBase
+import org.mps_cli.PathUtils
 import org.mps_cli.model.SSolutionModule
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 class SSolutionModuleBuilder extends AbstractSModuleBuilder {
 
     @Override
-    File moduleFile(File pathToModuleDirectory) {
-        pathToModuleDirectory.listFiles().find {it.name.endsWith(".msd")}
+    Path moduleFile(Path pathToModuleDirectory) {
+        (Path) Files.list(pathToModuleDirectory).find { it.fileName.toString().endsWith(".msd") }
     }
 
     @Override
-    SSolutionModule extractModuleCoreInfo(File solutionFile) {
-        moduleXML = new XmlParser().parse(solutionFile)
+    SSolutionModule extractModuleCoreInfo(Path solutionFile) {
+
+        moduleXML = PathUtils.parseXml(solutionFile)
         def sSolution = new SSolutionModule()
         sSolution.name = moduleXML.'@name'
         sSolution.moduleId = moduleXML.'@uuid'

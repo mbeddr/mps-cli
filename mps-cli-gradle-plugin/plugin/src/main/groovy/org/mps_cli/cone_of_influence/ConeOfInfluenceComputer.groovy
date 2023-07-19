@@ -4,13 +4,15 @@ import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.SSolutionModule
 import org.mps_cli.model.builder.SSolutionModuleBuilder
 
+import java.nio.file.Path
+
 class ConeOfInfluenceComputer {
 
     Tuple2<List<SModuleBase>, List<SModuleBase>> computeConeOfInfluence(String gitRepoLocation, List<String> allModifiedFiles,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies) {
 
-        List<File> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
+        List<Path> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
 
         List<String> differentModulesIds = differentModulesFiles.collect {
             SSolutionModuleBuilder builder = new SSolutionModuleBuilder()

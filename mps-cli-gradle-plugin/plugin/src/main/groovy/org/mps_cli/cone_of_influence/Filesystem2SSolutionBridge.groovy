@@ -1,30 +1,32 @@
 package org.mps_cli.cone_of_influence
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
 import static groovy.io.FileType.FILES
 
 class Filesystem2SSolutionBridge {
 
-    static List<File> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, List<String> allModifiedFiles) {
-        def gitRepoLocation = new File(gitRepoRootLocation).canonicalPath
+    static List<Path> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, List<String> allModifiedFiles) {
+        def gitRepoLocation = Paths.get(gitRepoRootLocation).toAbsolutePath().normalize()
 
-        List<File> affectedModulesFiles = []
-        def allAffectedFilesAreInsideSolutions = true
+        List<Path> affectedModulesFiles = []
         allModifiedFiles.each {
             if (it.endsWith('.msd'))
-                affectedModulesFiles.add(new File(gitRepoLocation + File.separator + it))
+                affectedModulesFiles.add(gitRepoLocation.resolve(it))
             else {
                 def filterSolutionFiles = ~/.*\.msd$/
-                def myFile = new File(gitRepoLocation + File.separator + it).parentFile
+                def myFile = gitRepoLocation.resolve(it).parent
                 def affectedModuleFound = false
                 while (myFile != null) {
-                    if (myFile.exists()) {
+                    if (Files.exists(myFile)) {
                         myFile.traverse(type: FILES, maxDepth: 0, nameFilter: filterSolutionFiles) {
                             affectedModuleFound = true; affectedModulesFiles.add(it) }
                     }
                     if (affectedModuleFound) break
-                    myFile = myFile.parentFile
+                    myFile = myFile.parent
                 }
-                if (!affectedModuleFound) allAffectedFilesAreInsideSolutions = false
             }
         }
 

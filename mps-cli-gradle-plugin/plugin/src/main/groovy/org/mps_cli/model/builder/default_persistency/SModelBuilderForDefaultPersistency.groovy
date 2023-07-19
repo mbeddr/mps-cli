@@ -2,23 +2,21 @@ package org.mps_cli.model.builder.default_persistency
 
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
-import groovy.xml.XmlParser
-import org.mps_cli.model.SModel
+import org.mps_cli.PathUtils
 import org.mps_cli.model.builder.AbstractModelBuilder
 import org.mps_cli.model.builder.BuildingDepthEnum
-import org.mps_cli.model.builder.file_per_root_persistency.RootNodeFromMpsrBuilder
 
-import static groovy.io.FileType.FILES
+import java.nio.file.Path
 
 class SModelBuilderForDefaultPersistency extends AbstractModelBuilder {
 
-    def build(String pathToMsdFile) {
+    def build(Path pathToMsdFile) {
         Date start = new Date()
 
-        def modelXML = new XmlParser().parse(pathToMsdFile)
+        def modelXML = PathUtils.parseXml(pathToMsdFile)
         def sModel = buildModelFromXML(modelXML)
         sModel.isFilePerRootPersistency = false
-        sModel.pathToModelFile = pathToMsdFile
+        sModel.pathToModelFile = PathUtils.pathToString(pathToMsdFile)
 
         if (buildingStrategy != BuildingDepthEnum.MODEL_DEPENDENCIES_ONLY) {
             def builder = new RootNodeFromMsdBuilder()
@@ -32,6 +30,4 @@ class SModelBuilderForDefaultPersistency extends AbstractModelBuilder {
 
         sModel
     }
-
-
 }
