@@ -35,7 +35,8 @@ abstract class AbstractSModuleBuilder {
         }
 
         if (buildingStrategy != BuildingDepthEnum.MODULE_DEPENDENCIES_ONLY) {
-            def modelFiles = Files.list(pathToModuleDirectory.resolve("models")).collect(toList())
+            def modelsDir = pathToModuleDirectory.resolve("models")
+            def modelFiles = Files.exists(modelsDir) ? Files.list(modelsDir).collect(toList()) : []
             modelFiles.findAll(Files.&isDirectory).each {
                 def modelBuilder = new SModelBuilderForFilePerRootPersistency(buildingStrategy: buildingStrategy)
                 def model = modelBuilder.build(it.toAbsolutePath())

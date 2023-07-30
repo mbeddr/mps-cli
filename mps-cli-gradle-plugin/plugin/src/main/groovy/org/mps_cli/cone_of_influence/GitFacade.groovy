@@ -14,7 +14,13 @@ class GitFacade {
             println("Running command '$commandString'")
             def proc = command.execute([], absoluteGitRepoLocation)
             proc.consumeProcessOutput(sout, serr)
-            proc.waitForOrKill(5000)
+            proc.waitForOrKill(60000)
+
+            if (proc.exitValue() != 0) {
+                throw new RuntimeException(
+                        """Error running command '$commandString' - 
+                            process failed with exit code ${proc.exitValue()}""".stripIndent())
+            }
 
             def errorString = serr.toString()
             if (errorString?.trim()) {
