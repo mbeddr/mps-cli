@@ -1,6 +1,10 @@
 name: MPS-CLI-PY_CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
 
 env:
   GITHUB_TOKEN: ${{ secrets.MPSCLI_GITHUB_PKG_REGISTRY }}
