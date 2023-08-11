@@ -4,6 +4,7 @@ import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.SSolutionModule
 import org.mps_cli.model.builder.SSolutionModuleBuilder
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 class ConeOfInfluenceComputer {
@@ -12,16 +13,18 @@ class ConeOfInfluenceComputer {
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies) {
 
-        List<Path> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
         def modulesUniverse = module2AllUpstreamDependencies.keySet()
 
-        List<File> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, branchName)
-        println("all different modules files: " + differentModulesFiles)
+        List<Path> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
+
+        println(">>>>>>>>>>>> All different modules files:")
+        differentModulesFiles.each { println it }
+        println("<<<<<<<<<<<<")
 
         // if any module is deleted (.msd file not available) then COI is the entire universe
-        if (differentModulesFiles.any {!it.exists() }) {
-            File notExistingSolution = differentModulesFiles.find {!it.exists() }
-            print("Solution ${notExistingSolution.name} does not exist on current branch. The cone of influence is the entire set of solutions.")
+        def notExistingSolutions = differentModulesFiles.findAll { Files.notExists(it) }
+        if (notExistingSolutions) {
+            println("Solutions ${notExistingSolutions.fileName} do not exist on current branch. The cone of influence is the entire set of solutions.")
             return new Tuple2(modulesUniverse.toList(), modulesUniverse.toList())
         }
 

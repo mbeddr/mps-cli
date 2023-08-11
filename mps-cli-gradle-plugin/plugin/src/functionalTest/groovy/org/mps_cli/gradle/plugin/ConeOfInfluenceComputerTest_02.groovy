@@ -36,7 +36,7 @@ task printConeOfInfluence {
         runTask("printConeOfInfluence")
 
         then:
-        result.output.contains "Solution mps.cli.lanuse.library_top2.msd does not exist on current branch. COI cannot be computed and is the entire universe of solutions."
+        result.output.contains "Solutions [mps.cli.lanuse.library_top2.msd] do not exist on current branch. The cone of influence is the entire set of solutions."
         result.output.contains "all affected solutions: [mps.cli.lanuse.library_second, mps.cli.lanuse.library_top]"
     }
 }
