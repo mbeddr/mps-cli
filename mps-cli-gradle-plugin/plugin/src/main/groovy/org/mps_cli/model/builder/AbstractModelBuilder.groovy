@@ -13,6 +13,8 @@ class AbstractModelBuilder {
         sModel.modelId = ref.substring(0, ref.indexOf('('))
         sModel.name = ref.substring(ref.indexOf('(') + 1, ref.indexOf(')'))
 
+        sModel.isDoNotGenerate = modelXMLNode.attribute.any{ it.'@name'.equals("doNotGenerate") && it.'@value'.equals("true")  }
+
         for (Node imp : modelXMLNode.imports.import) {
             def modelRefString = imp.'@ref'
             def modelIdRefString = modelRefString.substring(0, ref.indexOf('('))

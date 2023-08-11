@@ -2,30 +2,31 @@ package org.mps_cli.model.builder.file_per_root_persistency
 
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
-import groovy.xml.XmlParser
-import org.mps_cli.model.SModel
+import org.mps_cli.PathUtils
 import org.mps_cli.model.builder.AbstractModelBuilder
 import org.mps_cli.model.builder.BuildingDepthEnum
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 import static groovy.io.FileType.FILES
 
 class SModelBuilderForFilePerRootPersistency extends AbstractModelBuilder {
 
-    def build(String path) {
+    def build(Path path) {
         Date start = new Date()
 
-        def pathToModelFile = path + File.separator + ".model"
-        if (!new File(pathToModelFile).exists())
+        def pathToModelFile = path.resolve(".model")
+        if (Files.notExists(pathToModelFile))
             return null;
-        def modelXML = new XmlParser().parse(pathToModelFile)
+        def modelXML = PathUtils.parseXml(pathToModelFile)
         def sModel = buildModelFromXML(modelXML)
         sModel.isFilePerRootPersistency = true
-        sModel.pathToModelFile = pathToModelFile
+        sModel.pathToModelFile = PathUtils.pathToString(pathToModelFile)
 
         if (buildingStrategy != BuildingDepthEnum.MODEL_DEPENDENCIES_ONLY) {
-            def filePath = new File(path)
             def filterFilePerRoot = ~/.*\.mpsr$/
-            filePath.traverse type: FILES, nameFilter: filterFilePerRoot, {
+            path.traverse type: FILES, nameFilter: filterFilePerRoot, {
                 def builder = new RootNodeFromMpsrBuilder()
                 def root = builder.build(it, sModel)
                 sModel.rootNodes.add(root)
@@ -38,6 +39,4 @@ class SModelBuilderForFilePerRootPersistency extends AbstractModelBuilder {
 
         sModel
     }
-
-
 }
