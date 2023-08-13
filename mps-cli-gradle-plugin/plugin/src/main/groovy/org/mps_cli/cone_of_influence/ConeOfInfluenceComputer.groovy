@@ -4,6 +4,7 @@ import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.SSolutionModule
 import org.mps_cli.model.builder.SSolutionModuleBuilder
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 class ConeOfInfluenceComputer {
@@ -12,7 +13,20 @@ class ConeOfInfluenceComputer {
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies,
                                                                                 Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies) {
 
-        List<Path> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
+        def modulesUniverse = module2AllUpstreamDependencies.keySet()
+
+        HashSet<Path> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
+
+        println(">>>>>>>>>>>> All different modules files:")
+        differentModulesFiles.each { println it }
+        println("<<<<<<<<<<<<")
+
+        // if any module is deleted (.msd file not available) then COI is the entire universe
+        def notExistingSolutions = differentModulesFiles.findAll { Files.notExists(it) }
+        if (notExistingSolutions) {
+            println("Solutions ${notExistingSolutions.fileName} do not exist on current branch. The cone of influence is the entire set of solutions.")
+            return new Tuple2(modulesUniverse.toList(), modulesUniverse.toList())
+        }
 
         List<String> differentModulesIds = differentModulesFiles.collect {
             SSolutionModuleBuilder builder = new SSolutionModuleBuilder()
@@ -21,7 +35,7 @@ class ConeOfInfluenceComputer {
         }
 
         // directly affected modules
-        def differentModulesFromBranch = module2AllUpstreamDependencies.keySet().findAll {differentModulesIds.contains(it.moduleId) }
+        def differentModulesFromBranch = modulesUniverse.findAll {differentModulesIds.contains(it.moduleId) }
         // indirectly potentially affected modules
         def downstreamDependenciesOfDirectlyAffectedModules = differentModulesFromBranch.collectMany {module2AllDownstreamDependencies[it] }
 

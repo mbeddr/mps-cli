@@ -44,7 +44,7 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
         def solution2AllUpstreamDependencies = project.buildModuleDependencies.module2AllUpstreamDependencies
         def solution2AllDownstreamDependencies = project.buildModuleDependencies.module2AllDownstreamDependencies
 
-        def allModifiedFiles = modifiedFiles ?:
+        def allModifiedFiles = modifiedFiles != null ? modifiedFiles :
                 GitFacade.computeFilesWhichAreModifiedInCurrentBranch(gitRepoRootLocation, referenceBranchName)
 
         ConeOfInfluenceComputer coiComputer = new ConeOfInfluenceComputer()

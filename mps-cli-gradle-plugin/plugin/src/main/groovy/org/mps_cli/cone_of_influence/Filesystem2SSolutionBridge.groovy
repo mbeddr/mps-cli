@@ -8,10 +8,11 @@ import static groovy.io.FileType.FILES
 
 class Filesystem2SSolutionBridge {
 
-    static List<Path> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, List<String> allModifiedFiles) {
+    /** Returns a list of .msd Files representing the modified modules. **/
+    static HashSet<Path> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, List<String> allModifiedFiles) {
         def gitRepoLocation = Paths.get(gitRepoRootLocation).toAbsolutePath().normalize()
 
-        List<Path> affectedModulesFiles = []
+        LinkedHashSet<Path> affectedModulesFiles = []
         allModifiedFiles.each {
             if (it.endsWith('.msd'))
                 affectedModulesFiles.add(gitRepoLocation.resolve(it))

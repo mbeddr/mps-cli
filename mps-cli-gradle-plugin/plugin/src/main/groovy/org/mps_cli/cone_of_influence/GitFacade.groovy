@@ -37,8 +37,9 @@ class GitFacade {
         def differencesString = standardOutputOfCommand('git', 'diff', '--name-only', mergeBase)
         def differences = differencesString.split('\n')
 
-        println("Differences:")
+        println(">>>>>>>>>>>>> Differences:")
         differences.each { println(it) }
+        println ("<<<<<<<<<<<<")
 
         differences
     }
