@@ -38,7 +38,7 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
     def computeConeOfInfluence() {
         if (modifiedFiles == null && referenceBranchName == null ||
                 modifiedFiles != null && referenceBranchName != null) {
-            throw new RuntimeException("You must specify 'modifiedFiles' or 'referenceBranchName' input parameter")
+            throw new RuntimeException("You must specify either 'modifiedFiles' or 'referenceBranchName' input parameter")
         }
 
         def solution2AllUpstreamDependencies = project.buildModuleDependencies.module2AllUpstreamDependencies

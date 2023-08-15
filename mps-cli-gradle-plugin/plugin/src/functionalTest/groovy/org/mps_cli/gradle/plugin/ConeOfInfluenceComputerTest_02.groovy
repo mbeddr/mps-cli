@@ -19,7 +19,10 @@ buildModuleDependencies {
 }
 
 computeConeOfInfluence {
-   referenceBranchName = "origin/testing/do_not_delete/cone_of_influence_test_02" 
+   modifiedFiles = [
+      'mps_test_projects/mps_cli_lanuse_file_per_root/solutions/mps.cli.lanuse.library_top/models/mps.cli.lanuse.library_top.authors_top/_010_classical_authors.mpsr',
+      'mps_test_projects/mps_cli_lanuse_file_per_root/solutions/mps.cli.lanuse.library_top2/mps.cli.lanuse.library_top2.msd'
+   ] 
    gitRepoRootLocation = '../../../../../../../../../'
 }
 
