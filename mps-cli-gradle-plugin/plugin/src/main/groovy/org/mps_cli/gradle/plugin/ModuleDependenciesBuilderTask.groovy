@@ -1,14 +1,18 @@
 package org.mps_cli.gradle.plugin
 
-
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.mps_cli.cone_of_influence.EntityDependenciesBuilder
 import org.mps_cli.model.SModuleBase
-import org.mps_cli.model.SSolutionModule
 import org.mps_cli.model.builder.BuildingDepthEnum
 import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
-class ModuleDependenciesBuilderTask extends AbstractDependenciesBuilderTask {
+class ModuleDependenciesBuilderTask extends DefaultTask {
+
+    @Input
+    List<String> sourcesDir;
 
     @Internal
     Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies = [:];
@@ -23,17 +27,10 @@ class ModuleDependenciesBuilderTask extends AbstractDependenciesBuilderTask {
 
     @TaskAction
     def buildModuleDependencies() {
-        builder = new SModulesRepositoryBuilder(buildingStrategy: BuildingDepthEnum.MODULE_DEPENDENCIES_ONLY)
-        buildEntityDependencies(module2AllUpstreamDependencies, module2AllDownstreamDependencies)
-    }
+        def builder = new SModulesRepositoryBuilder(buildingStrategy: BuildingDepthEnum.MODULE_DEPENDENCIES_ONLY)
+        def repository = builder.buildAll(sourcesDir)
 
-    @Override
-    List<Object> allEntities() {
-        repository.modules
-    }
-
-    @Override
-    List<Object> directDependencies(Object entity) {
-        ((SSolutionModule)entity).dependencies;
+        (module2AllUpstreamDependencies, module2AllDownstreamDependencies) =
+                EntityDependenciesBuilder.buildModuleDependencies(repository)
     }
 }
