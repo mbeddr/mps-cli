@@ -15,7 +15,7 @@ class ConeOfInfluenceComputer {
 
         def modulesUniverse = module2AllUpstreamDependencies.keySet()
 
-        HashSet<Path> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
+        HashSet<Path> differentModulesFiles = Filesystem2SolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
 
         println(">>>>>>>>>>>> All different modules files:")
         differentModulesFiles.each { println it }

@@ -6,7 +6,7 @@ import java.nio.file.Paths
 
 import static groovy.io.FileType.FILES
 
-class Filesystem2SSolutionBridge {
+class Filesystem2SolutionBridge {
 
     /** Returns a list of .msd Files representing the modified modules. **/
     static HashSet<Path> computeModulesWhichAreModifiedInCurrentBranch(String gitRepoRootLocation, List<String> allModifiedFiles) {
