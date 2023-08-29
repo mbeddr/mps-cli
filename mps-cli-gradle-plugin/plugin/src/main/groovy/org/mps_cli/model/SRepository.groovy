@@ -1,35 +1,54 @@
 package org.mps_cli.model
 
 class SRepository {
-    def List<SModuleBase> modules = []
-    def List<SLanguage> languages = []
+    List<SModuleBase> modules = []
+    List<SLanguage> languages = []
+
+    private List<SModel> allModelsCache = null
+    private List<SNode> allNodesCache = null
+    private Map<String, SModel> id2modelsCache = null
+    private Map<String, SModuleBase> id2ModulesCache = null
 
     List<SModel> allModels() {
-        def models = []
-        modules.each { sol ->
-            models.addAll(sol.models)
+        if (allModelsCache == null) {
+            allModelsCache = modules.collectMany { it.models }
         }
-        models
-    }
-
-    List<SModel> findModelByName(String modelName) {
-        allModels().findAll {it.name.equals(modelName) }
-    }
-
-    Map<String, SModel> id2models() {
-        allModels().collectEntries {[it.modelId, it]}
-    }
-
-    Map<String, SModuleBase> id2modules() {
-        modules.collectEntries {[it.moduleId, it]}
+        allModelsCache
     }
 
     List<SNode> allNodes() {
-        def nodes = []
-        allModels().each { mod ->
-            nodes.addAll(mod.allNodes)
+        if (allNodesCache == null) {
+            allNodesCache = allModels().collectMany { it.allNodes }
         }
-        nodes
+        allNodesCache
+    }
+
+    Map<String, SModel> id2models() {
+        if (id2modelsCache == null) {
+            id2modelsCache = allModels().collectEntries {[it.modelId, it] }
+        }
+        id2modelsCache
+    }
+
+    Map<String, SModuleBase> id2modules() {
+        if (id2ModulesCache == null) {
+            id2ModulesCache = modules.collectEntries {[it.moduleId, it] }
+        }
+        id2ModulesCache
+    }
+
+    List<SModel> findModelByName(String modelName) {
+        allModels().findAll { (it.name == modelName) }
+    }
+
+    SModel findModelByRealPath(String realPath) {
+        if (realPath == null) return null
+        allModels().find { (it.pathToModelFile == realPath) }
+    }
+
+    SModuleBase findModuleByRealPath(String realPath) {
+        if (realPath == null) return null
+        modules.find { (it.pathToModuleFile == realPath) }
     }
 
     List<SNode> nodesOfConcept(String fullyQualifiedConceptName) {
