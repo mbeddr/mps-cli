@@ -33,7 +33,7 @@ class ModelBuilderTask extends DefaultTask {
         //setProperty("repository", repository)
         repository = builder.repo
 
-        println("number of solutions: " + repository.modules.size)
+        println("number of solutions: " + repository.modules.size())
     }
 
 }
