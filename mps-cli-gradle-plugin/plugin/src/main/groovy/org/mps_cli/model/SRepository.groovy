@@ -2,16 +2,6 @@ package org.mps_cli.model
 
 class SRepository {
 
-    SRepository(List<SModuleBase> modules, List<SLanguage> languages) {
-        this.modules = modules.asImmutable()
-        this.languages = languages.asImmutable()
-
-        this.models = modules.collectMany { it.models }.asImmutable()
-        this.nodes = models.collectMany { it.allNodes }.asImmutable()
-        this.id2modelsCache = models.collectEntries {[it.modelId, it] }.asImmutable()
-        this.id2ModulesCache = modules.collectEntries {[it.moduleId, it] }.asImmutable()
-    }
-
     private List<SModuleBase> modules;
     private List<SLanguage> languages;
 
@@ -20,13 +10,26 @@ class SRepository {
     private Map<String, SModel> id2modelsCache;
     private Map<String, SModuleBase> id2ModulesCache;
 
+    SRepository(List<SModuleBase> modules, List<SLanguage> languages) {
+        this.modules = modules.asImmutable()
+        this.languages = languages.asImmutable()
+
+        this.models = modules.collectMany { it.models }.asImmutable()
+        this.nodes = models.collectMany { it.allNodes }.asImmutable()
+        this.id2modelsCache = models.collectEntries { [it.modelId, it] }.asImmutable()
+        this.id2ModulesCache = modules.collectEntries { [it.moduleId, it] }.asImmutable()
+    }
+
     List<SModuleBase> getModules() { modules }
+
     List<SLanguage> getLanguages() { languages }
 
     List<SModel> allModels() { models }
+
     List<SNode> allNodes() { nodes }
 
     Map<String, SModel> id2models() { id2modelsCache }
+
     Map<String, SModuleBase> id2modules() { id2ModulesCache }
 
     List<SModel> findModelByName(String modelName) {
@@ -44,7 +47,7 @@ class SRepository {
     }
 
     List<SNode> nodesOfConcept(String fullyQualifiedConceptName) {
-        allNodes().findAll { it.concept.name == fullyQualifiedConceptName}
+        allNodes().findAll { it.concept.name == fullyQualifiedConceptName }
     }
 
     List<SNode> nodesOfShortConceptName(String shortConceptName) {
@@ -61,15 +64,15 @@ class SRepository {
     }
 
     Set<SConcept> conceptsOfLanguage(String langName) {
-        languages.find {it.name == langName}?.concepts
+        languages.find { it.name == langName }?.concepts
     }
 
     SConcept findConceptByShortName(String conceptShortName) {
         def ending = "." + conceptShortName
-        languages.collectMany {it.concepts }.find { it.name.endsWith(ending) }
+        languages.collectMany { it.concepts }.find { it.name.endsWith(ending) }
     }
 
     SModuleBase findModuleByName(String moduleName) {
-        modules.find {it.name.equals(moduleName) }
+        modules.find { it.name.equals(moduleName) }
     }
 }
