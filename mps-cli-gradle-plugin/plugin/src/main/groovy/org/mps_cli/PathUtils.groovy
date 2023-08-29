@@ -13,8 +13,8 @@ class PathUtils {
     }
 
     static String pathToString(Path path) {
-        path.getFileSystem() === FileSystems.default ?
-            path.toAbsolutePath().toString() :
+        Files.notExists(path) ? null :
+            path.getFileSystem() === FileSystems.default ? path.toRealPath().toString() :
             path.toUri().toString()
     }
 }

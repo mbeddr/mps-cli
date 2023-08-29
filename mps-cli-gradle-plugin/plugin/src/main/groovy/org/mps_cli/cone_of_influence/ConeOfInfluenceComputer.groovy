@@ -1,50 +1,56 @@
 package org.mps_cli.cone_of_influence
 
 import org.mps_cli.model.SModuleBase
-import org.mps_cli.model.SSolutionModule
-import org.mps_cli.model.builder.SSolutionModuleBuilder
-
-import java.nio.file.Files
-import java.nio.file.Path
+import org.mps_cli.model.SRepository
 
 class ConeOfInfluenceComputer {
 
-    Tuple2<List<SModuleBase>, List<SModuleBase>> computeConeOfInfluence(String gitRepoLocation, List<String> allModifiedFiles,
-                                                                                Map<SModuleBase, Set<SModuleBase>> module2AllUpstreamDependencies,
-                                                                                Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies) {
+    SRepository repository
 
-        def modulesUniverse = module2AllUpstreamDependencies.keySet()
+    Tuple2<List<SModuleBase>, List<SModuleBase>> computeConeOfInfluence(
+            String rootLocation,
+            List<String> allModifiedFiles
+    ) {
+        def bridge = new Filesystem2SSolutionBridge(repository: repository)
+        def modifiedEntities = bridge.computeModifiedEntities(rootLocation, allModifiedFiles)
 
-        HashSet<Path> differentModulesFiles = Filesystem2SSolutionBridge.computeModulesWhichAreModifiedInCurrentBranch(gitRepoLocation, allModifiedFiles)
-
-        println(">>>>>>>>>>>> All different modules files:")
-        differentModulesFiles.each { println it }
+        println(">>>>>>>>>>>> Modified modules:")
+        modifiedEntities.modules.each { println it.pathToModuleFile }
+        println(">>>>>>>>>>>> Modified models:")
+        modifiedEntities.models.each { println it.pathToModelFile }
         println("<<<<<<<<<<<<")
 
-        // if any module is deleted (.msd file not available) then COI is the entire universe
-        def notExistingSolutions = differentModulesFiles.findAll { Files.notExists(it) }
-        if (notExistingSolutions) {
-            println("Solutions ${notExistingSolutions.fileName} do not exist on current branch. The cone of influence is the entire set of solutions.")
-            return new Tuple2(modulesUniverse.toList(), modulesUniverse.toList())
+        def (module2AllUpstreamDependencies, module2AllDownstreamDependencies) = EntityDependenciesBuilder.buildModuleDependencies(repository)
+
+        if (modifiedEntities.foundMissingModules) {
+            println("Some solutions moved or deleted. Skipping cone of influence.")
+            def modulesUniverse = module2AllUpstreamDependencies.keySet()
+            [modulesUniverse.toList(), modulesUniverse.toList()]
+        } else if (modifiedEntities.foundMissingModels) {
+            println("Some models moved or deleted. Computing cone of influence based on modules.")
+            computeGeneric(modifiedEntities.modules, module2AllUpstreamDependencies, module2AllDownstreamDependencies)
+        } else {
+            println("Computing cone of influence based on models.")
+            def (models2AllUpstreamDependencies, models2AllDownstreamDependencies) = EntityDependenciesBuilder.buildModelDependencies(repository)
+
+            def (models, modelsAndUpstreamDependencies) =
+                computeGeneric(modifiedEntities.models, models2AllUpstreamDependencies, models2AllDownstreamDependencies)
+
+            [models.myModule.unique(), modelsAndUpstreamDependencies.myModule.unique()]
         }
+    }
 
-        List<String> differentModulesIds = differentModulesFiles.collect {
-            SSolutionModuleBuilder builder = new SSolutionModuleBuilder()
-            SSolutionModule sol = builder.extractModuleCoreInfo(it)
-            sol.moduleId
-        }
+    private static <Entity> Tuple2<List<Entity>, List<Entity>> computeGeneric(
+            Set<Entity> modifiedEntities,
+            Map<Entity, Set<Entity>> upstreamDependencies,
+            Map<Entity, Set<Entity>> downstreamDependencies
+    ) {
+        def transitivelyAffectedEntities = modifiedEntities.collectMany { downstreamDependencies[it] ?: [] }
+        def allAffectedEntities = modifiedEntities + transitivelyAffectedEntities
 
-        // directly affected modules
-        def differentModulesFromBranch = modulesUniverse.findAll {differentModulesIds.contains(it.moduleId) }
-        // indirectly potentially affected modules
-        def downstreamDependenciesOfDirectlyAffectedModules = differentModulesFromBranch.collectMany {module2AllDownstreamDependencies[it] }
+        def upstreamAffectedEntities = allAffectedEntities.collectMany { upstreamDependencies[it] ?: [] }
+        def allAffectedEntitiesAndUpstreamDependencies = allAffectedEntities + upstreamAffectedEntities
 
-        def allAffectedModules = (differentModulesFromBranch + downstreamDependenciesOfDirectlyAffectedModules).unique().toList()
-        // compute upstream dependencies
-        def upstreamAffectedModules = allAffectedModules.collectMany { module2AllUpstreamDependencies[it] }
-
-        def allAffectedModulesAndUpstreamDependencies = (allAffectedModules + upstreamAffectedModules).unique().toList()
-
-        new Tuple2(allAffectedModules, allAffectedModulesAndUpstreamDependencies)
+        [allAffectedEntities.toList(), allAffectedEntitiesAndUpstreamDependencies.toList()]
     }
 }

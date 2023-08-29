@@ -8,11 +8,17 @@ import org.gradle.api.tasks.TaskAction
 import org.mps_cli.cone_of_influence.ConeOfInfluenceComputer
 import org.mps_cli.cone_of_influence.GitFacade
 import org.mps_cli.model.SModuleBase
+import org.mps_cli.model.builder.BuildingDepthEnum
+import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
 class ConeOfInfluenceComputerTask extends DefaultTask {
 
     @Input
     String gitRepoRootLocation
+
+    @Optional
+    @Input
+    List<String> sourcesDir;
 
     @Optional
     @Input
@@ -31,7 +37,6 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
     ConeOfInfluenceComputerTask() {
         group "MPS-CLI"
         description "computes the solutions potentially affected (and their dependencies) of the changes from current branch compared to 'referenceBranchName' from the 'gitRootRepoLocation'"
-        dependsOn "buildModuleDependencies"
     }
 
     @TaskAction
@@ -40,18 +45,16 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
                 modifiedFiles != null && referenceBranchName != null) {
             throw new RuntimeException("You must specify either 'modifiedFiles' or 'referenceBranchName' input parameter")
         }
-
-        def solution2AllUpstreamDependencies = project.buildModuleDependencies.module2AllUpstreamDependencies
-        def solution2AllDownstreamDependencies = project.buildModuleDependencies.module2AllDownstreamDependencies
+        sourcesDir ?= [gitRepoRootLocation]
 
         def allModifiedFiles = modifiedFiles != null ? modifiedFiles :
                 GitFacade.computeFilesWhichAreModifiedInCurrentBranch(gitRepoRootLocation, referenceBranchName)
 
-        ConeOfInfluenceComputer coiComputer = new ConeOfInfluenceComputer()
-        (affectedSolutions, affectedSolutionsAndUpstreamDependencies) = coiComputer.computeConeOfInfluence(
-                gitRepoRootLocation,
-                allModifiedFiles,
-                solution2AllUpstreamDependencies,
-                solution2AllDownstreamDependencies)
+        def builder = new SModulesRepositoryBuilder(buildingStrategy: BuildingDepthEnum.MODEL_DEPENDENCIES_ONLY)
+        def repository = builder.buildAll(sourcesDir)
+        def coiComputer = new ConeOfInfluenceComputer(repository: repository)
+
+        (affectedSolutions, affectedSolutionsAndUpstreamDependencies) =
+                coiComputer.computeConeOfInfluence(gitRepoRootLocation, allModifiedFiles)
     }
 }
