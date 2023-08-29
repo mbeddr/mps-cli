@@ -20,7 +20,6 @@ class EntityDependenciesBuilder {
         Map<Entity, Set<Entity>> entity2AllUpstreamDependencies = [:]
         Map<Entity, Set<Entity>> entity2AllDownstreamDependencies = [:]
 
-        println("ALL ENTITIES" + allEntities(repository))
         for (Entity entity : allEntities(repository)) {
             entity2AllUpstreamDependencies[entity] = collectUpstreamDependencies(entity, repository, directDependencyRefs)
         }
