@@ -22,8 +22,6 @@ class ConeOfInfluenceComputerTest extends TestBase {
                 doLast {
                     def affectedSolutions = computeConeOfInfluence.affectedSolutions
                     println "all affected solutions: \${affectedSolutions.collect { it.name }.sort()}"
-                    println buildModelDependencies.model2AllDownstreamDependencies.collectEntries { k, v -> [k.name, v.name] }
-                    println buildModuleDependencies.module2AllDownstreamDependencies.collectEntries { k, v -> [k.name, v.name] }
                 }
             }
         """
