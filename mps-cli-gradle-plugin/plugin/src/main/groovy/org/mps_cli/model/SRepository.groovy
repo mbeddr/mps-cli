@@ -1,41 +1,33 @@
 package org.mps_cli.model
 
 class SRepository {
-    List<SModuleBase> modules = []
-    List<SLanguage> languages = []
 
-    private List<SModel> allModelsCache = null
-    private List<SNode> allNodesCache = null
-    private Map<String, SModel> id2modelsCache = null
-    private Map<String, SModuleBase> id2ModulesCache = null
+    SRepository(List<SModuleBase> modules, List<SLanguage> languages) {
+        this.modules = modules.asImmutable()
+        this.languages = languages.asImmutable()
 
-    List<SModel> allModels() {
-        if (allModelsCache == null) {
-            allModelsCache = modules.collectMany { it.models }
-        }
-        allModelsCache
+        this.models = modules.collectMany { it.models }.asImmutable()
+        this.nodes = models.collectMany { it.allNodes }.asImmutable()
+        this.id2modelsCache = models.collectEntries {[it.modelId, it] }.asImmutable()
+        this.id2ModulesCache = modules.collectEntries {[it.moduleId, it] }.asImmutable()
     }
 
-    List<SNode> allNodes() {
-        if (allNodesCache == null) {
-            allNodesCache = allModels().collectMany { it.allNodes }
-        }
-        allNodesCache
-    }
+    private List<SModuleBase> modules;
+    private List<SLanguage> languages;
 
-    Map<String, SModel> id2models() {
-        if (id2modelsCache == null) {
-            id2modelsCache = allModels().collectEntries {[it.modelId, it] }
-        }
-        id2modelsCache
-    }
+    private List<SModel> models;
+    private List<SNode> nodes;
+    private Map<String, SModel> id2modelsCache;
+    private Map<String, SModuleBase> id2ModulesCache;
 
-    Map<String, SModuleBase> id2modules() {
-        if (id2ModulesCache == null) {
-            id2ModulesCache = modules.collectEntries {[it.moduleId, it] }
-        }
-        id2ModulesCache
-    }
+    List<SModuleBase> getModules() { modules }
+    List<SLanguage> getLanguages() { languages }
+
+    List<SModel> allModels() { models }
+    List<SNode> allNodes() { nodes }
+
+    Map<String, SModel> id2models() { id2modelsCache }
+    Map<String, SModuleBase> id2modules() { id2ModulesCache }
 
     List<SModel> findModelByName(String modelName) {
         allModels().findAll { (it.name == modelName) }
