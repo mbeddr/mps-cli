@@ -25,7 +25,7 @@ class ModelBuilderTask extends DefaultTask {
         def builder = new SModulesRepositoryBuilder()
 
         repository = builder.buildAll(sourcesDir)
-        println("number of solutions: " + repository.modules.size)
+        println("number of solutions: " + repository.modules.size())
     }
 
 }

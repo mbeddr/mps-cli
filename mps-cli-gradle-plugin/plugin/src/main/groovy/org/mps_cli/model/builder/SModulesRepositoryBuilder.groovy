@@ -2,6 +2,8 @@ package org.mps_cli.model.builder
 
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
+import org.mps_cli.model.SLanguage
+import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.SRepository
 
 import java.nio.file.FileSystems
@@ -14,7 +16,10 @@ class SModulesRepositoryBuilder {
 
     BuildingDepthEnum buildingStrategy = BuildingDepthEnum.COMPLETE_MODEL
 
-    def repo = new SRepository()
+    SRepository repo;
+
+    private List<SLanguage> languages = [];
+    private List<SModuleBase> modules = [];
 
     def buildAll(List<String> sourcesDir) {
         SLanguageBuilder.clear()
@@ -33,12 +38,13 @@ class SModulesRepositoryBuilder {
         collectModulesFromSources(path)
         collectModulesFromJars(path)
 
-        repo.languages.addAll(SLanguageBuilder.allLanguages())
+        languages.addAll(SLanguageBuilder.allLanguages())
 
         Date stop = new Date()
         TimeDuration td = TimeCategory.minus(stop, start)
         println "${td} for handling ${path}"
-        repo
+
+        repo = new SRepository(modules, languages)
     }
 
     private void collectModulesFromSources(Path path) {
@@ -51,7 +57,7 @@ class SModulesRepositoryBuilder {
         languagesDirectories.each {
             def languageModuleBuilder = new SLanguageModuleBuilder(buildingStrategy : buildingStrategy)
             def language = languageModuleBuilder.build(it.toAbsolutePath())
-            repo.modules.add(language)
+            modules.add(language)
         }
 
         def filterSolutionDefinitions = ~/.*\.msd$/
@@ -63,7 +69,7 @@ class SModulesRepositoryBuilder {
         solutionsDirectories.each {
             def solutionModuleBuilder = new SSolutionModuleBuilder(buildingStrategy : buildingStrategy)
             def solution = solutionModuleBuilder.build(it.toAbsolutePath())
-            repo.modules.add(solution)
+            modules.add(solution)
         }
     }
 
