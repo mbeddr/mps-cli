@@ -7,6 +7,7 @@ import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.SModuleRef
 import org.mps_cli.model.builder.default_persistency.SModelBuilderForDefaultPersistency
 import org.mps_cli.model.builder.file_per_root_persistency.SModelBuilderForFilePerRootPersistency
+import org.slf4j.LoggerFactory
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -14,6 +15,8 @@ import java.nio.file.Path
 import static java.util.stream.Collectors.toList
 
 abstract class AbstractSModuleBuilder {
+
+    private def timingLogger = LoggerFactory.getLogger('repository-builder-timing')
 
     BuildingDepthEnum buildingStrategy = BuildingDepthEnum.COMPLETE_MODEL;
 
@@ -55,7 +58,7 @@ abstract class AbstractSModuleBuilder {
 
         Date stop = new Date()
         TimeDuration td = TimeCategory.minus(stop, start)
-        println "${td} for handling ${pathToModuleDirectory}"
+        timingLogger.info "{} for handling {}", td, pathToModuleDirectory
 
         sModuleBase
     }

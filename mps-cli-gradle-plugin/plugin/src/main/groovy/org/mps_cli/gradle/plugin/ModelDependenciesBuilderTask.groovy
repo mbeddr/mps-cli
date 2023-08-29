@@ -28,7 +28,7 @@ class ModelDependenciesBuilderTask extends AbstractDependenciesBuilderTask {
 
     @Override
     List<Object> allEntities() {
-        builder.repo.allModels()
+        repository.allModels()
     }
 
     @Override

@@ -2,8 +2,8 @@ package org.mps_cli.gradle.plugin
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.mps_cli.model.SRepository
-import org.mps_cli.model.builder.SLanguageBuilder
 import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
 abstract class AbstractDependenciesBuilderTask extends DefaultTask {
@@ -13,21 +13,19 @@ abstract class AbstractDependenciesBuilderTask extends DefaultTask {
     @Input
     List<String> sourcesDir;
 
+    @Internal
+    SRepository repository;
+
     abstract List<Object> allEntities();
     abstract List<Object> directDependencies(Object entity);
 
     def buildEntityDependencies(Map<?, Set<?>> entity2AllUpstreamDependencies,
                                 Map<?, Set<?>> entity2AllDownstreamDependencies) {
-        SLanguageBuilder.clear()
-        sourcesDir.each {
-            def dir = new File(it).getAbsoluteFile().canonicalPath
-            println("loading models from directory: " + dir)
-            builder.build(dir)
-        }
+        repository = builder.buildAll(sourcesDir)
 
         for (Object entity : allEntities()) {
             Set<Object> dependencies = [].toSet()
-            collectUpstreamDependencies(builder.repo, entity, dependencies)
+            collectUpstreamDependencies(repository, entity, dependencies)
             entity2AllUpstreamDependencies[entity] = dependencies
         }
 

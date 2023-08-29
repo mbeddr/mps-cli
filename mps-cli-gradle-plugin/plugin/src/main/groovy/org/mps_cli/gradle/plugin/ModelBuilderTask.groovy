@@ -5,7 +5,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.mps_cli.model.SRepository
-import org.mps_cli.model.builder.SLanguageBuilder
 import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
 class ModelBuilderTask extends DefaultTask {
@@ -24,15 +23,8 @@ class ModelBuilderTask extends DefaultTask {
     @TaskAction
     def buildModel() {
         def builder = new SModulesRepositoryBuilder()
-        SLanguageBuilder.clear()
-        sourcesDir.each {
-            def dir = new File(it).getAbsoluteFile().canonicalPath
-            println("loading models from directory: " + dir)
-            builder.build(dir)
-        }
-        //setProperty("repository", repository)
-        repository = builder.repo
 
+        repository = builder.buildAll(sourcesDir)
         println("number of solutions: " + repository.modules.size())
     }
 
