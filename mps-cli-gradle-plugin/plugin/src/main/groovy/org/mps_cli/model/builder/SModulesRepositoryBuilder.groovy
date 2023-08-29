@@ -16,6 +16,16 @@ class SModulesRepositoryBuilder {
 
     def repo = new SRepository()
 
+    def buildAll(List<String> sourcesDir) {
+        SLanguageBuilder.clear()
+        sourcesDir.each {
+            def dir = Paths.get(it).toAbsolutePath().normalize().toString()
+            println("loading models from directory: " + dir)
+            build(dir)
+        }
+        repo
+    }
+
     def build(String pathString) {
         Date start = new Date()
 
