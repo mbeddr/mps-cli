@@ -29,7 +29,7 @@ class ModuleDependenciesBuilderTask extends AbstractDependenciesBuilderTask {
 
     @Override
     List<Object> allEntities() {
-        builder.repo.modules
+        repository.modules
     }
 
     @Override
