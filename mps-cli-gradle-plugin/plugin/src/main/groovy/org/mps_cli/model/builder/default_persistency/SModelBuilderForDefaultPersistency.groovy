@@ -5,10 +5,13 @@ import groovy.time.TimeDuration
 import org.mps_cli.PathUtils
 import org.mps_cli.model.builder.AbstractModelBuilder
 import org.mps_cli.model.builder.BuildingDepthEnum
+import org.slf4j.LoggerFactory
 
 import java.nio.file.Path
 
 class SModelBuilderForDefaultPersistency extends AbstractModelBuilder {
+
+    private def timingLogger = LoggerFactory.getLogger('repository-builder-timing')
 
     def build(Path pathToMsdFile) {
         Date start = new Date()
@@ -26,7 +29,7 @@ class SModelBuilderForDefaultPersistency extends AbstractModelBuilder {
 
         Date stop = new Date()
         TimeDuration td = TimeCategory.minus( stop, start )
-        println "${td} for handling ${pathToMsdFile}"
+        timingLogger.info "{} for handling {}", td, pathToMsdFile
 
         sModel
     }
