@@ -25,7 +25,7 @@ class ConeOfInfluenceComputer {
         if (modifiedEntities.foundMissingModules) {
             println("Some solutions moved or deleted. Skipping cone of influence.")
             def modulesUniverse = module2AllUpstreamDependencies.keySet()
-            new Tuple2(modulesUniverse.toList(), modulesUniverse.toList())
+            [modulesUniverse.toList(), modulesUniverse.toList()]
         } else if (modifiedEntities.foundMissingModels) {
             println("Some models moved or deleted. Computing cone of influence based on modules.")
             computeGeneric(modifiedEntities.modules, module2AllUpstreamDependencies, module2AllDownstreamDependencies)
@@ -51,6 +51,6 @@ class ConeOfInfluenceComputer {
         def upstreamAffectedEntities = allAffectedEntities.collectMany { upstreamDependencies[it] ?: [] }
         def allAffectedEntitiesAndUpstreamDependencies = allAffectedEntities + upstreamAffectedEntities
 
-        new Tuple2(allAffectedEntities.toList(), allAffectedEntitiesAndUpstreamDependencies.toList())
+        [allAffectedEntities.toList(), allAffectedEntitiesAndUpstreamDependencies.toList()]
     }
 }
