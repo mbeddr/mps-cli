@@ -1,0 +1,30 @@
+{
+  "name": "mps-cli-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha 'dist/tests/**/*.js' --recursive",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.3.9",
+    "@types/jsdom": "^21.1.4",
+    "@types/mocha": "^10.0.3",
+    "@types/sinon": "^10.0.20",
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "^0.8.10",
+    "jsdom": "^22.1.0"
+  }
+}
