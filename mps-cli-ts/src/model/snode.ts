@@ -6,10 +6,12 @@ export class SNode {
     id : string;
     links : Map<SAbstractConceptLink, SNode[]> = new Map<SAbstractConceptLink, SNode[]>
     properties : Map<SProperty, string> = new Map<SProperty, string>
+    myParent : SNode | undefined;
 
-    constructor(myConcept : SConcept, id : string) {
+    constructor(myConcept : SConcept, id : string, parent : SNode | undefined) {
         this.myConcept = myConcept;
         this.id = id;
+        this.myParent = parent
     }
 
     addLink(link : SAbstractConceptLink, node : SNode) {
@@ -21,6 +23,14 @@ export class SNode {
         nodesForLink.push(node)
     }
 
+    allLinkedNodes() : SNode[] {
+        var res : SNode[] = []
+        this.links.forEach((linkedNodes : SNode[], link : SAbstractConceptLink) => {
+            res = res.concat(linkedNodes)
+        })
+        return res
+    }
+
     addProperty(property : SProperty, value : string) {
         this.properties.set(property, value);
     }
@@ -30,7 +40,7 @@ export class SRootNode extends SNode {
     registry : SRootNodeRegistry;
 
     constructor(registry : SRootNodeRegistry, myConcept : SConcept, id : string) {
-        super(myConcept, id);
+        super(myConcept, id, undefined);
         this.registry = registry;
     }
 }

@@ -42,7 +42,7 @@ describe('testing building of nodes', () => {
   it('root node', () => {
     assert.equal(rootNode.myConcept.name, "mps.cli.landefs.people.structure.PersonsContainer")
     assert.equal(rootNode.id, "4Yb5JA31NUu")
-    //assert.equal(rootNode.links.size, 2)
+    assert.equal(rootNode.allLinkedNodes().length, 2)
     assert.equal(rootNode.properties.size, 1)
     const propertiesKeysArray = Array.from(rootNode.properties.keys());
 

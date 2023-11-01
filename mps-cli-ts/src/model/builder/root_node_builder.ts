@@ -24,13 +24,14 @@ export function buildRootNode(doc : Document) : SRootNode {
 
 
 function buildChildNodes(parentNodeElement : Element, parent : SNode, registry : SRootNodeRegistry) {
-    for(var nodeElement of parentNodeElement.getElementsByTagName("node")) {
+    for(var nodeElement of childrenByTagName(parentNodeElement, "node")) {
         const nodeConceptIndex = nodeElement.attributes.getNamedItem("concept")!.value
         const nodeId = nodeElement.attributes.getNamedItem("id")!.value
         const nodeConcept = registry.getConceptByIndex(nodeConceptIndex)
         const nodeRoleInParentString = nodeElement.attributes.getNamedItem("role")!.value
         const linkInParent = registry.getLinkByIndex(nodeRoleInParentString)
-        const node = new SNode(nodeConcept, nodeId)
+
+        const node = new SNode(nodeConcept, nodeId, parent)
         parent.addLink(linkInParent, node)
         populateNodePropertiesAndLinks(nodeElement, node, registry)
 
@@ -41,7 +42,7 @@ function buildChildNodes(parentNodeElement : Element, parent : SNode, registry :
 function populateNodePropertiesAndLinks(nodeElement : Element, node : SNode, registry : SRootNodeRegistry) {
     const properties = nodeElement.children
     
-    for(var property of childrenByTagName(nodeElement, "PROPERTY")) {
+    for(var property of childrenByTagName(nodeElement, "property")) {
         const propertyRole = property.attributes.getNamedItem("role")!.value
         const propertyValue = property.attributes.getNamedItem("value")!.value
         const nodeProperty = registry.getPropertyByIndex(propertyRole)
@@ -69,19 +70,20 @@ function buildRootNodeRegistry(registryElement : Element) : SRootNodeRegistry {
             const myConceptRegistry = new SConceptRegistry(myConcept, conceptFlag, conceptIndex)
             myLanguageRegistry.usedConcepts.push(myConceptRegistry)
 
+
             for(var linkRegistryElement of conceptRegistryElement.children) {
                 
                 const linkId = linkRegistryElement.attributes.getNamedItem("id")!.value
                 const linkName = linkRegistryElement.attributes.getNamedItem("name")!.value
                 const linkIndex = linkRegistryElement.attributes.getNamedItem("index")!.value
                     
-                if (linkRegistryElement.tagName == "PROPERTY") {
+                if (linkRegistryElement.tagName == "property") {
                     const property = SLanguageBuilder.getProperty(myConcept, linkName, linkId)
                     const myRegistryProperty = new SPropertyRegistry(property, linkIndex)
                     myConceptRegistry.propertiesRegistries.push(myRegistryProperty)
                 } else {
                     var link : SAbstractConceptLink;
-                    if (linkRegistryElement.tagName == "CHILD") {
+                    if (linkRegistryElement.tagName == "child") {
                         link = SLanguageBuilder.getChildLink(myConcept, linkName, linkId)
                     } else {
                         link = SLanguageBuilder.getReferenceLink(myConcept, linkName, linkId)
