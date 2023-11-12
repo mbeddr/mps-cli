@@ -1,7 +1,7 @@
 
 
 import { SAbstractConceptLink, SConcept, SProperty } from '../sconcept';
-import { SConceptRegistry, SLanguageRegistry, SLinkRegistry, SNode, SPropertyRegistry, SRootNode, SRootNodeRegistry } from '../snode';
+import { SConceptRegistry, SLanguageRegistry, SLinkRegistry, SModelImport, SNode, SNodeRef, SPropertyRegistry, SRootNode, SRootNodeImports, SRootNodeRegistry } from '../snode';
 import { SLanguageBuilder } from './slanguage_builder';
 import { childrenByTagName } from './utils';
 
@@ -9,21 +9,24 @@ export function buildRootNode(doc : Document) : SRootNode {
     const modelNode : Element = doc.getElementsByTagName("model")[0];
     const registryElement = modelNode.getElementsByTagName("registry")[0];
     const registry = buildRootNodeRegistry(registryElement)
+    
+    const importsElement = modelNode.getElementsByTagName("imports")[0];
+    const imports = buildRootNodeImports(importsElement)
 
     const rootNodeElement = modelNode.getElementsByTagName("node")[0];
     const rootNodeConceptIndex = rootNodeElement.attributes.getNamedItem("concept")!.value
     const rootNodeId = rootNodeElement.attributes.getNamedItem("id")!.value
     const rootNodeConcept = registry.getConceptByIndex(rootNodeConceptIndex)
-    const mySRootNode = new SRootNode(registry, rootNodeConcept, rootNodeId);
+    const mySRootNode = new SRootNode(imports, registry, rootNodeConcept, rootNodeId);
 
-    populateNodePropertiesAndLinks(rootNodeElement, mySRootNode, registry)
-    buildChildNodes(rootNodeElement, mySRootNode, registry)
+    populateNodePropertiesAndLinks(rootNodeElement, mySRootNode, imports, registry)
+    buildChildNodes(rootNodeElement, mySRootNode, imports, registry)
 
     return mySRootNode;
 }
 
 
-function buildChildNodes(parentNodeElement : Element, parent : SNode, registry : SRootNodeRegistry) {
+function buildChildNodes(parentNodeElement : Element, parent : SNode, imports : SRootNodeImports, registry : SRootNodeRegistry) {
     for(var nodeElement of childrenByTagName(parentNodeElement, "node")) {
         const nodeConceptIndex = nodeElement.attributes.getNamedItem("concept")!.value
         const nodeId = nodeElement.attributes.getNamedItem("id")!.value
@@ -33,13 +36,13 @@ function buildChildNodes(parentNodeElement : Element, parent : SNode, registry :
 
         const node = new SNode(nodeConcept, nodeId, parent)
         parent.addLink(linkInParent, node)
-        populateNodePropertiesAndLinks(nodeElement, node, registry)
+        populateNodePropertiesAndLinks(nodeElement, node, imports, registry)
 
-        buildChildNodes(nodeElement, node, registry)
+        buildChildNodes(nodeElement, node, imports, registry)
     }
 }
 
-function populateNodePropertiesAndLinks(nodeElement : Element, node : SNode, registry : SRootNodeRegistry) {
+function populateNodePropertiesAndLinks(nodeElement : Element, node : SNode, imports : SRootNodeImports, registry : SRootNodeRegistry) {
     const properties = nodeElement.children
     
     for(var property of childrenByTagName(nodeElement, "property")) {
@@ -48,7 +51,34 @@ function populateNodePropertiesAndLinks(nodeElement : Element, node : SNode, reg
         const nodeProperty = registry.getPropertyByIndex(propertyRole)
         node.addProperty(nodeProperty, propertyValue)
     }
-    //ToDo: handle references
+
+    for(var ref of childrenByTagName(nodeElement, "ref")) {
+        const refRole = ref.attributes.getNamedItem("role")!.value
+        const refTo = ref.attributes.getNamedItem("to")!.value
+        const refToParts = refTo.split(":")
+        const refModel = refToParts[0]
+        const refNodeId = refToParts[1]
+
+        const modelId = imports.getModelIdByIndex(refModel)
+        const refLink = registry.getLinkByIndex(refRole)
+        node.addLink(refLink, new SNodeRef(modelId, refNodeId))
+    }
+}
+
+
+function buildRootNodeImports(importsElement : Element) : SRootNodeImports {
+    const imports = new SRootNodeImports
+    for(var modelImportElement of importsElement.getElementsByTagName("import")) {
+        const importIndex = modelImportElement?.attributes.getNamedItem("index")!.value
+        const modelRef = modelImportElement?.attributes.getNamedItem("ref")!.value
+        const splits = modelRef.split("(")
+        const modelId = splits[0]
+        const modelName = splits[1].substring(0, splits[1].length)
+        const implicit = modelImportElement?.attributes.getNamedItem("implicit")!.value
+
+        imports.imports.push(new SModelImport(importIndex, modelId, modelName, implicit === "true"))
+    }
+    return imports
 }
 
 function buildRootNodeRegistry(registryElement : Element) : SRootNodeRegistry {

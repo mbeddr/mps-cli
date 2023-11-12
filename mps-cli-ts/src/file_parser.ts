@@ -1,8 +1,72 @@
 import { JSDOM } from 'jsdom';
+import { readdirSync, readFileSync, lstatSync } from 'fs'
+import { join } from 'path'
+import { parseModelHeader } from './model/builder/model_builder';
+import { SModel } from './model/smodel';
+import { SRootNode } from './model/snode';
+import { buildRootNode } from './model/builder/root_node_builder';
+import { SRepository } from './model/srepository';
+import { buildSolution } from './model/builder/solution_builder';
+import { SSolution } from './model/smodule';
 
 export function parseXml(str : string) : XMLDocument {
     const doc = new JSDOM("");
     const DOMParser = doc.window.DOMParser
     const parser = new DOMParser
     return parser.parseFromString(str, "text/xml");
+}
+
+export function loadModelsFromSolution(solutionDir : string) : SModel[] {
+    const res : SModel[] = []
+    try {
+        const init = Date.now()
+        const modelsDir = join(solutionDir, "models")
+        const files = readdirSync(modelsDir);
+        files.forEach(crtModelDir => {
+            const filesOfModel = readdirSync(join(modelsDir, crtModelDir))
+            const dotModelContent = readFileSync(join(modelsDir, crtModelDir, ".model"), 'utf8')
+            const smodel : SModel = parseModelHeader(parseXml(dotModelContent))
+            res.push(smodel)
+            filesOfModel.forEach(crtFile => {
+                if (crtFile != ".model") {
+                    const rootNodeString = readFileSync(join(modelsDir, crtModelDir, crtFile), 'utf8')
+                    const rootNode : SRootNode = buildRootNode(parseXml(rootNodeString))
+                    smodel.rootNodes.push(rootNode)
+                }
+            })
+        });
+        console.log((Date.now() - init) + "ms for reading solution " + solutionDir)
+      } catch (err) {
+        console.error(err);
+      }
+    return res;  
+}
+
+export function loadSolutions(dir : string) : SRepository {
+    const repo = new SRepository(dir)
+    doLoadSolutions(dir, repo)
+    return repo
+}
+
+function doLoadSolutions(dir : string, repo : SRepository) {
+    try {
+        const files = readdirSync(dir);
+        const msdFile = files.find((it : string) => it.endsWith(".msd"))
+        if (msdFile == undefined) {
+            files.forEach(crtDir => {
+                const fullName = join(dir, crtDir) 
+                if (lstatSync(fullName).isDirectory()) {
+                    doLoadSolutions(fullName, repo)
+                }
+            })
+        } else {
+            const msdFileContent = readFileSync(join(dir, msdFile), "utf8")
+            const solution = buildSolution(parseXml(msdFileContent))
+            repo.modules.push(solution)
+            const models : SModel[] = loadModelsFromSolution(dir)
+            solution.models = models
+        }
+      } catch (err) {
+        console.error(err);
+      }
 }

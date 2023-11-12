@@ -7,7 +7,7 @@ import { assert } from "chai";
 import { buildRootNode } from '../src/model/builder/root_node_builder';
 import { SRootNode } from '../src/model/snode';
 
-describe('testing building of nodes', () => {
+describe('testing building of root nodes', () => {
   const xmlStr = `<?xml version="1.0" encoding="UTF-8"?>
                   <model ref="r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed(mps.cli.lanuse.library_top.authors_top)" content="root">
                     <persistence version="9" />
@@ -50,5 +50,10 @@ describe('testing building of nodes', () => {
     assert.equal(nameProperty.name, "name");
     assert.equal(nameProperty.id, "1169194664001");
     assert.equal(rootNode.properties.get(nameProperty), "_010_classical_authors");
+    assert.equal(rootNode.getProperty("name"), "_010_classical_authors");
+
+    const descendants = rootNode.descendants(undefined, false)
+    assert.equal(descendants.length, 2)
+    assert.equal(descendants[0].getProperty("name"), "Mark Twain")
   });
 });
