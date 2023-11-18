@@ -113,44 +113,19 @@ export class SRootNodeImports {
 export class SRootNodeRegistry {
     languages : SLanguageRegistry[] = [];
 
-    private index2concepts : Map<string, SConcept> = new Map<string, SConcept>();
-    private index2links : Map<string, SAbstractConceptLink> = new Map<string, SAbstractConceptLink>();
-    private index2properties : Map<string, SProperty> = new Map<string, SProperty>();
+    index2concepts : Map<string, SConcept> = new Map<string, SConcept>();
+    index2links : Map<string, SAbstractConceptLink> = new Map<string, SAbstractConceptLink>();
+    index2properties : Map<string, SProperty> = new Map<string, SProperty>();
 
     getConceptByIndex(index : string) : SConcept {
-        if (this.index2concepts.size == 0) {
-            for(var lan of this.languages) {
-                for(var con of lan.usedConcepts) {
-                    this.index2concepts.set(con.myConceptIndex, con.myConcept)
-                }
-            }                
-        }
         return this.index2concepts.get(index)!;
     }
 
     getLinkByIndex(index : string) : SAbstractConceptLink {
-        if (this.index2links.size == 0) {
-            for(var lan of this.languages) {
-                for(var con of lan.usedConcepts) {
-                    for(var link of con.linksRegistries) {
-                        this.index2links.set(link.index, link.link)
-                    }    
-                }
-            }                
-        }
         return this.index2links.get(index)!;
     }
 
     getPropertyByIndex(index : string) : SProperty {
-        if (this.index2properties.size == 0) {
-            for(var lan of this.languages) {
-                for(var con of lan.usedConcepts) {
-                    for(var property of con.propertiesRegistries) {
-                        this.index2properties.set(property.index, property.property)
-                    }    
-                }
-            }                
-        }
         return this.index2properties.get(index)!;
     }
 }

@@ -3,8 +3,8 @@
 export class SConcept {
     name : string;
     id : string;
-    links : SAbstractConceptLink[] = []
-    properties : SProperty[] = []
+    links = new Map<string, SAbstractConceptLink>()
+    properties = new Map<string, SProperty>() 
 
     constructor(name : string, id : string) {
         this.name = name;

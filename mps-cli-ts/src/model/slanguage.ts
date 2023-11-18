@@ -4,7 +4,7 @@ export class SLanguage {
     name : string;
     id : string;
 
-    concepts : SConcept[] = []
+    concepts = new Map<string, SConcept>
 
     constructor(name : string, id : string) {
         this.name = name;

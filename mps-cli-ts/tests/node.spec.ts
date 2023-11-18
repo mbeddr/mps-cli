@@ -37,7 +37,7 @@ describe('testing building of root nodes', () => {
                   </model>`;
 
   const doc : XMLDocument = parseXml(xmlStr);               
-  const rootNode : SRootNode = buildRootNode(doc)
+  const rootNode : SRootNode = buildRootNode(doc, new SModel("dummy_name", "dummy_id"))
 
   it('root node', () => {
     assert.equal(rootNode.myConcept.name, "mps.cli.landefs.people.structure.PersonsContainer")

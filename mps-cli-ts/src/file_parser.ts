@@ -19,18 +19,22 @@ export function parseXml(str : string) : XMLDocument {
 export function loadModelsFromSolution(solutionDir : string) : SModel[] {
     const res : SModel[] = []
     try {
+        console.log("Loading models from: " + solutionDir)
         const init = Date.now()
         const modelsDir = join(solutionDir, "models")
         const files = readdirSync(modelsDir);
         files.forEach(crtModelDir => {
             const filesOfModel = readdirSync(join(modelsDir, crtModelDir))
             const dotModelContent = readFileSync(join(modelsDir, crtModelDir, ".model"), 'utf8')
-            const smodel : SModel = parseModelHeader(parseXml(dotModelContent))
+            const dotModelXMLDocument = parseXml(dotModelContent)
+            const smodel : SModel = parseModelHeader(dotModelXMLDocument)
             res.push(smodel)
             filesOfModel.forEach(crtFile => {
                 if (crtFile != ".model") {
+                    //console.log("Reading root node from file: " + crtFile)
                     const rootNodeString = readFileSync(join(modelsDir, crtModelDir, crtFile), 'utf8')
-                    const rootNode : SRootNode = buildRootNode(parseXml(rootNodeString))
+                    const xmlDocument = parseXml(rootNodeString)
+                    const rootNode : SRootNode = buildRootNode(xmlDocument, smodel)
                     smodel.rootNodes.push(rootNode)
                 }
             })
@@ -61,7 +65,8 @@ function doLoadSolutions(dir : string, repo : SRepository) {
             })
         } else {
             const msdFileContent = readFileSync(join(dir, msdFile), "utf8")
-            const solution = buildSolution(parseXml(msdFileContent))
+            const xmlDocument = parseXml(msdFileContent)
+            const solution = buildSolution(xmlDocument)
             repo.modules.push(solution)
             const models : SModel[] = loadModelsFromSolution(dir)
             solution.models = models

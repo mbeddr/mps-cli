@@ -11,3 +11,12 @@ export function childrenByTagName(element : Element, tagName : string) : Element
 
     return res
 }
+
+export function firstChildByTagName(element : Element, tagName : string) : Element | null {
+    for(const child of element.children) {
+        if (child.tagName == tagName) {
+            return child
+        }
+    }
+    return null
+}

@@ -16,40 +16,38 @@ export class SLanguageBuilder {
     }
 
     static getConcept(language : SLanguage, name : string, id : string) : SConcept {
-        for(var concept of language.concepts) {
-            if (concept.name == name)
-                return concept;
+        var res = language.concepts.get(id)
+        if (res === undefined) {
+            res = new SConcept(name, id);
+            language.concepts.set(id, res)
         }
-        var res = new SConcept(name, id);
-        language.concepts.push(res)
         return res;
     }
 
     static getProperty(concept : SConcept, name : string, id : string) : SProperty {
-        return this.getOrCreateSpecificLink(concept, name, id, "property");
+        var res = concept.properties.get(id)
+        if (res === undefined) {
+            res = new SProperty(name, id)
+            concept.properties.set(id, res)
+        } 
+        return res;
     }
 
     static getChildLink(concept : SConcept, name : string, id : string) : SChildLink {
-        return this.getOrCreateSpecificLink(concept, name, id, "child");
-    }
-
-    static getReferenceLink(concept : SConcept, name : string, id : string) : SChildLink {
-        return this.getOrCreateSpecificLink(concept, name, id, "reference");
-    }
-
-    static getOrCreateSpecificLink(concept : SConcept, name : string, id : string, linkType : string) : SAbstractConceptLink {
-        for(var link of concept.links) {
-            if (link.id == id)
-                return link;
-        }
-        var res;
-        if(linkType == "property")
-            res = new SProperty(name, id);
-        else if(linkType == "child")
+        var res = concept.links.get(id)
+        if (res === undefined) {
             res = new SChildLink(name, id)
-        else 
+            concept.links.set(id, res)
+        } 
+        return res;
+    }
+
+    static getReferenceLink(concept : SConcept, name : string, id : string) : SReferenceLink {
+        var res = concept.links.get(id)
+        if (res === undefined) {
             res = new SReferenceLink(name, id)
-        concept.links.push(res)
+            concept.links.set(id, res)
+        } 
         return res;
     }
 }
