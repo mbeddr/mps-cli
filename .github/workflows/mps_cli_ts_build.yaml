@@ -11,7 +11,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.MPSCLI_GITHUB_PKG_REGISTRY }}
 
 jobs:
-  build_mps_cli_py:
+  build_mps_cli_ts:
     runs-on: ubuntu-latest
     env:
       DISPLAY: ':99'
@@ -23,6 +23,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm test
+      - name: Install packages and running tests
+        working-directory: ./mps-cli-ts
+        run: |
+          npm install 
+          npm run build --if-present
+          npm test
