@@ -9,7 +9,7 @@ import { SNode, SNodeRef } from "../src/model/snode";
 describe("testing building of the model from a directory with solutions", () => {
   it("solutions dir", () => {
     const repo: SRepository = loadSolutions(
-      "..\\mps_test_projects\\mps_cli_lanuse_file_per_root",
+      "../mps_test_projects/mps_cli_lanuse_file_per_root",
     );
     assert.equal(repo.modules.length, 2);
 
