@@ -18,3 +18,8 @@ The core of the Python object model is given by the following classes:
 ### Limitations
 The plugin has currently the following limitations:
 - the recovered language information reflects only the used language in the loaded solutions
+
+### Run tests
+
+- `cd mps-cli-py`
+- `python -m unittest discover`
