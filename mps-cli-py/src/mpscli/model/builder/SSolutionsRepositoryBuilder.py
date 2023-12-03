@@ -1,4 +1,4 @@
-import datetime
+from timeit import default_timer as timer
 import os
 import sys
 import zipfile
@@ -23,20 +23,21 @@ class SSolutionsRepositoryBuilder:
             sys.exit(1)
 
         print("building model from path:", path)
-        start = datetime.datetime.now()
+        start = timer()
         self.collect_solutions_from_sources(path)
         self.collect_solutions_from_jars(path)
         self.repo.languages = list(SLanguageBuilder.languages.values())
-        stop = datetime.datetime.now()
-        duration = (stop - start).microseconds / 1000
-        print('duration is: ' + str(duration))
+        stop = timer()
+        duration = (stop - start)
+        print('duration is: ' + str(duration) + ' seconds')
         return self.repo
 
     def collect_solutions_from_sources(self, path):
         for pth in Path(path).rglob('*.msd'):
             solutionBuilder = SSolutionBuilder()
             solution = solutionBuilder.build_solution(pth)
-            self.repo.solutions.append(solution)
+            if solution is not None:
+                self.repo.solutions.append(solution)
 
     def collect_solutions_from_jars(self, path):
         for jar_path in Path(path).rglob('*.jar'):

@@ -13,7 +13,7 @@ class SModelBuilderDefaultPersistency(SModelBuilderBase):
         self.extract_imports_and_registry(model_xml_node)
 
         for node_xml_node in model_xml_node.findall("node"):
-            root_node = self.extract_node(node_xml_node)
+            root_node = self.extract_node(model, node_xml_node)
             model.root_nodes.append(root_node)
 
         return model

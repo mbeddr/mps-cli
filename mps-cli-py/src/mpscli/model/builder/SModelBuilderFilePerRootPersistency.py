@@ -14,17 +14,17 @@ class SModelBuilderFilePerRootPersistency(SModelBuilderBase):
 
         for file in path.iterdir():
             if file.suffix == '.mpsr':
-                root_node = self.extract_root_node(file)
+                root_node = self.extract_root_node(model, file)
                 model.root_nodes.append(root_node)
 
         return model
 
-    def extract_root_node(self, mpsr_file):
+    def extract_root_node(self, model, mpsr_file):
         tree = ET.parse(mpsr_file)
         model_xml_node = tree.getroot()
         self.extract_imports_and_registry(model_xml_node)
         root_node = model_xml_node.find("node")
-        return self.extract_node(root_node)
+        return self.extract_node(model, root_node)
 
 
 

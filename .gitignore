@@ -17,3 +17,5 @@
 **/dist/
 
 gradle.properties
+**/workspace.xml
+**/misc.xml

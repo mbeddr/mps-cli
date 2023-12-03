@@ -1,4 +1,4 @@
-
+import os
 import xml.etree.ElementTree as ET
 from mpscli.model.SSolution import SSolution
 from mpscli.model.builder.SModelBuilderDefaultPersistency import SModelBuilderDefaultPersistency
@@ -13,6 +13,9 @@ class SSolutionBuilder:
         solution.path_to_solution_file = path_to_msd_file
         print("building from:", path_to_solution_dir)
         path_to_models_dir = path_to_solution_dir / 'models'
+        if not os.path.exists(path_to_models_dir):
+            print("ERROR: 'models' directory not found! No model is loaded from path: " + str(path_to_solution_dir))
+            return None
 
         for path_to_model in path_to_models_dir.iterdir():
             if path_to_model.is_dir():

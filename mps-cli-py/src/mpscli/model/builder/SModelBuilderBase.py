@@ -13,7 +13,7 @@ class SModelBuilderBase:
         self.index_2_reference_role = {}
         self.index_2_imported_model_uuid = {}
 
-    def extract_node(self, node_xml):
+    def extract_node(self, my_model, node_xml):
         root_node_id = node_xml.get("id")
         root_node_concept = self.index_2_concept[node_xml.get("concept")]
         child_role_index = node_xml.get("role")
@@ -30,12 +30,17 @@ class SModelBuilderBase:
         for ref_xml_node in node_xml.findall("ref"):
             ref_role = ref_xml_node.get("role")
             ref_to = ref_xml_node.get("to")
+            if ref_to is None:
+                ref_node_uuid = ref_xml_node.get("node")
+                s_node_ref = SNodeRef(my_model.uuid, ref_node_uuid)
+            else:
+                ref_model_index = ref_to[0 : ref_to.find(":")]
+                ref_node_uuid = ref_to[ref_to.find(":") + 1 : len(ref_to)]
+                s_node_ref = SNodeRef(self.index_2_imported_model_uuid[ref_model_index], ref_node_uuid)
             ref_name = self.index_2_reference_role[ref_role]
-            ref_model_index = ref_to[0 : ref_to.find(":")]
-            ref_node_uuid = ref_to[ref_to.find(":") + 1 : len(ref_to)]
-            s_node.references[ref_name] = SNodeRef(self.index_2_imported_model_uuid[ref_model_index], ref_node_uuid)
+            s_node.references[ref_name] = s_node_ref
         for child_node_xml in node_xml.findall("node"):
-            child_node = self.extract_node(child_node_xml)
+            child_node = self.extract_node(my_model, child_node_xml)
             s_node.children.append(child_node)
 
         return s_node
