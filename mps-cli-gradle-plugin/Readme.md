@@ -38,3 +38,9 @@ The plugin has currently the following limitations:
 - the extracted meta-information is based solely on the information saved in the model files
   - e.g. if a concept is not instantiated at all in the set of loaded models, the meta-information will not contain it at all
   - e.g. if a link of a concept is not set in any of its instances, the meta-information will not contain it at all
+
+### Demo application
+
+To quickly test the code, we packaged an application implemented in 'MpsCliDemo.groovy'. 
+To start the application run 
+`gradlew run --args PATH_TO_MPS_SOLUTIONS`

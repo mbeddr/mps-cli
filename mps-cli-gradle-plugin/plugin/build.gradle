@@ -15,6 +15,7 @@ plugins {
 
     id 'maven-publish'
     id 'com.gradle.plugin-publish' version '1.1.0'
+    id 'application'
 }
 
 // Project versions
@@ -87,6 +88,10 @@ if (System.env.CI != null && System.env.CI.toBoolean()) {
 } else {
     println "Local build detected, version will be SNAPSHOT"
     version = "$major.$minor"
+}
+
+application {
+    mainClass = 'org.mps_cli.MpsCliDemo'
 }
 
 publishing {
