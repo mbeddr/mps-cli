@@ -1,0 +1,8 @@
+<section>
+    <form>
+        <input type="text" placeholder="Filter modules ...">
+        <button class="primary" type="button">Search</button>
+    </form>
+</section>
+<app-module *ngFor="let module of modules" [module]="module"></app-module>
+<p>repository works!</p>

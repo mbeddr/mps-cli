@@ -10,7 +10,6 @@
 **/.settings/
 **/bin/
 **/.project
-**/workspace.xml
 **/*_gen*/
 **/venv/
 **/node_modules/
@@ -19,3 +18,4 @@
 gradle.properties
 **/workspace.xml
 **/misc.xml
+**/__pycache__/

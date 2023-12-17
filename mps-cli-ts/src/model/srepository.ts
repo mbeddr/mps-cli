@@ -23,6 +23,15 @@ export class SRepository {
         return res;
     }
 
+    findModuleById(moduleId : string) : SAbstractModule | undefined {
+        for(const crtModule of this.modules) {
+            if (crtModule.id === moduleId) {
+                return crtModule;
+            }
+        }
+        return undefined;
+    }
+
     findModelById(modelId : string) : SModel | undefined {
         for(const crtModule of this.modules) {
             for(const crtModel of crtModule.models) {
