@@ -4,5 +4,6 @@ const router = express.Router();
 
 router.get('/solutions', controller.getSolutions);
 router.get('/modelsOfSolution/:solutionId', controller.getModelsOfSolution);
+router.get('/rootNodesOfModel/:modelId', controller.getRootsOfModel);
 
 export = router;

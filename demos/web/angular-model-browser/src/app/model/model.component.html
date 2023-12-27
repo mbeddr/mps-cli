@@ -1,1 +1,6 @@
-<li> {{ model.name }}</li>
+<li> 
+    <p>{{ model.name }} <button (click)="showRoots()">Roots</button></p>
+    <ul>
+        <app-root-node *ngFor="let rootNode of this.model.rootNodes" [rootNode]="rootNode"></app-root-node>
+    </ul>
+</li>

@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import axios, { AxiosResponse } from 'axios';
-
 import { loadSolutions } from '../../../../../mps-cli-ts/src/file_parser'
 import { SRepository } from '../../../../../mps-cli-ts/src/model/srepository';
 import { SSolution } from '../../../../../mps-cli-ts/src/model/smodule';
 import { SModel } from '../../../../../mps-cli-ts/src/model/smodel';
+import { SRootNode } from '../../../../../mps-cli-ts/src/model/snode';
+import { removeCycles, replacer } from '../../../model-server/source/serializer_utils'
 
 var repo : SRepository;
 
@@ -33,12 +33,16 @@ const getModelsOfSolution = async (req: Request, res: Response, next: NextFuncti
 // getting root nodes of a model
 const getRootsOfModel = async (req: Request, res: Response, next: NextFunction) => {
     // get the model id from the req
-    let modelId: string = req.params.id;
-    
+    let modelId: string = req.params.modelId;    
     let model = repo.findModelById(modelId)
-    return res.status(200).json({
-        message: model?.rootNodes
+
+    let rootNodes = model?.rootNodes
+    rootNodes?.forEach(it => removeCycles(it))
+    let serializedRootNode = JSON.stringify(rootNodes, replacer)
+
+    return res.status(200).send({
+        message: serializedRootNode
     });
 };
 
-export default { getSolutions, getModelsOfSolution };
+export default { getSolutions, getModelsOfSolution, getRootsOfModel };
