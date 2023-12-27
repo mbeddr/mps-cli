@@ -1,3 +1,10 @@
-<section class="module">
-    <p class ="module-name"> {{ module.name }}</p> 
-</section>
+<li>
+    <section class="module">
+        <p class ="module-name"> {{ module.name }} 
+            <button (click)="showModels()">Show Models</button>
+        </p>    
+            <ul>
+                <app-model *ngFor="let model of this.module.models" [model]="model"></app-model>
+            </ul>
+    </section>    
+</li>
