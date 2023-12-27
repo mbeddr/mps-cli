@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha 'dist/tests/**/*.js' --recursive",
-    "build": "tsc"
+    "build": "tsc -w"
   },
   "keywords": [],
   "author": "",

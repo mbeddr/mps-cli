@@ -33,8 +33,8 @@ describe('testing parsing the root node registry', () => {
     const doc : XMLDocument = parseXml(xmlStr);               
     const rootNode : SRootNode = buildRootNode(doc, new SModel("dummy_name", "dummy_id"))
     const rootNodeRegistry = rootNode.registry
-    assert.equal(rootNodeRegistry.languages.length, 2)
-    const jetbrains_mps_lang_core_registry = rootNodeRegistry.languages[0] 
+    assert.equal(rootNodeRegistry!.languages.length, 2)
+    const jetbrains_mps_lang_core_registry = rootNodeRegistry!.languages[0] 
     assert.equal(jetbrains_mps_lang_core_registry.language.name, "jetbrains.mps.lang.core")
     assert.equal(jetbrains_mps_lang_core_registry.usedConcepts.length, 1)
 

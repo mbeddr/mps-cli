@@ -69,10 +69,10 @@ export class SNode {
 }
 
 export class SRootNode extends SNode {
-    imports : SRootNodeImports
-    registry : SRootNodeRegistry;
+    imports : SRootNodeImports | undefined;
+    registry : SRootNodeRegistry | undefined;
 
-    constructor(imports : SRootNodeImports, registry : SRootNodeRegistry, myConcept : SConcept, id : string) {
+    constructor(imports : SRootNodeImports | undefined, registry : SRootNodeRegistry | undefined, myConcept : SConcept, id : string) {
         super(myConcept, id, undefined);
         this.imports = imports
         this.registry = registry;
