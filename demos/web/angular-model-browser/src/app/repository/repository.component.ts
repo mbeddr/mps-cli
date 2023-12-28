@@ -3,11 +3,12 @@ import { ModuleComponent } from '../module/module.component';
 import { SAbstractModule, SSolution } from '../../../../../../mps-cli-ts/src/model/smodule';
 import { NgFor } from '@angular/common';
 import axios, { AxiosResponse } from 'axios';
+import { RootNodeEditorComponent } from '../root-node-editor/root-node-editor.component';
 
 @Component({
   selector: 'app-repository',
   standalone: true,
-  imports: [ ModuleComponent, NgFor ],
+  imports: [ ModuleComponent, NgFor, RootNodeEditorComponent ],
   templateUrl: './repository.component.html',
   styleUrl: './repository.component.css'
 })

@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { SRootNode } from '../../../../../../mps-cli-ts/src/model/snode';
+import { EditorService } from '../editor.service';
 
 @Component({
   selector: 'app-root-node',
@@ -9,4 +10,10 @@ import { SRootNode } from '../../../../../../mps-cli-ts/src/model/snode';
 })
 export class RootNodeComponent {
   @Input() rootNode! : SRootNode
+
+  constructor(private editorService : EditorService) {}
+
+  openRootNode() {
+    this.editorService.changeRootNode(this.rootNode)
+  }
 }

@@ -1,0 +1,22 @@
+<section *ngIf="node != undefined">
+    <p>node: {{ node!.getProperty("name") === undefined ? "" : node!.getProperty("name") }} ({{ node!.myConcept.name }})</p>
+    <ul class="px-2 list-disc list-inside">
+        <li>properties:</li>
+        <ul class="px-4 list-disc list-inside" *ngFor="let prop of propertiesKeys()">
+            <li> {{ prop[0].name }} :: {{ prop[1] }} </li>
+        </ul>
+    </ul>
+    <ul class="px-2 list-disc list-inside">
+        <li>references:</li>
+        <ul class="px-4 list-disc list-inside" *ngFor="let ref of referencesKeys()">
+            <li> {{ ref[0].name }} :: {{ ref[1] }} </li>
+        </ul>
+    </ul>
+    <ul class="px-2 list-disc list-inside">
+        <li>children: {{childrenKeys().length}}</li>
+        <ul class="px-4 list-disc list-inside" *ngFor="let ref of childrenKeys()">
+            <li> {{ ref.name }} : </li> 
+            <app-node-viewer *ngFor="let child of children(ref)" [node]="child"></app-node-viewer>
+        </ul>
+    </ul>
+</section>
