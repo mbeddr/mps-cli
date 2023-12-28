@@ -1,6 +1,6 @@
-<li> 
-    <p>{{ model.name }} <button (click)="showRoots()">Roots</button></p>
-    <ul>
+<li class="py-2"> 
+    {{ model.name }} <button class="btn" (click)="showRoots()">{{ showRootsFlag ? "Hide" : "Show" }}  Roots</button>
+    <ul *ngIf="showRootsFlag" class="px-4 list-disc list-inside">
         <app-root-node *ngFor="let rootNode of this.model.rootNodes" [rootNode]="rootNode"></app-root-node>
     </ul>
 </li>

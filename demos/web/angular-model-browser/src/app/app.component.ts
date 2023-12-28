@@ -11,7 +11,7 @@ import { RootNodeComponent } from './root-node/root-node.component';
   standalone: true,
   imports: [CommonModule, RouterOutlet, RepositoryComponent, ModuleComponent, ModelComponent, RootNodeComponent ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  //styleUrl: './app.component.css'
 })
 export class AppComponent {
   title = 'angular-model-browser';

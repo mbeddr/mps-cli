@@ -1,10 +1,5 @@
-<li>
-    <section class="module">
-        <p class ="module-name"> {{ module.name }} 
-            <button (click)="showModels()">Show Models</button>
-        </p>    
-            <ul>
-                <app-model *ngFor="let model of this.module.models" [model]="model"></app-model>
-            </ul>
-    </section>    
+<li class="px-4 py-2"> {{ module.name }} <button class="btn" (click)="showModels()">{{ showModelsFlag ? "Hide" : "Show" }} Models</button>
+    <ul *ngIf="showModelsFlag" class="px-4 list-disc list-inside">
+        <app-model *ngFor="let model of this.module.models" [model]="model"></app-model>
+    </ul>
 </li>
