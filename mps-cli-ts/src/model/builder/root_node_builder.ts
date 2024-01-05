@@ -44,32 +44,33 @@ function buildChildNodes(parentNodeElement : Element, parent : SNode, imports : 
 }
 
 function populateNodePropertiesAndLinks(nodeElement : Element, node : SNode, imports : SRootNodeImports, registry : SRootNodeRegistry, smodel : SModel) {
-    const properties = nodeElement.children
     
-    for(var property of childrenByTagName(nodeElement, "property")) {
-        const propertyRole = property.attributes.getNamedItem("role")!.value
-        const propertyValue = property.attributes.getNamedItem("value")!.value
-        const nodeProperty = registry.getPropertyByIndex(propertyRole)
-        node.addProperty(nodeProperty, propertyValue)
-    }
+    for(var child of nodeElement.children) {
+        if(child.tagName === "property") {
+            let property = child
+            const propertyRole = property.attributes.getNamedItem("role")!.value
+            const propertyValue = property.attributes.getNamedItem("value")!.value
+            const nodeProperty = registry.getPropertyByIndex(propertyRole)
+            node.addProperty(nodeProperty, propertyValue)
+        } else if(child.tagName === "ref") {
+            let ref = child
+            const refRole = ref.attributes.getNamedItem("role")!.value
 
-    for(var ref of childrenByTagName(nodeElement, "ref")) {
-        const refRole = ref.attributes.getNamedItem("role")!.value
-
-        var refNodeId : string;
-        var modelId : string;
-        if (ref.attributes.getNamedItem("to") != null) {
-            const refTo = ref.attributes.getNamedItem("to")!.value
-            const refToParts = refTo.split(":")
-            const refModel = refToParts[0]
-            refNodeId = refToParts[1]
-            modelId = imports.getModelIdByIndex(refModel)
-        } else {
-            modelId = smodel.id
-            refNodeId = ref.attributes.getNamedItem("node")!.value
+            var refNodeId : string;
+            var modelId : string;
+            if (ref.attributes.getNamedItem("to") != null) {
+                const refTo = ref.attributes.getNamedItem("to")!.value
+                const refToParts = refTo.split(":")
+                const refModel = refToParts[0]
+                refNodeId = refToParts[1]
+                modelId = imports.getModelIdByIndex(refModel)
+            } else {
+                modelId = smodel.id
+                refNodeId = ref.attributes.getNamedItem("node")!.value
+            }
+            const refLink = registry.getLinkByIndex(refRole)
+            node.addLink(refLink, new SNodeRef(modelId, refNodeId))
         }
-        const refLink = registry.getLinkByIndex(refRole)
-        node.addLink(refLink, new SNodeRef(modelId, refNodeId))
     }
 }
 
