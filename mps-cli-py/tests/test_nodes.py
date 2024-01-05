@@ -39,7 +39,9 @@ class TestNodes(TestBase):
         self.doSetUp(test_data_location)
         library_top_library_top = self.repo.find_model_by_name(library_top_library_top_model_name)
 
-        root_node = library_top_library_top.root_nodes[0]
+        root_nodes=library_top_library_top.root_nodes
+        root_nodes.sort(key=get_name)
+        root_node = root_nodes[0]
         self.assertEqual("munich_library", root_node.get_property("name"))
 
         tom_sawyer = root_node.get_children("entities")[0]
@@ -47,6 +49,8 @@ class TestNodes(TestBase):
         author_of_tom_sawyer = tom_sawyer.get_children("authors")[0].get_reference("person").resolve(self.repo)
         self.assertEqual("Mark Twain", author_of_tom_sawyer.get_property("name"))
 
+def get_name(node):
+    return node.get_property("name")
 
 if __name__ == '__main__':
     unittest.main()
