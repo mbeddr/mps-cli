@@ -1,2 +1,4 @@
 <p>Root: {{ viewedRootNode === undefined ? "No Node Selected" : viewedRootNode.getProperty("name") }}</p>
-<app-node-viewer [node]="this.viewedRootNode"></app-node-viewer>
+<ul class="px-2 list-disc list-inside">
+    <app-node-viewer [node]="this.viewedRootNode"></app-node-viewer>
+</ul>

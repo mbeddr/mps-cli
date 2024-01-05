@@ -31,11 +31,12 @@ export function loadModelsFromSolution(solutionDir : string) : SModel[] {
             res.push(smodel)
             filesOfModel.forEach(crtFile => {
                 if (crtFile != ".model") {
-                    //console.log("Reading root node from file: " + crtFile)
+                    //let startRootNodeTime = performance.now()
                     const rootNodeString = readFileSync(join(modelsDir, crtModelDir, crtFile), 'utf8')
                     const xmlDocument = parseXml(rootNodeString)
                     const rootNode : SRootNode = buildRootNode(xmlDocument, smodel)
                     smodel.rootNodes.push(rootNode)
+                    //console.log("Reading root node from file: " + crtFile + " " + (performance.now() - startRootNodeTime) + "ms")
                 }
             })
         });

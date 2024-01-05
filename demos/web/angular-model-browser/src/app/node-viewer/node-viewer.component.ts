@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { SNode } from '../../../../../../mps-cli-ts/src/model/snode';
+import { SNode, SNodeRef } from '../../../../../../mps-cli-ts/src/model/snode';
 import { NgFor, NgIf } from '@angular/common';
 import { SChildLink, SProperty, SReferenceLink } from '../../../../../../mps-cli-ts/src/model/sconcept';
 
@@ -18,7 +18,11 @@ export class NodeViewerComponent {
   }
 
   referencesKeys() {
-    return Array.from(this.node!.links).filter(it => it instanceof SReferenceLink)
+    return Array.from(this.node!.links.keys()).filter(it => it instanceof SReferenceLink)
+  }
+
+  references(link : SReferenceLink) : SNodeRef {
+    return this.node!.links.get(link)?.at(0) as SNodeRef;
   }
 
   childrenKeys() {
