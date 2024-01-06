@@ -11,14 +11,24 @@ export class SRepository {
         this.name = name;
     }
 
+    allNodes() : SNode[] {
+        const res : SNode[] = []
+        for(const crtModel of this.allModels()) {
+            for(const crtNode of crtModel.getNodes(undefined)) {
+                res.push(crtNode);
+            }
+        }
+        return res;
+    }
+
     getNodesWithPropertyAndValue(propertyName : string, propertyValue? : string) : SNode[] {
         const res : SNode[] = [];
         this.modules.forEach(module => {
             module.getNodes(undefined).forEach(node => {
                 const propVal = node.getProperty(propertyName)
-                if(typeof propertyValue === 'undefined' || propVal === propertyValue)
+                if(propVal != undefined && (typeof propertyValue === 'undefined' || propVal === propertyValue))
                     res.push(node)
-            }); 
+            });
         })
         return res;
     }
@@ -32,6 +42,14 @@ export class SRepository {
         return undefined;
     }
 
+    allModels() : SModel[] {
+        const res : SModel[] = []
+        for(const crtModule of this.modules) {
+            res.push(...crtModule.models)
+        }
+        return res;
+    }
+
     findModelById(modelId : string) : SModel | undefined {
         for(const crtModule of this.modules) {
             for(const crtModel of crtModule.models) {
@@ -42,6 +60,16 @@ export class SRepository {
         return undefined;
     }
 
+    findModelByName(modelName : string) : SModel[] {
+        const res : SModel[] = []
+        for(const crtModule of this.modules) {
+            for(const crtModel of crtModule.models) {
+                if (crtModel.name === modelName)
+                    res.push(crtModel)
+            }
+        }
+        return res;
+    }
 
 }
 

@@ -45,15 +45,21 @@ export class SNode {
 
     descendants(concept : undefined | SConcept, includeSelf : boolean) : SNode[] {
         const res : SNode[] = []
-        if (includeSelf && (concept === undefined || this.myConcept == concept)) res.push(this)
-        this.links.forEach((linkedNodes : (SNode | SNodeRef)[], link : SAbstractConceptLink) => {
-            if (link instanceof SChildLink) {
-                linkedNodes.forEach(it => {
-                    const tmp = (it as SNode).descendants(concept, true)
-                    res.push(...tmp)
-                })
-            }    
-        });
+        if (includeSelf && (concept === undefined || this.myConcept == concept)) { res.push(this) }
+
+        const linksToVisit : [SChildLink, SNode[]][] = []
+        const myChildren = Array.from(this.links.entries()).filter(it => it[0] instanceof SChildLink)
+        myChildren.forEach(it => linksToVisit.push(it as [SChildLink, SNode[]]))
+
+        while(linksToVisit.length > 0) {
+            const crtLink = linksToVisit.pop()!
+            res.push(...crtLink?.[1])
+
+            for(const childNode of crtLink?.[1]) {
+                const myChildren = Array.from(childNode.links.entries()).filter(it => it[0] instanceof SChildLink)
+                myChildren.forEach(it => linksToVisit.push(it as [SChildLink, SNode[]]))
+            }
+        }
         return res
     }
 

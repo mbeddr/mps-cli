@@ -8,6 +8,8 @@ import { buildRootNode } from './model/builder/root_node_builder';
 import { SRepository } from './model/srepository';
 import { buildSolution } from './model/builder/solution_builder';
 import { SSolution } from './model/smodule';
+import { XMLParser } from 'fast-xml-parser';
+import { buildRootNodeFast } from './model/builder/root_node_builder_fast';
 
 export function parseXml(str : string) : XMLDocument {
     const doc = new JSDOM("");
@@ -31,12 +33,25 @@ export function loadModelsFromSolution(solutionDir : string) : SModel[] {
             res.push(smodel)
             filesOfModel.forEach(crtFile => {
                 if (crtFile != ".model") {
-                    //let startRootNodeTime = performance.now()
+                    let startRootNodeTime = performance.now()
                     const rootNodeString = readFileSync(join(modelsDir, crtModelDir, crtFile), 'utf8')
-                    const xmlDocument = parseXml(rootNodeString)
-                    const rootNode : SRootNode = buildRootNode(xmlDocument, smodel)
-                    smodel.rootNodes.push(rootNode)
+                                        
+                    // >>>>>>>>>>>>> code below uses DOM parser
+                    //const xmlDocument = parseXml(rootNodeString)
+                    //const rootNode : SRootNode = buildRootNode(xmlDocument, smodel)
+                    // <<<<<<<<<<<<<
+                    
+                    // >>>>>>>>>>>>> code below uses fast_xml_parser
+                    const options = {
+                        ignoreAttributes : false
+                    };
+                    const xmlJson = new XMLParser(options).parse(rootNodeString)
                     //console.log("Reading root node from file: " + crtFile + " " + (performance.now() - startRootNodeTime) + "ms")
+                    const rootNode : SRootNode = buildRootNodeFast(xmlJson, smodel)
+                    // <<<<<<<<<<<<<
+
+                    smodel.rootNodes.push(rootNode)
+                    //console.log("Building root node from file: " + crtFile + " " + (performance.now() - startRootNodeTime) + "ms")
                 }
             })
         });
