@@ -5,8 +5,8 @@ import { SRepository } from "./srepository";
 export class SNode {
     myConcept : SConcept;
     id : string;
-    links : Map<SAbstractConceptLink, (SNode | SNodeRef)[]> = new Map<SAbstractConceptLink, (SNode | SNodeRef)[]>
-    properties : Map<SProperty, string> = new Map<SProperty, string>
+    links : [SAbstractConceptLink, (SNode | SNodeRef)[]][] = []
+    properties : [SProperty, string][] = []
     myParent : SNode | undefined;
 
     constructor(myConcept : SConcept, id : string, parent : SNode | undefined) {
@@ -16,30 +16,30 @@ export class SNode {
     }
 
     addLink(link : SAbstractConceptLink, node : SNode | SNodeRef) {
-        var nodesForLink = this.links.get(link);
-        if (nodesForLink == null) {
-            nodesForLink = [];
-            this.links.set(link, nodesForLink)
+        var nodesForLink = this.links.find(it => it[0] === link);
+        if (nodesForLink == undefined) {
+            this.links.push([link, [node]])
+        } else {
+            nodesForLink[1].push(node)
         }
-        nodesForLink.push(node)
     }
 
     allLinkedNodes() : (SNode | SNodeRef)[] {
         var res : (SNode | SNodeRef)[] = []
-        this.links.forEach((linkedNodes : (SNode | SNodeRef)[], link : SAbstractConceptLink) => {
-            res = res.concat(linkedNodes)
+        this.links.forEach(it => {
+            res = res.concat(it[1])
         })
         return res
     }
 
     addProperty(property : SProperty, value : string) {
-        this.properties.set(property, value);
+        this.properties.push([property, value]);
     }
 
     getProperty(propertyName : string) : string | undefined {
-        for(const prop of this.properties.keys())
-            if(prop.name === propertyName) 
-                return this.properties.get(prop);
+        for(const prop of this.properties)
+            if(prop[0].name === propertyName) 
+                return prop[1];
         return undefined
     }
 
@@ -48,7 +48,7 @@ export class SNode {
         if (includeSelf && (concept === undefined || this.myConcept == concept)) { res.push(this) }
 
         const linksToVisit : [SChildLink, SNode[]][] = []
-        const myChildren = Array.from(this.links.entries()).filter(it => it[0] instanceof SChildLink)
+        const myChildren = Array.from(this.links).filter(it => it[0] instanceof SChildLink)
         myChildren.forEach(it => linksToVisit.push(it as [SChildLink, SNode[]]))
 
         while(linksToVisit.length > 0) {
@@ -56,7 +56,7 @@ export class SNode {
             res.push(...crtLink?.[1])
 
             for(const childNode of crtLink?.[1]) {
-                const myChildren = Array.from(childNode.links.entries()).filter(it => it[0] instanceof SChildLink)
+                const myChildren = childNode.links.filter(it => it[0] instanceof SChildLink)
                 myChildren.forEach(it => linksToVisit.push(it as [SChildLink, SNode[]]))
             }
         }
@@ -65,9 +65,9 @@ export class SNode {
 
     getLinkedNodes(linkName : string) : (SNode | SNodeRef)[] {
         const res : (SNode | SNodeRef)[] = []
-        this.links.forEach((linkedNodes : (SNode | SNodeRef)[], link : SAbstractConceptLink) => {
-            if (link.name === linkName) {
-                res.push(...linkedNodes)
+        this.links.forEach(it => {
+            if (it[0].name === linkName) {
+                res.push(...it[1])
             }    
         });
         return res
@@ -88,10 +88,12 @@ export class SRootNode extends SNode {
 export class SNodeRef {
     modelId : string
     nodeId : string
+    resolveInfo : string;
 
-    constructor(modelId : string, nodeId : string) {
+    constructor(modelId : string, nodeId : string, resolveInfo : string) {
         this.modelId = modelId
         this.nodeId = nodeId
+        this.resolveInfo = resolveInfo
     }
 
     resolve(repo : SRepository) : SNode | undefined {
@@ -114,6 +116,14 @@ export class SRootNodeImports {
         return "undefined";
     }
 
+    getModelIndexByModelId(modelId : string) : string {
+        for(const imp of this.imports) {
+            if (imp.myModelId === modelId)
+                return imp.myModelIndex
+        }
+        return "undefined";
+    }
+
 }
 
 export class SRootNodeRegistry {
@@ -127,12 +137,33 @@ export class SRootNodeRegistry {
         return this.index2concepts.get(index)!;
     }
 
+    getIndexForConcept(concept : SConcept) : string | undefined {
+        for(const entry of this.index2concepts.entries())
+            if(entry[1] === concept)
+                return entry[0]
+        return undefined;
+    }
+
     getLinkByIndex(index : string) : SAbstractConceptLink {
         return this.index2links.get(index)!;
     }
 
-    getPropertyByIndex(index : string) : SProperty {
+    getIndexForLink(link : SAbstractConceptLink) : string | undefined {
+        for(const entry of this.index2links.entries())
+            if(entry[1] === link)
+                return entry[0]
+        return undefined;
+    }
+
+    getPropertyByRole(index : string) : SProperty {
         return this.index2properties.get(index)!;
+    }
+
+    getRoleForProperty(property : SProperty) : string | undefined {
+        for(const entry of this.index2properties.entries())
+            if(entry[1] === property)
+                return entry[0]
+        return undefined;
     }
 }
 

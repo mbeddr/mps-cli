@@ -43,13 +43,12 @@ describe('testing building of root nodes', () => {
     assert.equal(rootNode.myConcept.name, "mps.cli.landefs.people.structure.PersonsContainer")
     assert.equal(rootNode.id, "4Yb5JA31NUu")
     assert.equal(rootNode.allLinkedNodes().length, 2)
-    assert.equal(rootNode.properties.size, 1)
-    const propertiesKeysArray = Array.from(rootNode.properties.keys());
+    assert.equal(rootNode.properties.length, 1)
 
-    const nameProperty = propertiesKeysArray[0]
+    const nameProperty = rootNode.properties[0][0]
     assert.equal(nameProperty.name, "name");
     assert.equal(nameProperty.id, "1169194664001");
-    assert.equal(rootNode.properties.get(nameProperty), "_010_classical_authors");
+    assert.equal(rootNode.getProperty(nameProperty.name), "_010_classical_authors");
     assert.equal(rootNode.getProperty("name"), "_010_classical_authors");
 
     const descendants = rootNode.descendants(undefined, false)

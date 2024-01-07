@@ -1,6 +1,6 @@
 import { SModel } from "./smodel";
 import { SAbstractModule } from "./smodule";
-import { SNode } from "./snode";
+import { SNode, SRootNode } from "./snode";
 
 
 export class SRepository {
@@ -60,12 +60,25 @@ export class SRepository {
         return undefined;
     }
 
-    findModelByName(modelName : string) : SModel[] {
+    findModelsByName(modelName : string) : SModel[] {
         const res : SModel[] = []
         for(const crtModule of this.modules) {
             for(const crtModel of crtModule.models) {
                 if (crtModel.name === modelName)
                     res.push(crtModel)
+            }
+        }
+        return res;
+    }
+
+    findRootNodesByName(rootNodeName : string) : SRootNode[] {
+        const res : SRootNode[] = []
+        for(const crtModule of this.modules) {
+            for(const crtModel of crtModule.models) {
+                for(const crtRoot of crtModel.rootNodes) {
+                    if (crtRoot.getProperty("name") === rootNodeName)
+                        res.push(crtRoot)
+                }
             }
         }
         return res;

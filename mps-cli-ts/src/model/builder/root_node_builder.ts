@@ -50,11 +50,12 @@ function populateNodePropertiesAndLinks(nodeElement : Element, node : SNode, imp
             let property = child
             const propertyRole = property.attributes.getNamedItem("role")!.value
             const propertyValue = property.attributes.getNamedItem("value")!.value
-            const nodeProperty = registry.getPropertyByIndex(propertyRole)
+            const nodeProperty = registry.getPropertyByRole(propertyRole)
             node.addProperty(nodeProperty, propertyValue)
         } else if(child.tagName === "ref") {
             let ref = child
             const refRole = ref.attributes.getNamedItem("role")!.value
+            const refResolveInfo = ref.attributes.getNamedItem("resolve")!.value
 
             var refNodeId : string;
             var modelId : string;
@@ -69,7 +70,7 @@ function populateNodePropertiesAndLinks(nodeElement : Element, node : SNode, imp
                 refNodeId = ref.attributes.getNamedItem("node")!.value
             }
             const refLink = registry.getLinkByIndex(refRole)
-            node.addLink(refLink, new SNodeRef(modelId, refNodeId))
+            node.addLink(refLink, new SNodeRef(modelId, refNodeId, refResolveInfo))
         }
     }
 }

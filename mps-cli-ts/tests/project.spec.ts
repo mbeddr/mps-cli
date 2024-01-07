@@ -14,9 +14,9 @@ describe("testing building of the model from a directory with solutions", () => 
     assert.equal(repo.modules.length, 2);
 
     assert.equal(repo.getNodesWithPropertyAndValue("name").length, 11)
-    assert.equal(repo.findModelByName("mps.cli.lanuse.library_second.library_top").length, 1)
-    assert.equal(repo.findModelByName("mps.cli.lanuse.library_second.library_top")[0].rootNodes.length, 1)
-    assert.equal(repo.findModelByName("mps.cli.lanuse.library_second.library_top")[0].rootNodes[0].getProperty("name"), "_library")
+    assert.equal(repo.findModelsByName("mps.cli.lanuse.library_second.library_top").length, 1)
+    assert.equal(repo.findModelsByName("mps.cli.lanuse.library_second.library_top")[0].rootNodes.length, 1)
+    assert.equal(repo.findModelsByName("mps.cli.lanuse.library_second.library_top")[0].rootNodes[0].getProperty("name"), "_library")
     assert.equal(repo.getNodesWithPropertyAndValue("name", "_library").length, 1)
     assert.equal(repo.getNodesWithPropertyAndValue("name", "Mark Twain").length, 1)
     const markTwain = repo.getNodesWithPropertyAndValue("name", "Mark Twain")[0]

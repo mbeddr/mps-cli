@@ -30,4 +30,12 @@ export class SModel {
         return undefined
     }
 
+    findRootNodesByName(rootNodeName : string) : SRootNode[] {
+        const res : SRootNode[] = []
+        for(const crtNode of this.rootNodes) {
+            if(crtNode.getProperty("name") === rootNodeName)
+                res.push(crtNode)
+        }
+        return res
+    }
 }

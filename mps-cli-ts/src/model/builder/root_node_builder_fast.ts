@@ -48,12 +48,13 @@ function populateNodePropertiesAndLinks(node_json_element : any, node : SNode, i
     for(var property_json_element of  ensure_array(node_json_element["property"])) {
         const propertyRole = property_json_element["@_role"] as string
         const propertyValue = property_json_element["@_value"] as string
-        const nodeProperty = registry.getPropertyByIndex(propertyRole)
+        const nodeProperty = registry.getPropertyByRole(propertyRole)
         node.addProperty(nodeProperty, propertyValue)
     }
 
     for(var ref_json_element of  ensure_array(node_json_element["ref"])) {
         const refRole = ref_json_element["@_role"] as string
+        const refResolveInfo = ref_json_element["@_resolve"] as string
 
         var refNodeId : string;
         var modelId : string;
@@ -68,7 +69,7 @@ function populateNodePropertiesAndLinks(node_json_element : any, node : SNode, i
             refNodeId = ref_json_element["@_node"] as string
         }
         const refLink = registry.getLinkByIndex(refRole)
-        node.addLink(refLink, new SNodeRef(modelId, refNodeId))
+        node.addLink(refLink, new SNodeRef(modelId, refNodeId, refResolveInfo))
     }
 
 }
@@ -81,7 +82,7 @@ function buildRootNodeImports(imports_json_element : JsonElement) : SRootNodeImp
         const modelRef = model_import_json_element["@_ref"] as string
         const splits = modelRef.split("(")
         const modelId = splits[0]
-        const modelName = splits[1].substring(0, splits[1].length)
+        const modelName = splits[1].substring(0, splits[1].length - 1)
         const implicit = model_import_json_element["@_implicit"] as string
 
         imports.imports.push(new SModelImport(importIndex, modelId, modelName, implicit === "true"))
@@ -103,7 +104,7 @@ function buildRootNodeRegistry(registry_json_element : JsonElement) : SRootNodeR
             const conceptId = registry_language_concept_json_element["@_id"] as string
             const conceptName = registry_language_concept_json_element["@_name"] as string
             
-            const conceptFlag = registry_language_concept_json_element["@_flag"] as string
+            const conceptFlag = registry_language_concept_json_element["@_flags"] as string
             const conceptIndex = registry_language_concept_json_element["@_index"] as string
             
             var myConcept = SLanguageBuilder.getConcept(myLanguage, conceptName, conceptId)
