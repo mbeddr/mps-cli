@@ -31,11 +31,24 @@ class SRepository:
                     return concept
         return None
 
+    def get_concepts(self):
+        res = []
+        for lan in self.languages:
+            res.extend(lan.concepts)
+        return res
+
     def get_nodes(self):
         res = []
         for sol in self.solutions:
             for mod in sol.models:
                 res.extend(mod.get_nodes())
+        return res
+
+    def get_nodes_of_concept(self, concept_name):
+        res = []
+        for node in self.get_nodes():
+            if node.concept.name == concept_name:
+                res.append(node)
         return res
 
     def get_model_by_uuid(self, uuid):
