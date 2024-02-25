@@ -25,7 +25,7 @@ function replacer(key : any, value : any) {
   function removeCycles(node : SNode) : void {
     node.myParent = undefined;
     node.links.forEach((value, key) => {
-      value.forEach(it => {
+      value[1].forEach(it => {
         if (it instanceof SNode) {
           removeCycles(it);
         }
@@ -41,13 +41,13 @@ function replacer(key : any, value : any) {
   }
 
   function populateProperNode(node : SNode, properNode : SNode) {
-    node.properties.forEach((value, key) => { properNode.properties.set(new SProperty(key.name, key.id), value) });
+    node.properties.forEach(([prop, key], idx) => { properNode.properties.push([new SProperty(prop.name, prop.id), key]) });
 
-    node.links.forEach((value, key) => {
+    node.links.forEach(([key, value], idx) => {
       if ((value[0] as SNodeRef).modelId != undefined) {
         // we have reference links
-        let newValues = value.map(it => { return new SNodeRef((it as SNodeRef).modelId, (it as SNodeRef).nodeId)})
-        properNode.links.set(new SReferenceLink(key.name, key.id), newValues)
+        let newValues = value.map(it => { return new SNodeRef((it as SNodeRef).modelId, (it as SNodeRef).nodeId, (it as SNodeRef).resolveInfo) })
+        properNode.links.push([new SReferenceLink(key.name, key.id), newValues])
       } else {
         // we have containment links
         let newChildren : SNode[] = value.map(it => {
@@ -56,7 +56,7 @@ function replacer(key : any, value : any) {
           populateProperNode(fakeNode, newNode)
           return newNode
         })
-        properNode.links.set(new SChildLink(key.name, key.id), newChildren)
+        properNode.links.push([new SChildLink(key.name, key.id), newChildren])
       }
     });
   }

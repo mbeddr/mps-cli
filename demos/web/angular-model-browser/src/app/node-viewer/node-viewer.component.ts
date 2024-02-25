@@ -18,19 +18,19 @@ export class NodeViewerComponent {
   }
 
   referencesKeys() {
-    return Array.from(this.node!.links.keys()).filter(it => it instanceof SReferenceLink)
+    return Array.from(this.node!.allLinks()).filter(it => it instanceof SReferenceLink)
   }
 
   references(link : SReferenceLink) : SNodeRef {
-    return this.node!.links.get(link)?.at(0) as SNodeRef;
+    return this.node!.getLinkedNodes(link.name)?.at(0) as SNodeRef;
   }
 
   childrenKeys() {
-    return Array.from(this.node!.links.keys()).filter(it => it instanceof SChildLink)
+    return Array.from(this.node!.allLinks()).filter(it => it instanceof SChildLink)
   }
 
   children(link : SChildLink) : SNode[] {
-    let myChildren = this.node?.links.get(link)!;
+    let myChildren = this.node?.getLinkedNodes(link.name)!;
     return myChildren.filter(it => it instanceof SNode) as SNode[]
   }
 

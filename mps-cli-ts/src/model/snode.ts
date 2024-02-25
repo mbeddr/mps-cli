@@ -32,6 +32,10 @@ export class SNode {
         return res
     }
 
+    allLinks() : SAbstractConceptLink[] {
+        return this.links.map(it => it[0])
+    }
+
     addProperty(property : SProperty, value : string) {
         this.properties.push([property, value]);
     }
