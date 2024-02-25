@@ -20,3 +20,6 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/mbeddr/mps-cli"
 "Bug Tracker" = "https://github.com/mbeddr/mps-cli/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mpscli"]
