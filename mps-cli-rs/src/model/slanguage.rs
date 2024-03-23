@@ -1,15 +1,13 @@
-use uuid::Uuid;
-
 use crate::model::sconcept::SConcept;
 
 pub struct SLanguage {
     name: String,
-    uuid: Uuid,
+    uuid: String,
     concepts: Vec<SConcept>,
 }
 
 impl SLanguage {
-    pub fn new(name: String, uuid: Uuid) -> Self {
+    pub fn new(name: String, uuid: String) -> Self {
         SLanguage {
             name,
             uuid,
@@ -19,6 +17,10 @@ impl SLanguage {
 
     pub fn find_concept_by_name(&self, concept_name: &str) -> Option<&SConcept> {
         self.concepts.iter().find(|&concept| concept.name.eq(concept_name))
+    }
+
+    pub fn add_concept(&mut self, concept: SConcept) {
+        self.concepts.push(concept);
     }
 }
 
@@ -32,11 +34,11 @@ mod tests {
     #[test]
     fn test_find_concept_by_name() {
         // given
-        let mut slanguage = SLanguage::new("FirstLanguage".to_string(), Uuid::new_v4());
+        let mut slanguage = SLanguage::new("FirstLanguage".to_string(), Uuid::new_v4().to_string());
         let first_concept_name = "FirstConcept";
-        let first_concept: SConcept = SConcept::new(first_concept_name.to_string(), Uuid::new_v4());
+        let first_concept: SConcept = SConcept::new(&first_concept_name.to_string(), Uuid::new_v4().to_string());
         let second_concept_name = "SecondConcept";
-        let second_concept = SConcept::new(second_concept_name.to_string(), Uuid::new_v4());
+        let second_concept = SConcept::new(&second_concept_name.to_string(), Uuid::new_v4().to_string());
         slanguage.concepts.push(first_concept);
         slanguage.concepts.push(second_concept);
 

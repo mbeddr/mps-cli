@@ -8,7 +8,7 @@ use crate::model::snode::SNode;
 use crate::model::ssolution::SSolution;
 
 pub struct SRepository<'a> {
-    solutions: Vec<SSolution<'a>>,
+    pub solutions: Vec<SSolution<'a>>,
     languages: Vec<SLanguage>,
 
     models: Vec<&'a SModel<'a>>,
@@ -34,8 +34,8 @@ impl<'a> SRepository<'a> {
         return found_solution;
     }
 
-    pub fn get_model_by_uuid(&self, uuid: &Uuid) -> Option<&SModel> {
-        None
+    pub fn get_model_by_uuid(&self, uuid: &String) -> Option<&&SModel> {
+        self.models.iter().find(|&model| model.uuid.eq(uuid))
     }
 
     fn find_model_by_name(&self, name: &String) -> Option<&SModel> {

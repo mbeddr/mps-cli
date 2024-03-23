@@ -1,15 +1,13 @@
-use uuid::Uuid;
-
 use crate::model::snode::SNode;
 use crate::model::srepository::SRepository;
 
 struct SNodeRef {
-    model_uuid: Uuid,
-    node_uuid: Uuid,
+    model_uuid: String,
+    node_uuid: String,
 }
 
 impl SNodeRef {
-    pub fn new(model_uuid: Uuid, node_uuid: Uuid) -> Self {
+    pub fn new(model_uuid: String, node_uuid: String) -> Self {
         SNodeRef {
             model_uuid,
             node_uuid,

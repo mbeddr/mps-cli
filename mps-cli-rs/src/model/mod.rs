@@ -1,7 +1,7 @@
 pub mod sconcept;
-mod slanguage;
-mod smodel;
-mod snode;
+pub mod slanguage;
+pub mod smodel;
+pub mod snode;
 mod snoderef;
-mod ssolution;
-mod srepository;
+pub mod ssolution;
+pub mod srepository;

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="py: restructured to enable PIP packaging">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -50,6 +53,7 @@
   <component name="RunManager" selected="Python tests.Unittests for test_modules_and_models.TestModulesAndModels">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -71,6 +75,7 @@
     </configuration>
     <configuration name="Unittests for test_language_extraction.TestLanguageExtraction" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
@@ -85,6 +90,7 @@
     </configuration>
     <configuration name="Unittests for test_modules_and_models.TestModulesAndModels" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
@@ -99,6 +105,7 @@
     </configuration>
     <configuration name="Unittests for test_modules_and_models.TestModulesAndModels.test_build_modules_and_models" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
@@ -113,6 +120,7 @@
     </configuration>
     <configuration name="Unittests for test_nodes.TestNodes" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
@@ -127,6 +135,7 @@
     </configuration>
     <configuration name="Unittests in tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
@@ -213,7 +222,6 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="python.cli: added support for handling default persistency" />

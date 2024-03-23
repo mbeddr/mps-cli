@@ -5,7 +5,7 @@ use uuid::Uuid;
 #[derive(Debug, PartialEq)]
 pub struct SConcept {
     pub(crate) name: String,
-    uuid: Uuid,
+    uuid: String,
     pub(crate) properties: HashMap<String, SProperty>,
     containment_links: HashMap<String, SContainmentLink>,
     reference_links: HashMap<String, SReferenceLink>,
@@ -30,9 +30,9 @@ pub struct SReferenceLink {
 }
 
 impl SConcept {
-    pub fn new(name: String, uuid: Uuid) -> Self {
+    pub fn new(name: &String, uuid: String) -> Self {
         SConcept {
-            name,
+            name: name.to_string(),
             uuid,
             properties: HashMap::new(),
             containment_links: HashMap::new(),
@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn test_sconcept() {
         // given
-        let mut sconcept: SConcept = SConcept::new("FirstConcept".to_string(), Uuid::new_v4());
+        let mut sconcept: SConcept = SConcept::new(&"FirstConcept".to_string(), Uuid::new_v4().to_string());
         let sproperty = SProperty::new("FirstProperty".to_string(), Uuid::new_v4());
         let reference_link = SReferenceLink::new("FirstLink".to_string(), Uuid::new_v4());
         let containment_link_1 = SContainmentLink::new("FirstContainment".to_string(), Uuid::new_v4());

@@ -1,25 +1,23 @@
-use uuid::Uuid;
-
 use crate::model::snode::SNode;
 
 pub struct SModel<'a> {
-    name: String,
-    uuid: Uuid,
-    root_nodes: Vec<SNode<'a>>,
-    path_to_model_file: String,
-    is_do_not_generate: bool,
-    is_file_per_root_persistency: bool,
+    pub name: String,
+    pub uuid: String,
+    pub root_nodes: Vec<SNode<'a>>,
+    pub path_to_model_file: String,
+    pub is_do_not_generate: bool,
+    pub is_file_per_root_persistency: bool,
 }
 
 impl<'a> SModel<'a> {
-    pub fn new(name: String, uuid: Uuid) -> Self {
+    pub fn new(name: String, uuid: String, path_to_model_file: String, is_do_not_generate: bool, is_file_per_root_persistency: bool) -> Self {
         SModel {
             name,
             uuid,
             root_nodes: vec![],
-            path_to_model_file: "".to_string(),
-            is_do_not_generate: false,
-            is_file_per_root_persistency: true,
+            path_to_model_file,
+            is_do_not_generate,
+            is_file_per_root_persistency,
         }
     }
 
@@ -32,7 +30,7 @@ impl<'a> SModel<'a> {
         return nodes;
     }
 
-    pub fn get_node_by_uuid(&self, uuid: &Uuid) -> Option<&SNode> {
+    pub fn get_node_by_uuid(&self, uuid: &String) -> Option<&SNode> {
         self.get_nodes().iter().find(|&node| node.uuid.eq(uuid)).copied()
     }
 }

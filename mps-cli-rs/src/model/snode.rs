@@ -1,11 +1,9 @@
 use std::collections::HashMap;
 
-use uuid::Uuid;
-
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
 
 pub struct SNode<'a> {
-    pub(crate) uuid: Uuid,
+    pub(crate) uuid: String,
     concept: &'a SConcept,
     role_in_parent: Option<String>,
     properties: HashMap<&'a SProperty, String>,
@@ -15,7 +13,7 @@ pub struct SNode<'a> {
 }
 
 impl<'a> SNode<'a> {
-    pub fn new(uuid: Uuid, concept: &'a SConcept, role_in_parent: Option<String>) -> Self {
+    pub fn new(uuid: String, concept: &'a SConcept, role_in_parent: Option<String>) -> Self {
         SNode {
             uuid,
             concept,
@@ -43,7 +41,7 @@ impl<'a> SNode<'a> {
     }
 
     pub fn get_reference(&self, name: &String) -> Option<&&SNode> {
-        return match self.references.keys().find(|&&refLink| refLink.name.eq(name)) {
+        return match self.references.keys().find(|&&ref_link| ref_link.name.eq(name)) {
             None => None,
             Some(reference_link) => self.references.get(reference_link)
         };

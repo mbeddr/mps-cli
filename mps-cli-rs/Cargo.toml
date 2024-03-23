@@ -1,6 +1,5 @@
-workspace = { members = ["src/builder"] }
 [package]
-name = "mps-cli-rs"
+name = "mps_cli_rs"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 uuid = { version = "1.8.0", features = ["v4"] }
+quick-xml = { version = "0.31.0", features = ["serialize"] }
+serde = { version = "1.0.197", features = ["derive"] }
+walkdir = "2.5.0"
