@@ -17,6 +17,7 @@ This Gradle plugin contributes the following tasks:
     - `modifiedFiles` - list of paths to modified files - models, modules, root nodes, etc. (either set this input or 'referenceBranchName')
     - `referenceBranchName` - the current git working tree and the commits since branching off this branch will be considered (either set this input or 'modifiedFiles')
   - Outputs:
+    - `affectedModels` - list of models affected by modified files. If any of the modified files were moved or deleted then this is `null`.
     - `affectedSolutions` - list of modules affected by the modified files. This contains the modules of the modified models and the modules dependent on them
     - `affectedSolutionsAndUpstreamDependencies` - list of affected modules and all their dependencies
 

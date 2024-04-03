@@ -7,6 +7,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.mps_cli.cone_of_influence.ConeOfInfluenceComputer
 import org.mps_cli.cone_of_influence.GitFacade
+import org.mps_cli.model.SModel
 import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.builder.BuildingDepthEnum
 import org.mps_cli.model.builder.SModulesRepositoryBuilder
@@ -27,6 +28,9 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
     @Optional
     @Input
     List<String> modifiedFiles
+
+    @Internal
+    List<SModel> affectedModels
 
     @Internal
     List<SModuleBase> affectedSolutions
@@ -54,7 +58,7 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
         def repository = builder.buildAll(sourcesDir)
         def coiComputer = new ConeOfInfluenceComputer(repository: repository)
 
-        (affectedSolutions, affectedSolutionsAndUpstreamDependencies) =
+        (affectedModels, affectedSolutions, affectedSolutionsAndUpstreamDependencies) =
                 coiComputer.computeConeOfInfluence(gitRepoRootLocation, allModifiedFiles)
     }
 }
