@@ -12,8 +12,6 @@ import org.mps_cli.model.SModuleBase
 import org.mps_cli.model.builder.BuildingDepthEnum
 import org.mps_cli.model.builder.SModulesRepositoryBuilder
 
-import javax.annotation.Nullable
-
 class ConeOfInfluenceComputerTask extends DefaultTask {
 
     @Input
@@ -31,7 +29,6 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
     @Input
     List<String> modifiedFiles
 
-    @Nullable
     @Internal
     List<SModel> affectedModels
 
