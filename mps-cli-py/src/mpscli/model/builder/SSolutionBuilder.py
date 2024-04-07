@@ -7,7 +7,7 @@ from mpscli.model.builder.SModelBuilderFilePerRootPersistency import SModelBuild
 
 class SSolutionBuilder:
 
-    def build_solution(self, path_to_msd_file):
+    def build_solution(self, path_to_msd_file, file_filter=None):
         solution = self.extract_solution_core_info(path_to_msd_file)
         path_to_solution_dir = path_to_msd_file.parent
         solution.path_to_solution_file = path_to_msd_file
@@ -19,7 +19,7 @@ class SSolutionBuilder:
 
         for path_to_model in path_to_models_dir.iterdir():
             if path_to_model.is_dir():
-                builder = SModelBuilderFilePerRootPersistency()
+                builder = SModelBuilderFilePerRootPersistency(file_filter)
             else:
                 builder = SModelBuilderDefaultPersistency()
             model = builder.build(path_to_model)

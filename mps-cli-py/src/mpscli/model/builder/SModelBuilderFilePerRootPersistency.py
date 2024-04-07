@@ -1,9 +1,21 @@
-
 from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
 import xml.etree.ElementTree as ET
 
 
+class MpsrFileFiler:
+
+    def is_mpsr_file_needed(self, file):
+        return True
+
+
 class SModelBuilderFilePerRootPersistency(SModelBuilderBase):
+
+    def __init__(self, mpsr_file_filter=None):
+        if mpsr_file_filter is None:
+            self.mpsr_file_filter = MpsrFileFiler()
+        else:
+            self.mpsr_file_filter = mpsr_file_filter
+        super().__init__()
 
     def build(self, path):
         model_file = path / '.model'
@@ -13,7 +25,7 @@ class SModelBuilderFilePerRootPersistency(SModelBuilderBase):
         model.path_to_model_file = model_file
 
         for file in path.iterdir():
-            if file.suffix == '.mpsr':
+            if file.suffix == '.mpsr' and self.mpsr_file_filter.is_mpsr_file_needed(file):
                 root_node = self.extract_root_node(model, file)
                 model.root_nodes.append(root_node)
 
@@ -25,6 +37,3 @@ class SModelBuilderFilePerRootPersistency(SModelBuilderBase):
         self.extract_imports_and_registry(model_xml_node)
         root_node = model_xml_node.find("node")
         return self.extract_node(model, root_node)
-
-
-
