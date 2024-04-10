@@ -10,7 +10,7 @@ class SNode:
         self.children = []
 
     def get_property(self, name):
-        return self.properties[name]
+        return self.properties.get(name)
 
     def get_reference(self, name):
         return self.references[name]
