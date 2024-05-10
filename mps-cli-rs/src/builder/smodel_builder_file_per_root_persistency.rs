@@ -50,6 +50,7 @@ impl SModelBuilderFilePerRootPersistency {
     pub(crate) fn new() -> Self {
         SModelBuilderFilePerRootPersistency {}
     }
+    
     pub(crate) fn build_model(&mut self, path_to_model: PathBuf) -> SModel {
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
@@ -64,10 +65,12 @@ impl SModelBuilderFilePerRootPersistency {
             }
             return false;
         });
-        mpsr_files.into_iter().for_each(|mpsr_file| {
-            let root_node = self.build_root_node_from_file(mpsr_file.unwrap());
-            model.root_nodes.push(root_node);
+
+        let roots = mpsr_files.into_iter().map(|mpsr_file| {
+            let file = mpsr_file.unwrap();
+            self.build_root_node_from_file(file)            
         });
+        model.root_nodes.extend(roots);
 
         return model;
     }
@@ -112,7 +115,7 @@ impl SModelBuilderFilePerRootPersistency {
         return SModel::new(name, uuid, convert_to_string(&path_to_model), is_do_not_generate, true);
     }
 
-    fn build_root_node_from_file(&mut self, dir_entry: DirEntry) -> SNode {
+    fn build_root_node_from_file(&self, dir_entry: DirEntry) -> SNode {
         let mut mpsr_reader = Reader::from_file(dir_entry.path()).unwrap();
         let mut buf = vec![];
         let mut root_node = None;
@@ -134,7 +137,7 @@ impl SModelBuilderFilePerRootPersistency {
         return root_node.unwrap();
     }
 
-    fn parse_imports(&mut self, mpsr_reader: &mut Reader<BufReader<File>>) {
+    fn parse_imports(&self, mpsr_reader: &mut Reader<BufReader<File>>) {
         let mut child_buf = vec![];
         loop {
             match mpsr_reader.read_event_into(&mut child_buf) {
@@ -161,7 +164,7 @@ impl SModelBuilderFilePerRootPersistency {
         }
     }
 
-    fn parse_registry(&mut self, mpsr_reader: &mut Reader<BufReader<File>>) {
+    fn parse_registry(&self, mpsr_reader: &mut Reader<BufReader<File>>) {
         let mut child_buf = vec![];
         loop {
             match mpsr_reader.read_event_into(&mut child_buf) {
@@ -190,7 +193,7 @@ impl SModelBuilderFilePerRootPersistency {
         }
     }
 
-    fn parse_concept(&mut self, mpsr_reader: &mut Reader<BufReader<File>>, language_id: &String, language_name: &String) {
+    fn parse_concept(&self, mpsr_reader: &mut Reader<BufReader<File>>, language_id: &String, language_name: &String) {
         let mut concept_buf = vec![];
 
         loop {
