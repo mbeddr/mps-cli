@@ -76,8 +76,9 @@ impl SModelBuilderFilePerRootPersistency {
         let mut roots = vec!();
         for mpsr_file in mpsr_files.into_iter() {
             let file = mpsr_file.unwrap();
-            let r = Self::build_root_node_from_file(file, &opt, language_builder, model_builder_cache);
-            roots.push(r.unwrap());
+            if let Some(r) = Self::build_root_node_from_file(file, &opt, language_builder, model_builder_cache) {
+                roots.push(r);
+            }
         };
         model.root_nodes.extend(roots);
 
@@ -90,7 +91,7 @@ impl SModelBuilderFilePerRootPersistency {
         let file = std::fs::File::open(path_to_model_file.clone());  
         let mut s = String::new();
         file.unwrap().read_to_string(&mut s);
-        let parse_res = roxmltree::Document::parse_with_options(&s, *opt);
+        let parse_res = roxmltree::Document::parse(&s);
         let document = parse_res.unwrap();
 
         let model_element = document.root_element();
@@ -114,19 +115,20 @@ impl SModelBuilderFilePerRootPersistency {
     }
 
     fn build_root_node_from_file<'a>(dir_entry: DirEntry, opt : &ParsingOptions, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Option<Rc<SNode<'a>>> {        
-        println!("building root node from {}", dir_entry.path().as_os_str().to_str().unwrap());
+        //println!("building root node from {}", dir_entry.path().as_os_str().to_str().unwrap());
         let file = std::fs::File::open(dir_entry.path().as_os_str());  
 
         let mut s = String::new();
         file.unwrap().read_to_string(&mut s);
         let parse_res = roxmltree::Document::parse_with_options(&s, *opt);
+        
         let document = parse_res.unwrap();
         Self::parse_imports(&document, model_builder_cache);
         Self::parse_registry(&document, language_builder, model_builder_cache);
         
         let node = document.root_element().children().find(|it| it.tag_name().name() == "node");
         let mut parent: Option<Rc<SNode>> = None;
-        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, &model_builder_cache))
+        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, &model_builder_cache))      
     }
 
     fn parse_imports(document: &Document, model_builder_cache : &SModelBuilderCache) {
@@ -228,7 +230,7 @@ impl SModelBuilderFilePerRootPersistency {
         for ref_ in refs {
             let role = ref_.attributes().find(|a| a.name() == "role").unwrap().value();
             let to = ref_.attributes().find(|a| a.name() == "to");
-            let to = if let Some(t) = to { 
+            let to: &str = if let Some(t) = to { 
                 t.value() 
             } else {
                 ref_.attributes().find(|a| a.name() == "node").unwrap().value()
