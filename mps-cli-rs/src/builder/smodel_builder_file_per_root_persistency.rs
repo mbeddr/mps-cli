@@ -1,46 +1,45 @@
+use std::borrow::{Borrow, BorrowMut};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
+use std::ops::DerefMut;
 use std::path::PathBuf;
 use std::sync::Mutex;
+use std::io::Read;
+use roxmltree::{Document, Node};
+use std::rc::Rc;
+use std::cell::RefCell;
 
-use quick_xml::events::Event;
+use quick_xml::events::{attributes, Event};
 use quick_xml::Reader;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::builder::builder_helper::{convert_to_string, get_value_of_attribute_with_key, get_values_of_attributes_with_keys, panic_read_file, panic_unexpected_eof_read_file};
-use crate::builder::slanguage_builder::SLANGUAGE_BUILDER;
-use crate::model::sconcept::{SConcept, SProperty};
+use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
 use crate::model::smodel::SModel;
 use crate::model::snode::SNode;
+use roxmltree::ParsingOptions;
+use super::slanguage_builder::SLanguageBuilder;
 
-static SMODEL_BUILDER_CACHE: Mutex<SModelBuilderCache> = Mutex::new(SModelBuilderCache::new());
 
-pub struct SModelBuilderCache<'a> {
-    pub index_2_concept: Option<HashMap<String, &'a SConcept>>,
-    pub index_2_property: Option<HashMap<String, &'a SProperty>>,
-    pub index_2_imported_model_uuid: Option<HashMap<String, String>>,
+#[derive(Clone)]
+pub struct SModelBuilderCache {
+    pub index_2_concept: RefCell<HashMap<String, Rc<SConcept>>>,
+    pub index_2_property: RefCell<HashMap<String, Rc<SProperty>>>,
+    pub index_2_containment_link: RefCell<HashMap<String, Rc<SContainmentLink>>>,
+    pub index_2_reference_link: RefCell<HashMap<String, Rc<SReferenceLink>>>,
+    pub index_2_imported_model_uuid: RefCell<HashMap<String, String>>,
 }
 
-impl<'a> SModelBuilderCache<'a> {
-    const fn new() -> Self {
+impl SModelBuilderCache {
+    pub fn new() -> Self {
         SModelBuilderCache {
-            index_2_concept: None,
-            index_2_property: None,
-            index_2_imported_model_uuid: None,
+            index_2_concept: RefCell::new(HashMap::new()),
+            index_2_property: RefCell::new(HashMap::new()),
+            index_2_containment_link : RefCell::new(HashMap::new()),
+            index_2_reference_link : RefCell::new(HashMap::new()),
+            index_2_imported_model_uuid: RefCell::new(HashMap::new()),
         }
-    }
-
-    fn get_index_2_concept(&mut self) -> &mut HashMap<String, &'a SConcept> {
-        self.index_2_concept.get_or_insert(HashMap::new())
-    }
-
-    fn get_index_2_property(&mut self) -> &mut HashMap<String, &'a SProperty> {
-        self.index_2_property.get_or_insert(HashMap::new())
-    }
-
-    fn get_index_2_imported_model_uuid(&mut self) -> &mut HashMap<String, String> {
-        self.index_2_imported_model_uuid.get_or_insert(HashMap::new())
     }
 }
 
@@ -50,11 +49,19 @@ impl SModelBuilderFilePerRootPersistency {
     pub(crate) fn new() -> Self {
         SModelBuilderFilePerRootPersistency {}
     }
-    
-    pub(crate) fn build_model(&mut self, path_to_model: PathBuf) -> SModel {
+
+    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> SModel<'a> {
+        let opt = roxmltree::ParsingOptions {
+            allow_dtd: true,
+            ..roxmltree::ParsingOptions::default()
+        };
+        
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
-        let mut model: SModel = Self::extract_model_core_info(model_file);
+
+        let path_to_model_file = model_file.to_str().unwrap().to_string();
+
+        let mut model: SModel = Self::extract_model_core_info(model_file, &opt);
 
         let mpsr_file_walker = WalkDir::new(path_to_model).min_depth(1).max_depth(1);
         let mpsr_files = mpsr_file_walker.into_iter().filter(|entry| {
@@ -66,181 +73,209 @@ impl SModelBuilderFilePerRootPersistency {
             return false;
         });
 
-        let roots = mpsr_files.into_iter().map(|mpsr_file| {
+        let mut roots = vec!();
+        for mpsr_file in mpsr_files.into_iter() {
             let file = mpsr_file.unwrap();
-            self.build_root_node_from_file(file)            
-        });
+            let r = Self::build_root_node_from_file(file, &opt, language_builder, model_builder_cache);
+            roots.push(r.unwrap());
+        };
         model.root_nodes.extend(roots);
 
         return model;
     }
 
-    fn extract_model_core_info<'a>(path_to_model: PathBuf) -> SModel<'a> {
-        let mut model_file_reader = Reader::from_file(path_to_model.clone()).unwrap();
-        let mut name = String::new();
-        let mut uuid = String::new();
+    fn extract_model_core_info<'a>(path_to_model: PathBuf, opt : &ParsingOptions) -> SModel<'a> {
+        let path_to_model_file = path_to_model.to_str().unwrap().to_string();        
+
+        let file = std::fs::File::open(path_to_model_file.clone());  
+        let mut s = String::new();
+        file.unwrap().read_to_string(&mut s);
+        let parse_res = roxmltree::Document::parse_with_options(&s, *opt);
+        let document = parse_res.unwrap();
+
+        let model_element = document.root_element();
+        let uuid_and_name = model_element.attributes().find(|a| a.name() == "ref").unwrap().value().to_string();
+
+        let left_parens_pos = uuid_and_name.find('(').unwrap();
+        let right_parens_pos = uuid_and_name.find(')').unwrap();
+        let uuid = uuid_and_name[0..left_parens_pos].to_string();
+        let name = uuid_and_name[left_parens_pos + 1..right_parens_pos].to_string();
+
         let mut is_do_not_generate = false;
-        let mut buf = vec![];
-        let mut model_found = false;
-        let mut do_not_gen_found = false;
-        while !(do_not_gen_found && model_found) {
-            match model_file_reader.read_event_into(&mut buf) {
-                Ok(Event::Start(ref e)) => {
-                    match e.name().as_ref() {
-                        b"model" => {
-                            let value = get_value_of_attribute_with_key(e.attributes(), "ref").unwrap();
-                            let index = value.find("(").unwrap();
-                            uuid = value[..index].to_string();
-                            name = value[index + 1..value.len() - 1].to_string();
-                            model_found = true;
-                        }
-                        _ => {}
-                    }
-                }
-                Ok(Event::Empty(ref e)) => {
-                    if e.name().as_ref() == b"attribute" {
-                        let attribute_name = get_value_of_attribute_with_key(e.attributes(), "name");
-                        if attribute_name.is_some() && attribute_name.unwrap().eq("doNotGenerate") {
-                            let value = get_value_of_attribute_with_key(e.attributes(), "value").unwrap();
-                            is_do_not_generate = value.eq("true");
-                            do_not_gen_found = true;
-                        }
-                    }
-                }
-                Ok(Event::Eof) => break,
-                Err(e) => panic_read_file(&mut model_file_reader, e),
-                _ => {}
-            }
+        let model_attributes_elements = model_element.children().filter(|c| (c.tag_name().name().to_string() == "attribute"));
+        let do_not_generate_attribute = (model_attributes_elements.clone()).find(|a| a.attributes().find(|aa| aa.value() == "doNotGenerate").is_some());
+        if let Some(do_not_generate_attribute) = do_not_generate_attribute {
+            let do_not_generate_str = do_not_generate_attribute.attributes().find(|aa| aa.name() == "value").unwrap().value();        
+            if do_not_generate_str == "true" { is_do_not_generate = true; }                                                        
         }
-        return SModel::new(name, uuid, convert_to_string(&path_to_model), is_do_not_generate, true);
+        
+        
+        return SModel::new(name, uuid, path_to_model_file, is_do_not_generate, true);
     }
 
-    fn build_root_node_from_file(&self, dir_entry: DirEntry) -> SNode {
-        let mut mpsr_reader = Reader::from_file(dir_entry.path()).unwrap();
-        let mut buf = vec![];
-        let mut root_node = None;
-        loop {
-            match mpsr_reader.read_event_into(&mut buf) {
-                Ok(Event::Start(ref e)) => match e.name().as_ref() {
-                    b"imports" => self.parse_imports(&mut mpsr_reader),
-                    b"registry" => self.parse_registry(&mut mpsr_reader),
-                    b"node" => {
-                        //root_node = Some(parse_node(&mpsr_reader, e, &mut buf))
-                    }
-                    _ => {}
-                },
-                Ok(Event::Eof) => break,
-                Err(e) => panic_read_file(&mut mpsr_reader, e),
-                _ => {}
-            }
-        }
-        return root_node.unwrap();
+    fn build_root_node_from_file<'a>(dir_entry: DirEntry, opt : &ParsingOptions, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Option<Rc<SNode<'a>>> {        
+        println!("building root node from {}", dir_entry.path().as_os_str().to_str().unwrap());
+        let file = std::fs::File::open(dir_entry.path().as_os_str());  
+
+        let mut s = String::new();
+        file.unwrap().read_to_string(&mut s);
+        let parse_res = roxmltree::Document::parse_with_options(&s, *opt);
+        let document = parse_res.unwrap();
+        Self::parse_imports(&document, model_builder_cache);
+        Self::parse_registry(&document, language_builder, model_builder_cache);
+        
+        let node = document.root_element().children().find(|it| it.tag_name().name() == "node");
+        let mut parent: Option<Rc<SNode>> = None;
+        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, &model_builder_cache))
     }
 
-    fn parse_imports(&self, mpsr_reader: &mut Reader<BufReader<File>>) {
-        let mut child_buf = vec![];
-        loop {
-            match mpsr_reader.read_event_into(&mut child_buf) {
-                Ok(Event::Empty(e)) => {
-                    let key_values = get_values_of_attributes_with_keys(e.attributes(), vec!["index", "ref"]);
-                    if let Some(imported_model_ref) = key_values.get("ref") {
-                        let index = imported_model_ref.find("(").unwrap();
-                        let imported_model_uuid = imported_model_ref[..index].to_string();
-                        if let Some(index_value) = key_values.get("index") {
-                            SMODEL_BUILDER_CACHE.lock().unwrap().get_index_2_imported_model_uuid().insert(index_value.to_string(), imported_model_uuid);
-                        }
+    fn parse_imports(document: &Document, model_builder_cache : &SModelBuilderCache) {
+        let model_element = document.root_element();
+        let imports_element = model_element.children().find(|c| c.tag_name().name() == "imports");
+        match imports_element {
+            Some(imports) => {
+                for import in imports.children() {
+                    let tag_name = import.tag_name();
+                    if tag_name.name() == "import" {
+                        let index = import.attributes().find(|a| a.name() == "index").unwrap().value();
+                        let uuid = import.attributes().find(|a| a.name() == "ref").unwrap().value();
+
+                        let uuid = uuid.to_string()[0..uuid.find('(').unwrap()].to_string();
+                        model_builder_cache.index_2_imported_model_uuid.borrow_mut().insert(index.to_string(), uuid);
                     }
                 }
-                Ok(Event::End(e)) => {
-                    match e.name().as_ref() {
-                        b"imports" => break,
-                        _ => {}
-                    }
-                }
-                Ok(Event::Eof) => panic_unexpected_eof_read_file(mpsr_reader),
-                Err(e) => panic_read_file(mpsr_reader, e),
-                _ => {}
-            }
+            },
+            _ => ()
         }
     }
 
-    fn parse_registry(&self, mpsr_reader: &mut Reader<BufReader<File>>) {
-        let mut child_buf = vec![];
-        loop {
-            match mpsr_reader.read_event_into(&mut child_buf) {
-                Ok(Event::Empty(e)) => {
-                    match e.name().as_ref() {
-                        b"language" => {
-                            let id_name_attributes = get_values_of_attributes_with_keys(e.attributes(), vec!["id", "name"]);
-                            let id = id_name_attributes.get("id").unwrap();
-                            let name = id_name_attributes.get("name").unwrap();
-                            self.parse_concept(mpsr_reader, id, name);
-                        }
+    fn parse_registry<'a>(document: &Document, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) {
+        let model_element = document.root_element();
+        let registry_element = model_element.children().find(|c| c.tag_name().name() == "registry");
+        match registry_element {
+            Some(registry) => {
+                for language in registry.children() {
+                    if language.tag_name().name() != "language" { continue; }
+                    
+                    let language_id = language.attributes().find(|a| a.name() == "id").unwrap().value();
+                    let language_name = language.attributes().find(|a| a.name() == "name").unwrap().value();
+                    
+                    let lang = language_builder.get_or_build_language(&language_id.to_string(), &language_name.to_string());
+                    for concept in language.children() {
+                        if concept.tag_name().name() != "concept" { continue; }
+                                                
+                        let concept_id = concept.attributes().find(|a| a.name() == "id").unwrap().value();
+                        let concept_name = concept.attributes().find(|a| a.name() == "name").unwrap().value();
+                        let concept_index = concept.attributes().find(|a| a.name() == "index").unwrap().value();
+                        let conc = language_builder.get_or_create_concept(Rc::clone(&lang), concept_id.to_string(), concept_name.to_string());
+                        model_builder_cache.index_2_concept.borrow_mut().insert(concept_index.to_string(), Rc::clone(&conc));
+                       
+                        for properties_links_references in concept.children() {
+                            if properties_links_references.tag_name().name() == "" { continue; }
 
-                        _ => {}
+                            let tag_name = properties_links_references.tag_name().name();
+                            let id = properties_links_references.attributes().find(|a| a.name() == "id").unwrap().value();
+                            let name = properties_links_references.attributes().find(|a| a.name() == "name").unwrap().value();
+                            let index = properties_links_references.attributes().find(|a| a.name() == "index").unwrap().value();
+                            
+                            if tag_name == "property" {
+                                let prop = language_builder.get_or_create_property(Rc::clone(&conc),id.to_string(), name.to_string());
+                                model_builder_cache.index_2_property.borrow_mut().insert(index.to_string(), Rc::clone(&prop));                                    
+                            } else if tag_name == "child" {
+                                let child_link = language_builder.get_or_create_child(Rc::clone(&conc),id.to_string(), name.to_string());                                    
+                                model_builder_cache.index_2_containment_link.borrow_mut().insert(index.to_string(), Rc::clone(&child_link));
+                            } else if tag_name == "reference" {
+                                let ref_link = language_builder.get_or_create_reference(Rc::clone(&conc),id.to_string(), name.to_string());
+                                model_builder_cache.index_2_reference_link.borrow_mut().insert(index.to_string(), Rc::clone(&ref_link));                                    
+                            }    
+                        }                           
                     }
-                }
-                Ok(Event::End(e)) => {
-                    match e.name().as_ref() {
-                        b"registry" => break,
-                        _ => {}
-                    }
-                }
-                Ok(Event::Eof) => panic_unexpected_eof_read_file(mpsr_reader),
-                Err(e) => panic_read_file(mpsr_reader, e),
-                _ => {}
-            }
+                };
+            },
+            _ => ()
         }
     }
 
-    fn parse_concept(&self, mpsr_reader: &mut Reader<BufReader<File>>, language_id: &String, language_name: &String) {
-        let mut concept_buf = vec![];
 
-        loop {
-            match mpsr_reader.read_event_into(&mut concept_buf) {
-                Ok(Event::Empty(e)) => {
-                    match e.name().as_ref() {
-                        b"concept" => {
-                            let mut id_map_index_map = get_values_of_attributes_with_keys(e.attributes(), vec!["id", "name", "index"]);
-                            let concept_id = id_map_index_map.remove("id").unwrap();
-                            let concept_name = id_map_index_map.remove("name").unwrap();
-                            let mut language_builder = SLANGUAGE_BUILDER.lock().unwrap();
-                            let concept: &SConcept = language_builder.get_or_create_concept_in_language(language_id, language_name, concept_id, concept_name);
-                            SMODEL_BUILDER_CACHE.lock().unwrap().get_index_2_concept().insert(id_map_index_map.remove("index").unwrap(), concept);
-                        }
+    fn parse_node<'a>(parent_node : &mut Option<Rc<SNode<'a>>>, node: &Node, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Rc<SNode<'a>> {
+        let node_attrs = node.attributes();
+        let concept_index = (node_attrs.clone()).into_iter().find(|a| a.name() == "concept").unwrap().value();
+        let node_id = (node_attrs.clone()).into_iter().find(|a| a.name() == "id").unwrap().value();
+        let role = (node_attrs.clone()).into_iter().find(|a| a.name() == "role");
+        let role = if role.is_none() { None } else { Some(role.unwrap().value().to_string()) };
 
-                        _ => {}
-                    }
-                }
-                Ok(Event::End(e)) => {
-                    match e.name().as_ref() {
-                        b"concept" => break,
-                        _ => {}
-                    }
-                }
-                Ok(Event::Eof) => panic_unexpected_eof_read_file(mpsr_reader),
-                Err(e) => panic_read_file(mpsr_reader, e),
-                _ => {}
-            }
-        }
+        let index_2_concept = model_builder_cache.index_2_concept.borrow();
+        
+        let my_concept = index_2_concept.get(concept_index).unwrap();
+        let mut current_node : Rc<SNode> = Rc::new(SNode::new(node_id.to_string(), Rc::clone(my_concept), role.clone()));
+        
+        if let Some(parent) = parent_node {
+            let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
+            let cl = index_2_containment_link.get(&role.unwrap());
+            parent.borrow_mut().add_child(Rc::clone(cl.unwrap()), Rc::clone(&current_node));
+        };
+
+        let properties = node.children().filter(|it| it.tag_name().name() == "property");
+        for property in properties {
+            let role = property.attributes().find(|a| a.name() == "role").unwrap().value();
+            let value = property.attributes().find(|a| a.name() == "value").unwrap().value();
+            let index_2_properties = model_builder_cache.index_2_property.borrow();
+            let prop = index_2_properties.get(role).unwrap();
+            current_node.add_property(prop, value.to_string());
+        };
+
+        let refs = node.children().filter(|it| it.tag_name().name() == "ref");
+        for ref_ in refs {
+            let role = ref_.attributes().find(|a| a.name() == "role").unwrap().value();
+            let to = ref_.attributes().find(|a| a.name() == "to");
+            let to = if let Some(t) = to { 
+                t.value() 
+            } else {
+                ref_.attributes().find(|a| a.name() == "node").unwrap().value()
+            };
+            let resolve = if let Some(r) = ref_.attributes().find(|a| a.name() == "resolve") {
+                Some(String::from(r.value()))
+            } else {
+                None
+            };
+
+            let index_2_reference_links = model_builder_cache.index_2_reference_link.borrow();
+            let reference_link = index_2_reference_links.get(&role.to_string()).unwrap();
+            current_node.add_reference(reference_link, to.to_string(), resolve);
+        };
+
+        let nodes = node.children().filter(|it| it.tag_name().name() == "node");
+        for node in nodes {
+            Self::parse_node(&mut Some(Rc::clone(&current_node)), &node, language_builder, model_builder_cache);
+        };
+
+        Rc::clone(&current_node)
     }
+
+
 }
 
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
 
-    use crate::builder::smodel_builder_file_per_root_persistency::{SMODEL_BUILDER_CACHE, SModelBuilderFilePerRootPersistency};
+    use crate::builder::slanguage_builder::SLanguageBuilder;
+    use crate::builder::smodel_builder_file_per_root_persistency::{SModelBuilderCache, SModelBuilderFilePerRootPersistency};
     use crate::builder::test_helper::{get_path_to_model_mpsr_example_lib_file, get_path_to_mpsr_example_lib_file};
     use crate::builder::test_helper::get_path_to_example_mpsr_model_files;
 
     #[test]
     fn test_model_extract_core_info() {
+        let opt = roxmltree::ParsingOptions {
+            allow_dtd: true,
+            ..roxmltree::ParsingOptions::default()
+        };
+
         // given
-        let path_to_model_file = PathBuf::from(get_path_to_mpsr_example_lib_file());
+        let path_to_model_file = PathBuf::from(get_path_to_model_mpsr_example_lib_file());
 
         //when
-        let model = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file);
+        let model = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file, &opt);
 
         //assert
         assert_eq!(model.name, "mps.cli.lanuse.library_top.library_top");
@@ -256,14 +291,15 @@ mod tests {
         let path_to_mpsr_file = PathBuf::from(get_path_to_example_mpsr_model_files());
 
         //when
-        let mut smodel_builder = SModelBuilderFilePerRootPersistency::new();
-        smodel_builder.build_model(path_to_mpsr_file);
+        let mut language_builder = SLanguageBuilder::new();
+        let mut model_builder_cache = SModelBuilderCache::new();
+        SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
 
         //assert
-        assert_eq!(SMODEL_BUILDER_CACHE.lock().unwrap().get_index_2_imported_model_uuid().len(), 1);
-        assert!(SMODEL_BUILDER_CACHE.lock().unwrap().get_index_2_imported_model_uuid().contains_key(&"q0v6".to_string()));
-        let mut binding = SMODEL_BUILDER_CACHE.lock().unwrap();
-        let imported_model_uuid = binding.get_index_2_imported_model_uuid().get(&"q0v6".to_string()).unwrap();
-        assert_eq!(**imported_model_uuid, "ec5f093b-9d83-43a1-9b41-b5952da8b1ed".to_string());
+        let index_2_imported_model_uuid = model_builder_cache.index_2_imported_model_uuid.borrow();
+        assert_eq!(index_2_imported_model_uuid.len(), 1);
+        assert!(index_2_imported_model_uuid.contains_key(&"q0v6".to_string()));
+        let imported_model_uuid = index_2_imported_model_uuid.get(&"q0v6".to_string()).unwrap();
+        assert_eq!(**imported_model_uuid, "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed".to_string());
     }
 }

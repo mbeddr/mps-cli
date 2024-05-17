@@ -1,44 +1,45 @@
 use std::collections::HashMap;
 
-use uuid::Uuid;
-
 use crate::model::slanguage::SLanguage;
 use crate::model::smodel::SModel;
 use crate::model::snode::SNode;
 use crate::model::ssolution::SSolution;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct SRepository<'a> {
-    pub solutions: Vec<SSolution<'a>>,
-    languages: Vec<SLanguage>,
+    pub solutions: RefCell<Vec<Rc<SSolution<'a>>>>,
+    languages: RefCell<Vec<Rc<SLanguage>>>,
 
-    models: Vec<&'a SModel<'a>>,
-    nodes: Vec<&'a SNode<'a>>,
-    id_2_models_cache: HashMap<Uuid, &'a SModel<'a>>,
-    id_2_nodes_cache: HashMap<Uuid, &'a SNode<'a>>,
+    models: RefCell<Vec<Rc<SModel<'a>>>>,
+    nodes: RefCell<Vec<Rc<SNode<'a>>>>,
 }
 
 impl<'a> SRepository<'a> {
-    pub fn new(solutions: Vec<SSolution<'a>>, languages: Vec<SLanguage>) -> Self {
+    pub fn new(solutions: Vec<Rc<SSolution<'a>>>, languages: Vec<Rc<SLanguage>>) -> Self {
         SRepository {
-            solutions,
-            languages,
-            models: vec![],
-            nodes: vec![],
-            id_2_models_cache: HashMap::new(),
-            id_2_nodes_cache: HashMap::new(),
+            solutions : RefCell::new(solutions),
+            languages : RefCell::new(languages),
+            models: RefCell::new(vec![]),
+            nodes: RefCell::new(vec![]),
         }
     }
 
-    fn find_solution_by_name(&self, name: &String) -> Option<&SSolution> {
-        let found_solution = self.solutions.iter().find(|&ssolution| ssolution.name.eq(name));
-        return found_solution;
-    }
-
-    pub fn get_model_by_uuid(&self, uuid: &String) -> Option<&&SModel> {
-        self.models.iter().find(|&model| model.uuid.eq(uuid))
-    }
-
-    fn find_model_by_name(&self, name: &String) -> Option<&SModel> {
+    pub fn find_solution_by_name(&self, name: &String) -> Option<Rc<SSolution<'a>>> {
+        let solutions = self.solutions.borrow();
+        let found_solution = solutions.iter().find(|&ssolution| ssolution.name.eq(name));
+        if let Some(found_solution) = found_solution {
+            return Some(Rc::clone(found_solution));
+        }
         None
     }
+
+    pub fn get_model_by_uuid(&self, uuid: &'a String) -> Option<Rc<SModel<'a>>> {
+        let models = self.models.borrow();
+        let res = models.iter().find(|&model| model.uuid.eq(uuid));
+        if let Some(res) = res {
+            return Some(Rc::clone(res));
+        }
+        None
+    }    
 }

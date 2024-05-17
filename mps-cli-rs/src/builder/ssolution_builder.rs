@@ -1,3 +1,4 @@
+use std::borrow::BorrowMut;
 use std::path::PathBuf;
 
 use quick_xml::events::Event;
@@ -8,9 +9,12 @@ use walkdir::WalkDir;
 use crate::builder::builder_helper::convert_to_string;
 use crate::builder::builder_helper::panic_read_file;
 use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderFilePerRootPersistency;
+use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::model::ssolution::SSolution;
 
-pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf) -> SSolution<'a> {
+use super::smodel_builder_file_per_root_persistency::SModelBuilderCache;
+
+pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> SSolution<'a> {
     let path_to_msd_file = convert_to_string(&path_buf_to_msd_file);
     let mut solution: SSolution = extract_solution_core_info(path_to_msd_file);
     println!("Building from solution {}", solution.name);
@@ -19,17 +23,18 @@ pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf) -> SSolution<'a> {
     let model_dir = convert_to_string(&solution_dir.to_path_buf()) + "/models";
 
     let model_dir = WalkDir::new(model_dir).min_depth(1).max_depth(1);
+    let mut models = vec![];
     for model_entry in model_dir.into_iter() {
         let path = model_entry.unwrap().into_path();
         if path.is_dir() {
-            let mut smodel_builder = SModelBuilderFilePerRootPersistency::new();
-            let model = smodel_builder.build_model(path);
-            //solution.models.push(model)
+            let model = SModelBuilderFilePerRootPersistency::build_model(path, language_builder, model_builder_cache);
+            models.push(model)
         } else {
             println!("ERROR: model entry {} is a file not a directory. Cannot be parsed as only file per root persistency is supported.", path.to_str().unwrap().to_string())
         }
     }
 
+    solution.models.extend(models);
     return solution;
 }
 
