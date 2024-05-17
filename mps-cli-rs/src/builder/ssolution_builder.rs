@@ -1,5 +1,6 @@
 use std::borrow::BorrowMut;
 use std::path::PathBuf;
+use std::time::Instant;
 
 use quick_xml::events::Event;
 use quick_xml::name::QName;
@@ -15,10 +16,10 @@ use crate::model::ssolution::SSolution;
 use super::smodel_builder_file_per_root_persistency::SModelBuilderCache;
 
 pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> SSolution<'a> {
+    let now = Instant::now();
+    
     let path_to_msd_file = convert_to_string(&path_buf_to_msd_file);
     let mut solution: SSolution = extract_solution_core_info(path_to_msd_file);
-    println!("Building from solution {}", solution.name);
-
     let solution_dir = path_buf_to_msd_file.parent().unwrap();
     let model_dir = convert_to_string(&solution_dir.to_path_buf()) + "/models";
 
@@ -35,6 +36,8 @@ pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a
     }
 
     solution.models.extend(models);
+    println!("Building from solution {} - {}ms", solution.name, now.elapsed().as_millis);
+
     return solution;
 }
 
