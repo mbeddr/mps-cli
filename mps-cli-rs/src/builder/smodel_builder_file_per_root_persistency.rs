@@ -204,6 +204,7 @@ impl SModelBuilderFilePerRootPersistency {
             let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
             let cl = index_2_containment_link.get(&role.unwrap());
             parent.borrow_mut().add_child(Rc::clone(cl.unwrap()), Rc::clone(&current_node));
+            current_node.set_parent(Rc::clone(parent));
         };
 
         let properties = node.children().filter(|it| it.tag_name().name() == "property");

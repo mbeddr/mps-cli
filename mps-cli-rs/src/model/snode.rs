@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, collections::HashMap};
+use std::collections::HashMap;
 
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
 use std::rc::Rc;
@@ -14,9 +14,9 @@ pub struct SNode<'a> {
     concept: Rc<SConcept>,
     role_in_parent: Option<String>,
     properties: RefCell<HashMap<Rc<SProperty>, String>>,
-    children: RefCell<HashMap<Rc<SContainmentLink>, Rc<Vec<Rc<SNode<'a>>>>>>,
+    children: RefCell<HashMap<Rc<SContainmentLink>, Vec<Rc<SNode<'a>>>>>,
     references: RefCell<HashMap<Rc<SReferenceLink>, Rc<SNodeRef>>>,
-    parent: Option<&'a SNode<'a>>,
+    parent: RefCell<Option<Rc<SNode<'a>>>>,
 }
 
 impl<'a> SNode<'a> {
@@ -28,7 +28,7 @@ impl<'a> SNode<'a> {
             properties: RefCell::new(HashMap::new()),
             children: RefCell::new(HashMap::new()),
             references: RefCell::new(HashMap::new()),
-            parent: None,
+            parent: RefCell::new(None),
         }
     }
 
@@ -54,8 +54,12 @@ impl<'a> SNode<'a> {
 
     pub fn add_child(&self, cl: Rc<SContainmentLink>, node: Rc<SNode<'a>>) {
         let mut children = self.children.borrow_mut();
-        let vec = children.entry(Rc::clone(&cl)).or_insert(Rc::new(Vec::new()));
-        Rc::get_mut(vec).unwrap().push(Rc::clone(&node));
+        let vec = children.entry(Rc::clone(&cl)).or_insert(Vec::new());
+        vec.push(Rc::clone(&node));
+    }
+
+    pub fn set_parent(&self, parent : Rc<SNode<'a>>) {
+        self.parent.replace(Some(parent));
     }
 
     /*pub fn get_children(&self, name: &String) -> Option<&Vec<SNode>> {
