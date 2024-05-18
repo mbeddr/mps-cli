@@ -36,7 +36,7 @@ pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a
     }
 
     solution.models.extend(models);
-    println!("Building from solution {} - {}ms", solution.name, now.elapsed().as_millis);
+    println!("Building from solution {} - {}ms", solution.name, now.elapsed().as_millis());
 
     return solution;
 }

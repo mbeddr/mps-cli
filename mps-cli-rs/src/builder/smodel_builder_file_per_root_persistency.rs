@@ -10,15 +10,12 @@ use roxmltree::{Document, Node};
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use quick_xml::events::{attributes, Event};
-use quick_xml::Reader;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::builder::builder_helper::{convert_to_string, get_value_of_attribute_with_key, get_values_of_attributes_with_keys, panic_read_file, panic_unexpected_eof_read_file};
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
 use crate::model::smodel::SModel;
 use crate::model::snode::SNode;
-use roxmltree::ParsingOptions;
 use super::slanguage_builder::SLanguageBuilder;
 
 
@@ -51,17 +48,9 @@ impl SModelBuilderFilePerRootPersistency {
     }
 
     pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> SModel<'a> {
-        let opt = roxmltree::ParsingOptions {
-            allow_dtd: true,
-            ..roxmltree::ParsingOptions::default()
-        };
-        
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
-
-        let path_to_model_file = model_file.to_str().unwrap().to_string();
-
-        let mut model: SModel = Self::extract_model_core_info(model_file, &opt);
+        let mut model: SModel = Self::extract_model_core_info(model_file);
 
         let mpsr_file_walker = WalkDir::new(path_to_model).min_depth(1).max_depth(1);
         let mpsr_files = mpsr_file_walker.into_iter().filter(|entry| {
@@ -76,7 +65,7 @@ impl SModelBuilderFilePerRootPersistency {
         let mut roots = vec!();
         for mpsr_file in mpsr_files.into_iter() {
             let file = mpsr_file.unwrap();
-            if let Some(r) = Self::build_root_node_from_file(file, &opt, language_builder, model_builder_cache) {
+            if let Some(r) = Self::build_root_node_from_file(file, language_builder, model_builder_cache) {
                 roots.push(r);
             }
         };
@@ -85,7 +74,7 @@ impl SModelBuilderFilePerRootPersistency {
         return model;
     }
 
-    fn extract_model_core_info<'a>(path_to_model: PathBuf, opt : &ParsingOptions) -> SModel<'a> {
+    fn extract_model_core_info<'a>(path_to_model: PathBuf) -> SModel<'a> {
         let path_to_model_file = path_to_model.to_str().unwrap().to_string();        
 
         let file = std::fs::File::open(path_to_model_file.clone());  
@@ -114,13 +103,13 @@ impl SModelBuilderFilePerRootPersistency {
         return SModel::new(name, uuid, path_to_model_file, is_do_not_generate, true);
     }
 
-    fn build_root_node_from_file<'a>(dir_entry: DirEntry, opt : &ParsingOptions, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Option<Rc<SNode<'a>>> {        
+    fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Option<Rc<SNode<'a>>> {        
         //println!("building root node from {}", dir_entry.path().as_os_str().to_str().unwrap());
         let file = std::fs::File::open(dir_entry.path().as_os_str());  
 
         let mut s = String::new();
         file.unwrap().read_to_string(&mut s);
-        let parse_res = roxmltree::Document::parse_with_options(&s, *opt);
+        let parse_res = roxmltree::Document::parse_with_options(&s, roxmltree::ParsingOptions::default());
         
         let document = parse_res.unwrap();
         Self::parse_imports(&document, model_builder_cache);
@@ -209,7 +198,7 @@ impl SModelBuilderFilePerRootPersistency {
         let index_2_concept = model_builder_cache.index_2_concept.borrow();
         
         let my_concept = index_2_concept.get(concept_index).unwrap();
-        let mut current_node : Rc<SNode> = Rc::new(SNode::new(node_id.to_string(), Rc::clone(my_concept), role.clone()));
+        let current_node : Rc<SNode> = Rc::new(SNode::new(node_id.to_string(), Rc::clone(my_concept), role.clone()));
         
         if let Some(parent) = parent_node {
             let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
@@ -268,16 +257,11 @@ mod tests {
 
     #[test]
     fn test_model_extract_core_info() {
-        let opt = roxmltree::ParsingOptions {
-            allow_dtd: true,
-            ..roxmltree::ParsingOptions::default()
-        };
-
         // given
         let path_to_model_file = PathBuf::from(get_path_to_model_mpsr_example_lib_file());
 
         //when
-        let model = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file, &opt);
+        let model = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file);
 
         //assert
         assert_eq!(model.name, "mps.cli.lanuse.library_top.library_top");

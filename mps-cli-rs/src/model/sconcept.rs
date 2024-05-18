@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use uuid::Uuid;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -82,17 +81,5 @@ impl SReferenceLink {
             name,
             id,
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use uuid::Uuid;
-
-    use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
-
-    #[test]
-    fn test_sconcept() {
-       
     }
 }

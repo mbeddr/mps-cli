@@ -65,25 +65,18 @@ impl<'a> SNode<'a> {
         };
     }*/
 
-    pub fn get_descendants(&'a self, include_self: bool) -> Vec<&SNode> {
-        let mut descendants: Vec<&SNode<'a>> = Vec::new();
-        if include_self { descendants.push(self) }
-        self.get_descendants_internal(&mut descendants);
+    pub fn get_descendants(&'a self, include_self: bool) -> Vec<Rc<SNode<'a>>> {
+        let mut descendants: Vec<Rc<SNode<'a>>> = Vec::new();
+        //if include_self { descendants.push(Rc::new(self)) }
+        //self.get_descendants_internal(&mut descendants);
         return descendants;
     }
 
-    fn get_descendants_internal(&'a self, descendants: &mut Vec<&SNode<'a>>) {
-        /*let all_children_entries = self.children.borrow();
-        let containment_links = all_children_entries.keys();
-        
-        for containment_link in containment_links {
-            for children in all_children_entries.get(containment_link) {
-                for child in children {
-                    descendants.push(child.as_ref());
-                    child.get_descendants_internal(descendants);
-                }
-            }
+    fn get_descendants_internal(self, descendants: &mut Vec<Rc<SNode<'a>>>) {
+        /*let vectors_of_children = self.children.borrow().values().flatten().collect::<Vec<Rc<SNode>>>;
+        for child in ..flatten() {
+            descendants.push(child.as_ref());
+            child.get_descendants_internal(descendants);
         }*/
-
     }
 }
