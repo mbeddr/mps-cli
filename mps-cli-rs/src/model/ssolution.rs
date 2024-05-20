@@ -1,10 +1,12 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::model::smodel::SModel;
 
 pub struct SSolution<'a> {
     pub name: String,
     pub uuid: String,
     path_to_module_file: String,
-    pub models: Vec<SModel<'a>>,
+    pub models: Vec<Rc<RefCell<SModel<'a>>>>,
 }
 
 impl<'a> SSolution<'a> {

@@ -1,5 +1,5 @@
 use crate::model::snode::SNode;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 pub struct SModel<'a> {
     pub name: String,
@@ -8,19 +8,19 @@ pub struct SModel<'a> {
     pub path_to_model_file: String,
     pub is_do_not_generate: bool,
     pub is_file_per_root_persistency: bool,
-    pub imported_models: Vec<Rc<SModel<'a>>>
+    pub imported_models: Vec<Rc<RefCell<SModel<'a>>>>
 }
 
 impl<'a> SModel<'a> {
-    pub fn new(name: String, uuid: String, path_to_model_file: String, imported_models : Vec<Rc<SModel<'a>>>, is_do_not_generate: bool, is_file_per_root_persistency: bool) -> Self {
+    pub fn new(name: String, uuid: String) -> Self {
         SModel {
             name,
             uuid,
             root_nodes: vec![],
-            path_to_model_file,
-            imported_models,
-            is_do_not_generate,
-            is_file_per_root_persistency,
+            path_to_model_file : String::from(""),
+            imported_models : vec![],
+            is_do_not_generate : false,
+            is_file_per_root_persistency : false,
         }
     }
 

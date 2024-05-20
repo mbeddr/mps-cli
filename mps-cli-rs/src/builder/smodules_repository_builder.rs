@@ -11,7 +11,7 @@ use crate::model::srepository::SRepository;
 use crate::model::ssolution::SSolution;
 use crate::model::slanguage::SLanguage;
 
-pub fn build_repo_from_directories<'a>(source_dirs: Vec<String>, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> SRepository<'a> {
+pub fn build_repo_from_directories<'a>(source_dirs: Vec<String>, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> SRepository<'a> {
     let mut all_solutions : Vec<Rc<SSolution>> = Vec::new();
 
     for source_dir in source_dirs {
@@ -25,7 +25,7 @@ pub fn build_repo_from_directories<'a>(source_dirs: Vec<String>, language_builde
 }
 
 
-pub fn build_repo_from_directory<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> SRepository<'a> {
+pub fn build_repo_from_directory<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> SRepository<'a> {
     let mut all_solutions : Vec<Rc<SSolution>> = Vec::new();
     let solutions = build_solutions_from(source_dir, language_builder, model_builder_cache);
     solutions.into_iter().for_each(|s| all_solutions.push(Rc::new(s)));
@@ -35,7 +35,7 @@ pub fn build_repo_from_directory<'a>(source_dir: String, language_builder : &'a 
     SRepository::new(all_solutions, languages)
 }
 
-fn build_solutions_from<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Vec<SSolution<'a>> {
+fn build_solutions_from<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> Vec<SSolution<'a>> {
     let now = Instant::now();
     let solutions = collect_modules_from_sources(source_dir.clone(), language_builder, model_builder_cache);
     let elapsed = now.elapsed();
@@ -44,7 +44,7 @@ fn build_solutions_from<'a>(source_dir: String, language_builder : &'a SLanguage
     return solutions;
 }
 
-pub fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Vec<SSolution<'a>> {
+pub fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> Vec<SSolution<'a>> {
     let msd_files = find_msd_files(&source_dir, 3);
     let solutions: Vec<SSolution> = msd_files.iter().map(|msd_file| build_solution(msd_file, language_builder, &model_builder_cache)).collect();
     return solutions;
@@ -69,6 +69,8 @@ pub fn find_msd_files(source_dir: &String, start_depth: usize) -> Vec<PathBuf> {
 #[cfg(test)]
 mod tests {
     use core::num;
+    use std::cell::RefCell;
+    use std::rc::Rc;
 
     use crate::builder::slanguage_builder::SLanguageBuilder;
     use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderCache;
@@ -103,8 +105,8 @@ mod tests {
         //then
         let required_time = now.elapsed().as_millis();
         let solutions = repository.solutions.borrow();
-        let models: Vec<&SModel> = solutions.iter().flat_map(|solution| &solution.models).collect();
-        let do_not_gen_models: Vec<&&SModel> = models.iter().filter(|&model| model.is_do_not_generate).collect();
+        let models: Vec<&Rc<RefCell<SModel>>> = solutions.iter().flat_map(|solution| &solution.models).collect();
+        let do_not_gen_models: Vec<&&Rc<RefCell<SModel>>> = models.iter().filter(|&model| model.as_ref().borrow().is_do_not_generate).collect();
         let number_of_solutions = repository.solutions.borrow().len();
         println!("Found {} solutions with {} models (out of which {} are set to do not generate) in {} ms", number_of_solutions, models.len(), do_not_gen_models.len(), required_time);
         assert!(number_of_solutions > 1);

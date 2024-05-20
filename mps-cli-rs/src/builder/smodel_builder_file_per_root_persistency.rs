@@ -20,15 +20,16 @@ use super::slanguage_builder::SLanguageBuilder;
 
 
 #[derive(Clone)]
-pub struct SModelBuilderCache {
+pub struct SModelBuilderCache<'a> {
     pub index_2_concept: RefCell<HashMap<String, Rc<SConcept>>>,
     pub index_2_property: RefCell<HashMap<String, Rc<SProperty>>>,
     pub index_2_containment_link: RefCell<HashMap<String, Rc<SContainmentLink>>>,
     pub index_2_reference_link: RefCell<HashMap<String, Rc<SReferenceLink>>>,
     pub index_2_imported_model_uuid: RefCell<HashMap<String, String>>,
+    pub index_2_model : RefCell<HashMap<String, Rc<RefCell<SModel<'a>>>>>,
 }
 
-impl SModelBuilderCache {
+impl<'a> SModelBuilderCache<'a> {
     pub fn new() -> Self {
         SModelBuilderCache {
             index_2_concept: RefCell::new(HashMap::new()),
@@ -36,8 +37,21 @@ impl SModelBuilderCache {
             index_2_containment_link : RefCell::new(HashMap::new()),
             index_2_reference_link : RefCell::new(HashMap::new()),
             index_2_imported_model_uuid: RefCell::new(HashMap::new()),
+            index_2_model: RefCell::new(HashMap::new()),
         }
     }
+
+    pub fn get_model(&'a self, name : String, uuid : String) -> Rc<RefCell<SModel<'a>>> {
+        let mut i2m = self.index_2_model.borrow_mut();
+        if let Some(model) = i2m.get(&uuid) { 
+            Rc::clone(&model) 
+        } else {
+            let temp = Rc::new(RefCell::new(SModel::new(name.clone(), uuid.clone())));
+            i2m.insert(uuid, temp.clone());
+            temp  
+        }
+    }
+
 }
 
 pub struct SModelBuilderFilePerRootPersistency {}
@@ -47,10 +61,10 @@ impl SModelBuilderFilePerRootPersistency {
         SModelBuilderFilePerRootPersistency {}
     }
 
-    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> SModel<'a> {
+    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> Rc<RefCell<SModel<'a>>> {
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
-        let mut model: SModel = Self::extract_model_core_info(model_file);
+        let mut model: Rc<RefCell<SModel<'a>>> = Self::extract_model_core_info(model_file, &model_builder_cache);
 
         let mpsr_file_walker = WalkDir::new(path_to_model).min_depth(1).max_depth(1);
         let mpsr_files = mpsr_file_walker.into_iter().filter(|entry| {
@@ -69,12 +83,12 @@ impl SModelBuilderFilePerRootPersistency {
                 roots.push(r);
             }
         };
-        model.root_nodes.extend(roots);
+        model.as_ref().borrow_mut().root_nodes.extend(roots);
 
         return model;
     }
 
-    fn extract_model_core_info<'a>(path_to_model: PathBuf) -> SModel<'a> {
+    fn extract_model_core_info<'a>(path_to_model: PathBuf, model_builder_cache : &'a SModelBuilderCache<'a>) -> Rc<RefCell<SModel<'a>>> {
         let path_to_model_file = path_to_model.to_str().unwrap().to_string();        
 
         let file = std::fs::File::open(path_to_model_file.clone());  
@@ -99,9 +113,25 @@ impl SModelBuilderFilePerRootPersistency {
             if do_not_generate_str == "true" { is_do_not_generate = true; }                                                        
         }
         
-        let imports_element = model_element.children().find(|c| c.tag_name().name() == "imports");
+        let mut my_model = model_builder_cache.get_model(name, uuid);
+        my_model.as_ref().borrow_mut().path_to_model_file = path_to_model_file;
+        my_model.as_ref().borrow_mut().is_do_not_generate = is_do_not_generate;
+        my_model.as_ref().borrow_mut().is_file_per_root_persistency = true;
 
-        return SModel::new(name, uuid, path_to_model_file, Vec::new(), is_do_not_generate, true);
+        let imports = model_element.children().find(|c| c.tag_name().name() == "imports").unwrap();
+        for import in imports.children() {
+            let tag_name = import.tag_name();
+            if tag_name.name() == "import" {
+                let uuid_att = import.attributes().find(|a| a.name() == "ref").unwrap().value();
+
+                let uuid = uuid_att.to_string()[0..uuid_att.find('(').unwrap()].to_string();
+                let name = uuid_att.to_string()[uuid_att.find('(').unwrap()+1..uuid_att.find(')').unwrap()].to_string();
+                let imported_model = model_builder_cache.get_model(name, uuid);
+                my_model.as_ref().borrow_mut().imported_models.push(imported_model);
+            }
+        }
+
+        my_model.clone()
     }
 
     fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Option<Rc<SNode<'a>>> {        
@@ -271,7 +301,9 @@ mod tests {
         let path_to_model_file = PathBuf::from(get_path_to_model_mpsr_example_lib_file());
 
         //when
-        let model = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file);
+        let mut model_builder_cache = SModelBuilderCache::new();
+        let temp = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file, &model_builder_cache);
+        let model = temp.borrow();
 
         //assert
         assert_eq!(model.name, "mps.cli.lanuse.library_top.library_top");
@@ -279,6 +311,10 @@ mod tests {
         assert_eq!(model.path_to_model_file, get_path_to_model_mpsr_example_lib_file());
         assert_eq!(model.is_do_not_generate, true);
         assert!(model.is_file_per_root_persistency);
+        assert_eq!(model.imported_models.len(), 1);
+        let import = model.imported_models.first().unwrap();
+        assert_eq!(import.borrow_mut().name, "mps.cli.lanuse.library_top.authors_top");
+        assert_eq!(import.borrow_mut().uuid, "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed");
     }
 
     #[test]
@@ -290,7 +326,8 @@ mod tests {
         //when
         let mut language_builder = SLanguageBuilder::new();
         let mut model_builder_cache = SModelBuilderCache::new();
-        let model = SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
+        let temp = SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
+        let model = temp.as_ref().borrow();
 
         //assert
         assert_eq!(model.root_nodes.len(), 2);
