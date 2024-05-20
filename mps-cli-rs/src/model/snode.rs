@@ -10,13 +10,13 @@ pub struct SNodeRef {
 }
 
 pub struct SNode<'a> {
-    pub(crate) id: String,
-    concept: Rc<SConcept>,
-    role_in_parent: Option<String>,
+    pub id: String,
+    pub concept: Rc<SConcept>,
+    pub role_in_parent: Option<String>,
     properties: RefCell<HashMap<Rc<SProperty>, String>>,
     children: RefCell<HashMap<Rc<SContainmentLink>, Vec<Rc<SNode<'a>>>>>,
     references: RefCell<HashMap<Rc<SReferenceLink>, Rc<SNodeRef>>>,
-    parent: RefCell<Option<Rc<SNode<'a>>>>,
+    pub parent: RefCell<Option<Rc<SNode<'a>>>>,
 }
 
 impl<'a> SNode<'a> {
@@ -32,17 +32,17 @@ impl<'a> SNode<'a> {
         }
     }
 
-    pub fn get_property(&self, property_name: &String) -> Option<String> {
-        let properties = self.properties.borrow();
-        return match properties.keys().find(|&key| key.name.eq(property_name)) {
-            Some(property) => { let p = properties.get(property).unwrap().clone(); Some(p) }
-            None => None
-        };
+    pub fn add_property(&self, property: &Rc<SProperty>, value: String) {
+        self.properties.borrow_mut().insert(Rc::clone(property), value);
     }
 
-    pub fn add_property(&self, property: &Rc<SProperty>, value: String) {
-        let mut props = self.concept.properties.borrow_mut();
-        self.properties.borrow_mut().insert(Rc::clone(property), value);
+    pub fn get_property(&self, property_name: &str) -> Option<String> {
+        let properties = self.properties.borrow();
+        let entry = properties.iter().find(|it| it.0.name.eq(property_name));
+        return match entry {
+            Some(key_val) => { Some(String::clone(key_val.1)) }
+            None => None
+        }
     }
 
     pub fn add_reference(&self, reference_link: &Rc<SReferenceLink>, to: String, resolve : Option<String>) {
@@ -56,6 +56,15 @@ impl<'a> SNode<'a> {
         let mut children = self.children.borrow_mut();
         let vec = children.entry(Rc::clone(&cl)).or_insert(Vec::new());
         vec.push(Rc::clone(&node));
+    }
+
+    pub fn get_children(&self, child_role_name: &str) -> Vec<Rc<SNode<'a>>> {
+        let children = self.children.borrow();
+        let entry = children.iter().find(|it| it.0.name.eq(child_role_name));
+        match entry {
+            Some(e) => e.1.clone(),
+            None => Vec::new()
+        }
     }
 
     pub fn set_parent(&self, parent : Rc<SNode<'a>>) {

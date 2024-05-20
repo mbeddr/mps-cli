@@ -99,8 +99,9 @@ impl SModelBuilderFilePerRootPersistency {
             if do_not_generate_str == "true" { is_do_not_generate = true; }                                                        
         }
         
-        
-        return SModel::new(name, uuid, path_to_model_file, is_do_not_generate, true);
+        let imports_element = model_element.children().find(|c| c.tag_name().name() == "imports");
+
+        return SModel::new(name, uuid, path_to_model_file, Vec::new(), is_do_not_generate, true);
     }
 
     fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache) -> Option<Rc<SNode<'a>>> {        
@@ -198,7 +199,15 @@ impl SModelBuilderFilePerRootPersistency {
         let index_2_concept = model_builder_cache.index_2_concept.borrow();
         
         let my_concept = index_2_concept.get(concept_index).unwrap();
-        let current_node : Rc<SNode> = Rc::new(SNode::new(node_id.to_string(), Rc::clone(my_concept), role.clone()));
+        let role_human_readable = match role.clone() {
+            Some(role_string) => {
+                let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
+                let r = index_2_containment_link.get(&role_string).unwrap();
+                Some(String::from(&r.name))
+            },
+            None => None,
+        };
+        let current_node : Rc<SNode> = Rc::new(SNode::new(node_id.to_string(), Rc::clone(my_concept), role_human_readable));
         
         if let Some(parent) = parent_node {
             let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
@@ -275,18 +284,29 @@ mod tests {
     #[test]
     fn test_build_model() {
         // given
-        let path_to_mpsr_file = PathBuf::from(get_path_to_example_mpsr_model_files());
+        let path = "../mps_test_projects/mps_cli_lanuse_file_per_root/solutions/mps.cli.lanuse.library_top/models/mps.cli.lanuse.library_top.library_top"; 
+        let path_to_mpsr_file = PathBuf::from(path);
 
         //when
         let mut language_builder = SLanguageBuilder::new();
         let mut model_builder_cache = SModelBuilderCache::new();
-        SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
+        let model = SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
 
         //assert
-        let index_2_imported_model_uuid = model_builder_cache.index_2_imported_model_uuid.borrow();
-        assert_eq!(index_2_imported_model_uuid.len(), 1);
-        assert!(index_2_imported_model_uuid.contains_key(&"q0v6".to_string()));
-        let imported_model_uuid = index_2_imported_model_uuid.get(&"q0v6".to_string()).unwrap();
-        assert_eq!(**imported_model_uuid, "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed".to_string());
+        assert_eq!(model.root_nodes.len(), 2);
+        let munich_library = model.root_nodes.first().unwrap();
+        assert_eq!(munich_library.get_property("name"), Some(String::from("munich_library")));
+
+        let munich_library_entities = munich_library.get_children("entities");
+        assert_eq!(munich_library_entities.len(), 4);
+        let tom_sawyer = munich_library_entities.first().unwrap();
+        assert_eq!(tom_sawyer.get_property("name"), Some(String::from("Tom Sawyer")));
+        assert_eq!(tom_sawyer.role_in_parent, Some(String::from("entities")));
+        assert_eq!(tom_sawyer.get_property("publicationDate"), Some(String::from("1876")));
+        assert_eq!(tom_sawyer.get_property("isbn"), Some(String::from("4323r2")));
+        assert_eq!(tom_sawyer.get_property("available"), Some(String::from("true")));
+        assert_eq!(tom_sawyer.concept.name, String::from("mps.cli.landefs.library.structure.Book"));
+
+
     }
 }

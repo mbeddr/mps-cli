@@ -6,7 +6,7 @@ use std::rc::Rc;
 #[derive(Debug, PartialEq, Clone)]
 pub struct SConcept {
     pub(crate) name: String,
-    uuid: String,
+    id: String,
     pub(crate) properties: RefCell<HashMap<String, Rc<SProperty>>>,
     pub containment_links: RefCell<HashMap<String, Rc<SContainmentLink>>>,
     pub reference_links: RefCell<HashMap<String, Rc<SReferenceLink>>>,
@@ -31,10 +31,10 @@ pub struct SReferenceLink {
 }
 
 impl SConcept {
-    pub fn new(name: String, uuid: String) -> Self {
+    pub fn new(name: String, id: String) -> Self {
         SConcept {
             name: name.to_string(),
-            uuid,
+            id,
             properties: RefCell::new(HashMap::new()),
             containment_links: RefCell::new(HashMap::new()),
             reference_links: RefCell::new(HashMap::new()),

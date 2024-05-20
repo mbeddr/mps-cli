@@ -1,7 +1,5 @@
-use std::borrow::BorrowMut;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::Mutex;
 use std::rc::Rc;
 
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
