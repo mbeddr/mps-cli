@@ -3,5 +3,4 @@ mod ssolution_builder;
 pub mod smodel_builder_file_per_root_persistency;
 mod builder_helper;
 mod root_node_from_mpsr_file_builder;
-mod test_helper;
 pub mod slanguage_builder;

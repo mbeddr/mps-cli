@@ -24,7 +24,7 @@ impl<'a> SModel<'a> {
         }
     }
 
-    pub fn get_nodes(&'a self) -> Vec<Rc<SNode<'a>>> {
+    pub fn get_nodes(&self) -> Vec<Rc<SNode<'a>>> {
         let mut nodes = Vec::new();
         for root in self.root_nodes.iter() {            
             nodes.extend(SNode::get_descendants(Rc::clone(root), true));
@@ -32,11 +32,11 @@ impl<'a> SModel<'a> {
         return nodes;
     }
 
-    pub fn get_node_by_id(&'a self, id: &'a String) -> Option<Rc<SNode<'a>>> {
-        /*let nodes = self.get_nodes();
+    pub fn get_node_by_id(&self, id: &str) -> Option<Rc<SNode<'a>>> {
+        let nodes = self.get_nodes();
         let n = nodes.iter().find(|node| node.id.eq(id));
-        if let Some(nn) = n { return Some(Rc::new(**nn)); }
-        */None
+        if let Some(nn) = n { return Some(Rc::clone(nn)); }
+        None
     }
 }
 

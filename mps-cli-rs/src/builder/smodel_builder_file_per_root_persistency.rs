@@ -189,7 +189,7 @@ impl SModelBuilderFilePerRootPersistency {
                         let concept_id = concept.attributes().find(|a| a.name() == "id").unwrap().value();
                         let concept_name = concept.attributes().find(|a| a.name() == "name").unwrap().value();
                         let concept_index = concept.attributes().find(|a| a.name() == "index").unwrap().value();
-                        let conc = language_builder.get_or_create_concept(Rc::clone(&lang), concept_id.to_string(), concept_name.to_string());
+                        let conc = language_builder.get_or_create_concept(Rc::clone(&lang), concept_id, concept_name);
                         model_builder_cache.index_2_concept.borrow_mut().insert(concept_index.to_string(), Rc::clone(&conc));
                        
                         for properties_links_references in concept.children() {
@@ -293,13 +293,13 @@ mod tests {
 
     use crate::builder::slanguage_builder::SLanguageBuilder;
     use crate::builder::smodel_builder_file_per_root_persistency::{SModelBuilderCache, SModelBuilderFilePerRootPersistency};
-    use crate::builder::test_helper::get_path_to_model_mpsr_example_lib_file;
     use crate::model::snode::SNode;
 
     #[test]
     fn test_model_extract_core_info() {
         // given
-        let path_to_model_file = PathBuf::from(get_path_to_model_mpsr_example_lib_file());
+        let path = "../mps_test_projects/mps_cli_lanuse_file_per_root/solutions/mps.cli.lanuse.library_top/models/mps.cli.lanuse.library_top.library_top/.model"; 
+        let path_to_model_file = PathBuf::from(path);
 
         //when
         let model_builder_cache = SModelBuilderCache::new();
@@ -309,7 +309,7 @@ mod tests {
         //assert
         assert_eq!(model.name, "mps.cli.lanuse.library_top.library_top");
         assert_eq!(model.uuid, "r:a96b23f6-56db-490c-a218-d40d11be7f1e");
-        assert_eq!(model.path_to_model_file, get_path_to_model_mpsr_example_lib_file());
+        assert_eq!(model.path_to_model_file, path);
         assert_eq!(model.is_do_not_generate, true);
         assert!(model.is_file_per_root_persistency);
         assert_eq!(model.imported_models.len(), 1);
@@ -356,13 +356,16 @@ mod tests {
         let mut language_builder = SLanguageBuilder::new();
         let model_builder_cache = SModelBuilderCache::new();
         let temp = SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
-        let m = temp.as_ref().borrow();
+        let model = temp.as_ref().borrow();
 
         //assert
-        let munich_library_root = m.root_nodes.first().unwrap();
+        let munich_library_root = model.root_nodes.first().unwrap();
         assert_eq!(munich_library_root.get_property("name"), Some(String::from("munich_library")));
         assert_eq!(SNode::get_descendants(Rc::clone(munich_library_root), true).len(), 8);
         assert_eq!(munich_library_root.get_children("entities").len(), 4);
+
+        assert_eq!(model.get_nodes().len(), 9);
+        assert_eq!(model.get_node_by_id("4Yb5JA31NUC").unwrap().get_property("name").unwrap(), "munich_library");
     }
 
 }

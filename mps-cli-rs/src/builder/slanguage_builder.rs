@@ -25,15 +25,19 @@ impl<'a> SLanguageBuilder {
         Rc::clone(res)
     }
 
-    pub(crate) fn get_or_create_concept(&'a self, language: Rc<SLanguage>, concept_id: String, concept_name: String) -> Rc<SConcept> {
-        let mut concepts = language.concepts.borrow_mut();
-        if let Some(i) = concepts.iter().position(|c| c.name == concept_name) {
-            let c = &concepts[i];
-            Rc::clone(c)
-        } else {
-            concepts.push(Rc::new(SConcept::new(concept_name.clone(), concept_id.clone())));
-            Rc::clone(concepts.last().unwrap())
+    pub(crate) fn get_or_create_concept(&'a self, language: Rc<SLanguage>, concept_id: &str, concept_name: &str) -> Rc<SConcept> {
+        let mut concept_id_to_concept = self.concept_id_to_concept.borrow_mut();
+        let concept = concept_id_to_concept.get(concept_id);
+        if let Some(c) = concept {
+            return Rc::clone(c);
         }
+       
+        let mut concepts = language.concepts.borrow_mut();
+        let concept = SConcept::new(concept_name.to_string(), concept_id.to_string());
+        let rc = Rc::new(concept);
+        concept_id_to_concept.insert(concept_id.to_string(), rc.clone());
+        concepts.push(rc.clone());
+        rc
     }
 
 

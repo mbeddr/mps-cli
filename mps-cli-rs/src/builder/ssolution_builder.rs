@@ -77,12 +77,11 @@ mod tests {
     use crate::builder::builder_helper::convert_to_string;
     use crate::builder::smodules_repository_builder::find_msd_files;
     use crate::builder::ssolution_builder::extract_solution_core_info;
-    use crate::builder::test_helper::{get_path_to_mps_cli_lanuse_file_per_root, get_path_to_mps_cli_lanuse_library_top_msd_file};
-
+    
     #[test]
     fn test_extract_core_info() {
         // given
-        let path_to_msd_file = get_path_to_mps_cli_lanuse_library_top_msd_file();
+        let path_to_msd_file = "../mps_test_projects/mps_cli_lanuse_file_per_root/solutions/mps.cli.lanuse.library_top/mps.cli.lanuse.library_top.msd".to_string();
 
         //when
         let solution = extract_solution_core_info(path_to_msd_file);
@@ -95,7 +94,7 @@ mod tests {
     #[test]
     fn smoke_test_extract_core_info_for_solutions() {
         //given
-        let path_to_test_project = get_path_to_mps_cli_lanuse_file_per_root();
+        let path_to_test_project = "../mps_test_projects/mps_cli_lanuse_file_per_root".to_string();
 
         use std::time::Instant;
         let now = Instant::now();

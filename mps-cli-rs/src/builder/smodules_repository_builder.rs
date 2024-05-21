@@ -74,14 +74,12 @@ mod tests {
     use crate::builder::slanguage_builder::SLanguageBuilder;
     use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderCache;
     use crate::builder::smodules_repository_builder::{build_repo_from_directory, find_msd_files};
-    use crate::builder::test_helper::get_path_to_mps_cli_lanuse_file_per_root;
     use crate::model::smodel::SModel;
 
     #[test]
     fn test_find_msd_files() {
         //given
-        let src_dir = get_path_to_mps_cli_lanuse_file_per_root();
-
+        let src_dir = "../mps_test_projects/mps_cli_lanuse_file_per_root/".to_string();
         //when
         let msd_files = find_msd_files(&src_dir, 3);
 
@@ -92,7 +90,7 @@ mod tests {
     #[test]
     fn smoke_test_build_repo_from() {
         //given
-        let src_dir = get_path_to_mps_cli_lanuse_file_per_root();
+        let src_dir = "../mps_test_projects/mps_cli_lanuse_file_per_root/".to_string();
 
         use std::time::Instant;
         let now = Instant::now();
