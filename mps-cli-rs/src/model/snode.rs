@@ -69,27 +69,21 @@ impl<'a> SNode<'a> {
 
     pub fn set_parent(&self, parent : Rc<SNode<'a>>) {
         self.parent.replace(Some(parent));
-    }
+    }    
 
-    /*pub fn get_children(&self, name: &String) -> Option<&Vec<SNode>> {
-        return match self.children.keys().find(|&&containmetd_link| containmetd_link.name.eq(name)) {
-            None => None,
-            Some(containment_link) => self.children.get(containment_link)
-        };
-    }*/
-
-    pub fn get_descendants(&'a self, include_self: bool) -> Vec<Rc<SNode<'a>>> {
+    pub fn get_descendants(node : Rc<SNode<'a>>, include_self: bool) -> Vec<Rc<SNode<'a>>> {
         let mut descendants: Vec<Rc<SNode<'a>>> = Vec::new();
-        //if include_self { descendants.push(Rc::new(self)) }
-        //self.get_descendants_internal(&mut descendants);
+        if include_self { descendants.push(Rc::clone(&node)) }
+        Self::get_descendants_internal(node, &mut descendants);
         return descendants;
     }
 
-    fn get_descendants_internal(self, descendants: &mut Vec<Rc<SNode<'a>>>) {
-        /*let vectors_of_children = self.children.borrow().values().flatten().collect::<Vec<Rc<SNode>>>;
-        for child in ..flatten() {
-            descendants.push(child.as_ref());
-            child.get_descendants_internal(descendants);
-        }*/
+    fn get_descendants_internal(node : Rc<SNode<'a>>, descendants: &mut Vec<Rc<SNode<'a>>>) {        
+        let children = node.children.borrow();
+        let vectors_of_children : Vec<&Rc<SNode<'a>>> = children.values().flatten().collect();
+        for child in vectors_of_children {            
+            descendants.push(Rc::clone(child));
+            Self::get_descendants_internal(Rc::clone(child), descendants);
+        }
     }
 }

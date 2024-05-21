@@ -289,11 +289,12 @@ impl SModelBuilderFilePerRootPersistency {
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
+    use std::rc::Rc;
 
     use crate::builder::slanguage_builder::SLanguageBuilder;
     use crate::builder::smodel_builder_file_per_root_persistency::{SModelBuilderCache, SModelBuilderFilePerRootPersistency};
-    use crate::builder::test_helper::{get_path_to_model_mpsr_example_lib_file, get_path_to_mpsr_example_lib_file};
-    use crate::builder::test_helper::get_path_to_example_mpsr_model_files;
+    use crate::builder::test_helper::get_path_to_model_mpsr_example_lib_file;
+    use crate::model::snode::SNode;
 
     #[test]
     fn test_model_extract_core_info() {
@@ -301,7 +302,7 @@ mod tests {
         let path_to_model_file = PathBuf::from(get_path_to_model_mpsr_example_lib_file());
 
         //when
-        let mut model_builder_cache = SModelBuilderCache::new();
+        let model_builder_cache = SModelBuilderCache::new();
         let temp = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file, &model_builder_cache);
         let model = temp.borrow();
 
@@ -325,7 +326,7 @@ mod tests {
 
         //when
         let mut language_builder = SLanguageBuilder::new();
-        let mut model_builder_cache = SModelBuilderCache::new();
+        let model_builder_cache = SModelBuilderCache::new();
         let temp = SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
         let model = temp.as_ref().borrow();
 
@@ -343,7 +344,25 @@ mod tests {
         assert_eq!(tom_sawyer.get_property("isbn"), Some(String::from("4323r2")));
         assert_eq!(tom_sawyer.get_property("available"), Some(String::from("true")));
         assert_eq!(tom_sawyer.concept.name, String::from("mps.cli.landefs.library.structure.Book"));
-
-
     }
+
+    #[test]
+    fn test_navigate_model() {
+        // given
+        let path = "../mps_test_projects/mps_cli_lanuse_file_per_root/solutions/mps.cli.lanuse.library_top/models/mps.cli.lanuse.library_top.library_top"; 
+        let path_to_mpsr_file = PathBuf::from(path);
+
+        //when
+        let mut language_builder = SLanguageBuilder::new();
+        let model_builder_cache = SModelBuilderCache::new();
+        let temp = SModelBuilderFilePerRootPersistency::build_model(path_to_mpsr_file, &mut language_builder, &model_builder_cache);
+        let m = temp.as_ref().borrow();
+
+        //assert
+        let munich_library_root = m.root_nodes.first().unwrap();
+        assert_eq!(munich_library_root.get_property("name"), Some(String::from("munich_library")));
+        assert_eq!(SNode::get_descendants(Rc::clone(munich_library_root), true).len(), 8);
+        assert_eq!(munich_library_root.get_children("entities").len(), 4);
+    }
+
 }

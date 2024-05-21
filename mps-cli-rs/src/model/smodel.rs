@@ -24,12 +24,11 @@ impl<'a> SModel<'a> {
         }
     }
 
-    pub fn get_nodes(&'a self) -> Vec<&SNode<'a>> {
-        let mut nodes: Vec<&SNode> = Vec::new();
-        /*for root in &self.root_nodes {
-            nodes.push(root);
-            nodes.extend(root.get_descendants(false));
-        }*/
+    pub fn get_nodes(&'a self) -> Vec<Rc<SNode<'a>>> {
+        let mut nodes = Vec::new();
+        for root in self.root_nodes.iter() {            
+            nodes.extend(SNode::get_descendants(Rc::clone(root), true));
+        }
         return nodes;
     }
 
@@ -40,3 +39,4 @@ impl<'a> SModel<'a> {
         */None
     }
 }
+

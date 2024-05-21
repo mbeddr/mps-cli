@@ -67,8 +67,7 @@ pub fn find_msd_files(source_dir: &String, start_depth: usize) -> Vec<PathBuf> {
 
 
 #[cfg(test)]
-mod tests {
-    use core::num;
+mod tests {   
     use std::cell::RefCell;
     use std::rc::Rc;
 
