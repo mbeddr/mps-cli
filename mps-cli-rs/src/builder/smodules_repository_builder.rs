@@ -106,8 +106,13 @@ mod tests {
         let do_not_gen_models: Vec<&&Rc<RefCell<SModel>>> = models.iter().filter(|&model| model.as_ref().borrow().is_do_not_generate).collect();
         let number_of_solutions = repository.solutions.borrow().len();
         println!("Found {} solutions with {} models (out of which {} are set to do not generate) in {} ms", number_of_solutions, models.len(), do_not_gen_models.len(), required_time);
-        assert!(number_of_solutions > 1);
-        assert!(models.len() > 1);
+        assert_eq!(number_of_solutions, 2);
+        assert_eq!(models.len(), 3);
         assert_eq!(do_not_gen_models.len(), 1);
+
+        assert!(repository.find_solution_by_name("mps.cli.lanuse.library_top").is_some());
+
+        
+        //assert!(repository.get_model_by_uuid("r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed").is_some());
     }
 }

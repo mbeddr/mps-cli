@@ -1,10 +1,6 @@
-use std::borrow::{Borrow, BorrowMut};
+use std::borrow::BorrowMut;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::BufReader;
-use std::ops::DerefMut;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use std::io::Read;
 use roxmltree::{Document, Node};
 use std::rc::Rc;
@@ -12,7 +8,6 @@ use std::cell::RefCell;
 
 use walkdir::{DirEntry, WalkDir};
 
-use crate::builder::builder_helper::{convert_to_string, get_value_of_attribute_with_key, get_values_of_attributes_with_keys, panic_read_file, panic_unexpected_eof_read_file};
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
 use crate::model::smodel::SModel;
 use crate::model::snode::SNode;
@@ -57,14 +52,11 @@ impl<'a> SModelBuilderCache<'a> {
 pub struct SModelBuilderFilePerRootPersistency {}
 
 impl SModelBuilderFilePerRootPersistency {
-    pub(crate) fn new() -> Self {
-        SModelBuilderFilePerRootPersistency {}
-    }
-
+    
     pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> Rc<RefCell<SModel<'a>>> {
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
-        let mut model: Rc<RefCell<SModel<'a>>> = Self::extract_model_core_info(model_file, &model_builder_cache);
+        let model: Rc<RefCell<SModel<'a>>> = Self::extract_model_core_info(model_file, &model_builder_cache);
 
         let mpsr_file_walker = WalkDir::new(path_to_model).min_depth(1).max_depth(1);
         let mpsr_files = mpsr_file_walker.into_iter().filter(|entry| {
@@ -93,7 +85,7 @@ impl SModelBuilderFilePerRootPersistency {
 
         let file = std::fs::File::open(path_to_model_file.clone());  
         let mut s = String::new();
-        file.unwrap().read_to_string(&mut s);
+        let _ = file.unwrap().read_to_string(&mut s);
         let parse_res = roxmltree::Document::parse(&s);
         let document = parse_res.unwrap();
 
@@ -113,7 +105,7 @@ impl SModelBuilderFilePerRootPersistency {
             if do_not_generate_str == "true" { is_do_not_generate = true; }                                                        
         }
         
-        let mut my_model = model_builder_cache.get_model(name, uuid);
+        let my_model = model_builder_cache.get_model(name, uuid);
         my_model.as_ref().borrow_mut().path_to_model_file = path_to_model_file;
         my_model.as_ref().borrow_mut().is_do_not_generate = is_do_not_generate;
         my_model.as_ref().borrow_mut().is_file_per_root_persistency = true;
@@ -139,7 +131,7 @@ impl SModelBuilderFilePerRootPersistency {
         let file = std::fs::File::open(dir_entry.path().as_os_str());  
 
         let mut s = String::new();
-        file.unwrap().read_to_string(&mut s);
+        let _ = file.unwrap().read_to_string(&mut s);
         let parse_res = roxmltree::Document::parse_with_options(&s, roxmltree::ParsingOptions::default());
         
         let document = parse_res.unwrap();

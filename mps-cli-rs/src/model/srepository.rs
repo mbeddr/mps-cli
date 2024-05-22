@@ -2,15 +2,14 @@ use crate::model::slanguage::SLanguage;
 use crate::model::smodel::SModel;
 use crate::model::snode::SNode;
 use crate::model::ssolution::SSolution;
+use std::borrow::Borrow;
+use std::ops::Deref;
 use std::rc::Rc;
 use std::cell::RefCell;
 
 pub struct SRepository<'a> {
     pub solutions: RefCell<Vec<Rc<SSolution<'a>>>>,
     languages: RefCell<Vec<Rc<SLanguage>>>,
-
-    models: RefCell<Vec<Rc<SModel<'a>>>>,
-    nodes: RefCell<Vec<Rc<SNode<'a>>>>,
 }
 
 impl<'a> SRepository<'a> {
@@ -18,12 +17,10 @@ impl<'a> SRepository<'a> {
         SRepository {
             solutions : RefCell::new(solutions),
             languages : RefCell::new(languages),
-            models: RefCell::new(vec![]),
-            nodes: RefCell::new(vec![]),
         }
     }
 
-    pub fn find_solution_by_name(&self, name: &String) -> Option<Rc<SSolution<'a>>> {
+    pub fn find_solution_by_name(&self, name: &str) -> Option<Rc<SSolution<'a>>> {
         let solutions = self.solutions.borrow();
         let found_solution = solutions.iter().find(|&ssolution| ssolution.name.eq(name));
         if let Some(found_solution) = found_solution {
@@ -32,12 +29,16 @@ impl<'a> SRepository<'a> {
         None
     }
 
-    pub fn get_model_by_uuid(&self, uuid: &'a String) -> Option<Rc<SModel<'a>>> {
-        let models = self.models.borrow();
-        let res = models.iter().find(|&model| model.uuid.eq(uuid));
-        if let Some(res) = res {
-            return Some(Rc::clone(res));
+    /*pub fn get_model_by_uuid(&self, uuid: &str) -> Option<Rc<RefCell<SModel<'a>>>> {        
+        let solutions = self.solutions.borrow();
+        for sol in solutions.into_iter() {
+            let models = sol.models;
+            for m in models.iter() {
+                if (**m).borrow().uuid.eq(uuid) {
+                    return Some(Rc::clone(m));
+                }
+            }            
         }
         None
-    }    
+    }*/    
 }

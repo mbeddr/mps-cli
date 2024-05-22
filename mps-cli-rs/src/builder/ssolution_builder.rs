@@ -1,14 +1,9 @@
-use std::borrow::BorrowMut;
 use std::path::PathBuf;
 use std::time::Instant;
 
-use quick_xml::events::Event;
-use quick_xml::name::QName;
-use quick_xml::Reader;
+use std::io::Read;
 use walkdir::WalkDir;
 
-use crate::builder::builder_helper::convert_to_string;
-use crate::builder::builder_helper::panic_read_file;
 use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderFilePerRootPersistency;
 use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::model::ssolution::SSolution;
@@ -18,10 +13,10 @@ use super::smodel_builder_file_per_root_persistency::SModelBuilderCache;
 pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> SSolution<'a> {
     let now = Instant::now();
     
-    let path_to_msd_file = convert_to_string(&path_buf_to_msd_file);
+    let path_to_msd_file = path_buf_to_msd_file.to_str().unwrap().to_string();
     let mut solution: SSolution = extract_solution_core_info(path_to_msd_file);
     let solution_dir = path_buf_to_msd_file.parent().unwrap();
-    let model_dir = convert_to_string(&solution_dir.to_path_buf()) + "/models";
+    let model_dir = solution_dir.to_path_buf().to_str().unwrap().to_string() + "/models";
 
     let model_dir = WalkDir::new(model_dir).min_depth(1).max_depth(1);
     let mut models = vec![];
@@ -43,38 +38,21 @@ pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a
 
 fn extract_solution_core_info<'a>(path_to_msd_file: String) -> SSolution<'a> {
     //let solution_file = SolutionFile::new(&path_to_msd_file);
-    let mut msd_file_reader = Reader::from_file(&path_to_msd_file).unwrap();
-    let mut buf = Vec::new();
-    let mut name: String = "".to_string();
-    let mut uuid: String = "".to_string();
-    loop {
-        match msd_file_reader.read_event_into(&mut buf) {
-            Ok(Event::Start(e)) => {
-                match e.name().as_ref() {
-                    b"solution" => {
-                        for attribute in e.attributes() {
-                            let attribute = attribute.unwrap();
-                            match attribute.key {
-                                QName(b"name") => { name = attribute.unescape_value().unwrap().to_string() }
-                                QName(b"uuid") => { uuid = attribute.unescape_value().unwrap().to_string() }
-                                QName(_) => {}
-                            }
-                        }
-                        break;
-                    }
-                    _ => {}
-                }
-            }
-            Err(e) => panic_read_file(&mut msd_file_reader, e),
-            _ => {}
-        }
-    }
+
+    let file = std::fs::File::open(path_to_msd_file.clone());  
+    let mut s = String::new();
+    let _ = file.unwrap().read_to_string(&mut s);
+    let parse_res = roxmltree::Document::parse(&s);
+    let document = parse_res.unwrap();
+
+    let model_element = document.root_element();
+    let name = model_element.attributes().find(|a| a.name() == "name").unwrap().value().to_string();
+    let uuid = model_element.attributes().find(|a| a.name() == "uuid").unwrap().value().to_string();
     return SSolution::new(name, uuid, path_to_msd_file.clone());
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::builder::builder_helper::convert_to_string;
     use crate::builder::smodules_repository_builder::find_msd_files;
     use crate::builder::ssolution_builder::extract_solution_core_info;
     
@@ -102,7 +80,7 @@ mod tests {
         let msd_files = find_msd_files(&path_to_test_project, 3);
         let mut solutions = vec![];
         for msd_file in &msd_files {
-            let solution = extract_solution_core_info(convert_to_string(&msd_file));
+            let solution = extract_solution_core_info(msd_file.to_str().unwrap().to_string());
             solutions.push(solution);
         }
 
