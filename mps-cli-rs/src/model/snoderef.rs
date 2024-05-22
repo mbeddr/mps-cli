@@ -2,20 +2,27 @@ use crate::model::snode::SNode;
 use crate::model::srepository::SRepository;
 use std::rc::Rc;
 
-struct SNodeRef {
-    model_uuid: String,
-    node_uuid: String,
+pub struct SNodeRef<'a> {
+    pub to: String,
+    pub resolve_info: String,
+    referenced_node : Option<Rc<SNode<'a>>>,
 }
 
-impl SNodeRef {
-    pub fn new(model_uuid: String, node_uuid: String) -> Self {
+impl<'a> SNodeRef<'a> {
+    pub fn new(to: String, resolve_info: String) -> Self {
         SNodeRef {
-            model_uuid,
-            node_uuid,
+            to,
+            resolve_info,
+            referenced_node : None,
         }
     }
 
-    pub fn resolve<'a>(&'a self, repository: &'a SRepository<'a>) -> Option<Rc<SNode<'a>>> {
+    pub fn resolve(&'a self, repository: &'a SRepository<'a>) -> Option<Rc<SNode<'a>>> {
+        /*if self.referenced_node.is_some() {
+            return self.referenced_node.clone();
+        }*/
+
+
         /*return match repository.get_model_by_uuid(&self.model_uuid) {
             None => None,
             Some(model) => 

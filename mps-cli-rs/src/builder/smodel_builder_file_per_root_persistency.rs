@@ -336,6 +336,12 @@ mod tests {
         assert_eq!(tom_sawyer.get_property("isbn"), Some(String::from("4323r2")));
         assert_eq!(tom_sawyer.get_property("available"), Some(String::from("true")));
         assert_eq!(tom_sawyer.concept.name, String::from("mps.cli.landefs.library.structure.Book"));
+
+        let authors = tom_sawyer.get_children("authors");
+        let mark_twain = authors.first().unwrap().get_reference("person").unwrap();
+        assert_eq!(mark_twain.resolve_info, "Mark Twain");
+        assert_eq!(mark_twain.to, "q0v6:4Yb5JA31NUv");
+
     }
 
     #[test]

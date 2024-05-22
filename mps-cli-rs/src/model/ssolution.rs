@@ -5,7 +5,7 @@ use crate::model::smodel::SModel;
 pub struct SSolution<'a> {
     pub name: String,
     pub uuid: String,
-    path_to_module_file: String,
+    pub path_to_module_file: String,
     pub models: Vec<Rc<RefCell<SModel<'a>>>>,
 }
 

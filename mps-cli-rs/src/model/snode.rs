@@ -1,13 +1,9 @@
 use std::collections::HashMap;
 
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
+use crate::model::snoderef::SNodeRef;
 use std::rc::Rc;
 use std::cell::RefCell;
-
-pub struct SNodeRef {
-    to : String,
-    resolve : Option<String>,
-}
 
 pub struct SNode<'a> {
     pub id: String,
@@ -15,7 +11,7 @@ pub struct SNode<'a> {
     pub role_in_parent: Option<String>,
     properties: RefCell<HashMap<Rc<SProperty>, String>>,
     children: RefCell<HashMap<Rc<SContainmentLink>, Vec<Rc<SNode<'a>>>>>,
-    references: RefCell<HashMap<Rc<SReferenceLink>, Rc<SNodeRef>>>,
+    references: RefCell<HashMap<Rc<SReferenceLink>, Rc<SNodeRef<'a>>>>,
     pub parent: RefCell<Option<Rc<SNode<'a>>>>,
 }
 
@@ -46,10 +42,16 @@ impl<'a> SNode<'a> {
     }
 
     pub fn add_reference(&self, reference_link: &Rc<SReferenceLink>, to: String, resolve : Option<String>) {
-        self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef {
-            to : to,
-            resolve : resolve,
-        }));
+        self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(to, resolve.unwrap())));
+    }
+
+    pub fn get_reference(&self, ref_role_name: &str) -> Option<Rc<SNodeRef<'a>>> {
+        let references = self.references.borrow();
+        let entry = references.iter().find(|it| it.0.name.eq(ref_role_name));
+        match entry {
+            Some(e) => Some(e.1.clone()),
+            None => None
+        }
     }
 
     pub fn add_child(&self, cl: Rc<SContainmentLink>, node: Rc<SNode<'a>>) {
