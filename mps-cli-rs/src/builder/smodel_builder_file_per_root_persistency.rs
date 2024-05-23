@@ -84,6 +84,9 @@ impl SModelBuilderFilePerRootPersistency {
         let path_to_model_file = path_to_model.to_str().unwrap().to_string();        
 
         let file = std::fs::File::open(path_to_model_file.clone());  
+        if file.is_err() {
+            panic!("file not found '{}'", path_to_model_file);
+        }
         let mut s = String::new();
         let _ = file.unwrap().read_to_string(&mut s);
         let parse_res = roxmltree::Document::parse(&s);
@@ -132,15 +135,15 @@ impl SModelBuilderFilePerRootPersistency {
 
         let mut s = String::new();
         let _ = file.unwrap().read_to_string(&mut s);
-        let parse_res = roxmltree::Document::parse_with_options(&s, roxmltree::ParsingOptions::default());
-        
+        let parse_res = roxmltree::Document::parse(&s);
+          
         let document = parse_res.unwrap();
         Self::parse_imports(&document, model_builder_cache);
         Self::parse_registry(&document, language_builder, model_builder_cache);
         
         let node = document.root_element().children().find(|it| it.tag_name().name() == "node");
         let mut parent: Option<Rc<SNode>> = None;
-        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, &model_builder_cache))      
+        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, &model_builder_cache))    
     }
 
     fn parse_imports(document: &Document, model_builder_cache : &SModelBuilderCache) {
