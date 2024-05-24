@@ -2,14 +2,14 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::model::smodel::SModel;
 
-pub struct SSolution<'a> {
+pub struct SSolution {
     pub name: String,
     pub uuid: String,
     pub path_to_module_file: String,
-    pub models: Vec<Rc<RefCell<SModel<'a>>>>,
+    pub models: Vec<Rc<RefCell<SModel>>>,
 }
 
-impl<'a> SSolution<'a> {
+impl SSolution {
     pub fn new(name: String, uuid: String, path_to_module_file: String) -> Self {
         SSolution {
             name,

@@ -5,17 +5,17 @@ use crate::model::snoderef::SNodeRef;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-pub struct SNode<'a> {
+pub struct SNode {
     pub id: String,
     pub concept: Rc<SConcept>,
     pub role_in_parent: Option<String>,
     properties: RefCell<HashMap<Rc<SProperty>, String>>,
-    children: RefCell<HashMap<Rc<SContainmentLink>, Vec<Rc<SNode<'a>>>>>,
-    references: RefCell<HashMap<Rc<SReferenceLink>, Rc<SNodeRef<'a>>>>,
-    pub parent: RefCell<Option<Rc<SNode<'a>>>>,
+    children: RefCell<HashMap<Rc<SContainmentLink>, Vec<Rc<SNode>>>>,
+    references: RefCell<HashMap<Rc<SReferenceLink>, Rc<SNodeRef>>>,
+    pub parent: RefCell<Option<Rc<SNode>>>,
 }
 
-impl<'a> SNode<'a> {
+impl SNode {
     pub fn new(id: String, concept: Rc<SConcept>, role_in_parent: Option<String>) -> Self {
         SNode {
             id,
@@ -45,7 +45,7 @@ impl<'a> SNode<'a> {
         self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(to, resolve.unwrap_or("".to_string()))));
     }
 
-    pub fn get_reference(&self, ref_role_name: &str) -> Option<Rc<SNodeRef<'a>>> {
+    pub fn get_reference(&self, ref_role_name: &str) -> Option<Rc<SNodeRef>> {
         let references = self.references.borrow();
         let entry = references.iter().find(|it| it.0.name.eq(ref_role_name));
         match entry {
@@ -54,13 +54,13 @@ impl<'a> SNode<'a> {
         }
     }
 
-    pub fn add_child(&self, cl: Rc<SContainmentLink>, node: Rc<SNode<'a>>) {
+    pub fn add_child(&self, cl: Rc<SContainmentLink>, node: Rc<SNode>) {
         let mut children = self.children.borrow_mut();
         let vec = children.entry(Rc::clone(&cl)).or_insert(Vec::new());
         vec.push(Rc::clone(&node));
     }
 
-    pub fn get_children(&self, child_role_name: &str) -> Vec<Rc<SNode<'a>>> {
+    pub fn get_children(&self, child_role_name: &str) -> Vec<Rc<SNode>> {
         let children = self.children.borrow();
         let entry = children.iter().find(|it| it.0.name.eq(child_role_name));
         match entry {
@@ -69,20 +69,20 @@ impl<'a> SNode<'a> {
         }
     }
 
-    pub fn set_parent(&self, parent : Rc<SNode<'a>>) {
+    pub fn set_parent(&self, parent : Rc<SNode>) {
         self.parent.replace(Some(parent));
     }    
 
-    pub fn get_descendants(node : Rc<SNode<'a>>, include_self: bool) -> Vec<Rc<SNode<'a>>> {
-        let mut descendants: Vec<Rc<SNode<'a>>> = Vec::new();
+    pub fn get_descendants(node : Rc<SNode>, include_self: bool) -> Vec<Rc<SNode>> {
+        let mut descendants: Vec<Rc<SNode>> = Vec::new();
         if include_self { descendants.push(Rc::clone(&node)) }
         Self::get_descendants_internal(node, &mut descendants);
         return descendants;
     }
 
-    fn get_descendants_internal(node : Rc<SNode<'a>>, descendants: &mut Vec<Rc<SNode<'a>>>) {        
+    fn get_descendants_internal(node : Rc<SNode>, descendants: &mut Vec<Rc<SNode>>) {        
         let children = node.children.borrow();
-        let vectors_of_children : Vec<&Rc<SNode<'a>>> = children.values().flatten().collect();
+        let vectors_of_children : Vec<&Rc<SNode>> = children.values().flatten().collect();
         for child in vectors_of_children {            
             descendants.push(Rc::clone(child));
             Self::get_descendants_internal(Rc::clone(child), descendants);

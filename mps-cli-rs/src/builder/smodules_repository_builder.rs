@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -11,43 +12,33 @@ use crate::model::srepository::SRepository;
 use crate::model::ssolution::SSolution;
 use crate::model::slanguage::SLanguage;
 
-pub fn build_repo_from_directories<'a>(source_dirs: Vec<String>, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> SRepository<'a> {
+pub fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
     let mut all_solutions : Vec<Rc<SSolution>> = Vec::new();
+    let language_builder = RefCell::new(SLanguageBuilder::new());
 
-    for source_dir in source_dirs {
-        println!("loading models from directory: {}", source_dir);
-        let solutions = build_solutions_from(source_dir, &language_builder, model_builder_cache);
-        solutions.into_iter().for_each(|s| all_solutions.push(Rc::new(s)));
-    }
+    build_solutions_from(source_dir, &language_builder, & mut all_solutions);
+
     let mut languages: Vec<Rc<SLanguage>> = Vec::new();
-    language_builder.language_id_to_slanguage.borrow().values().for_each(|v| languages.push(Rc::clone(v)));
+    language_builder.borrow().language_id_to_slanguage.borrow().values().for_each(|v| languages.push(Rc::clone(v)));
     SRepository::new(all_solutions, languages)
 }
 
-
-pub fn build_repo_from_directory<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> SRepository<'a> {
-    let mut all_solutions : Vec<Rc<SSolution>> = Vec::new();
-    let solutions = build_solutions_from(source_dir, language_builder, model_builder_cache);
-    solutions.into_iter().for_each(|s| all_solutions.push(Rc::new(s)));
-
-    let mut languages: Vec<Rc<SLanguage>> = Vec::new();
-    language_builder.language_id_to_slanguage.borrow().values().for_each(|v| languages.push(Rc::clone(v)));
-    SRepository::new(all_solutions, languages)
-}
-
-fn build_solutions_from<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> Vec<SSolution<'a>> {
+fn build_solutions_from<'a>(source_dir: String, language_builder : &RefCell<SLanguageBuilder>, solutions : &'a mut Vec<Rc<SSolution>>) {
     let now = Instant::now();
-    let solutions = collect_modules_from_sources(source_dir.clone(), language_builder, model_builder_cache);
+    collect_modules_from_sources(source_dir.clone(), language_builder, solutions);
     let elapsed = now.elapsed();
     println!("{} milli seconds for handling {}", elapsed.as_millis(), source_dir);
-
-    return solutions;
 }
 
-pub fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> Vec<SSolution<'a>> {
+pub fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &RefCell<SLanguageBuilder>, solutions : &'a mut Vec<Rc<SSolution>>) {
+    let model_builder_cache = RefCell::new(SModelBuilderCache::new());
+
     let msd_files = find_msd_files(&source_dir, 3);
-    let solutions: Vec<SSolution> = msd_files.iter().map(|msd_file| build_solution(msd_file, language_builder, &model_builder_cache)).collect();
-    return solutions;
+    msd_files.iter()
+            .for_each(|msd_file| {
+                let s = build_solution(msd_file, language_builder, &model_builder_cache);
+                solutions.push(Rc::new(s));
+            });
 }
 
 pub fn find_msd_files(source_dir: &String, start_depth: usize) -> Vec<PathBuf> {
@@ -71,8 +62,6 @@ mod tests {
     use std::cell::RefCell;
     use std::rc::Rc;
 
-    use crate::builder::slanguage_builder::SLanguageBuilder;
-    use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderCache;
     use crate::builder::smodules_repository_builder::{build_repo_from_directory, find_msd_files};
     use crate::model::smodel::SModel;
 
@@ -95,9 +84,7 @@ mod tests {
         use std::time::Instant;
         let now = Instant::now();
         //when
-        let language_builder = SLanguageBuilder::new();
-        let model_builder_cache = SModelBuilderCache::new();
-        let repository = build_repo_from_directory(src_dir, &language_builder, &model_builder_cache);
+        let repository = build_repo_from_directory(src_dir);
 
         //then
         let required_time = now.elapsed().as_millis();

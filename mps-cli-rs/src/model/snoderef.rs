@@ -2,13 +2,13 @@ use crate::model::snode::SNode;
 use crate::model::srepository::SRepository;
 use std::rc::Rc;
 
-pub struct SNodeRef<'a> {
+pub struct SNodeRef {
     pub to: String,
     pub resolve_info: String,
-    referenced_node : Option<Rc<SNode<'a>>>,
+    referenced_node : Option<Rc<SNode>>,
 }
 
-impl<'a> SNodeRef<'a> {
+impl SNodeRef {
     pub fn new(to: String, resolve_info: String) -> Self {
         SNodeRef {
             to,
@@ -17,7 +17,7 @@ impl<'a> SNodeRef<'a> {
         }
     }
 
-    pub fn resolve(&'a self, repository: &'a SRepository<'a>) -> Option<Rc<SNode<'a>>> {
+    pub fn resolve(&self, repository: &SRepository) -> Option<Rc<SNode>> {
         /*if self.referenced_node.is_some() {
             return self.referenced_node.clone();
         }*/

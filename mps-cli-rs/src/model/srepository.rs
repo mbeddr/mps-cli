@@ -7,26 +7,23 @@ use std::ops::Deref;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-pub struct SRepository<'a> {
-    pub solutions: RefCell<Vec<Rc<SSolution<'a>>>>,
+pub struct SRepository {
+    pub solutions: RefCell<Vec<Rc<SSolution>>>,
     languages: RefCell<Vec<Rc<SLanguage>>>,
 }
 
-impl<'a> SRepository<'a> {
-    pub fn new(solutions: Vec<Rc<SSolution<'a>>>, languages: Vec<Rc<SLanguage>>) -> Self {
+impl SRepository {
+    pub fn new(solutions: Vec<Rc<SSolution>>, languages: Vec<Rc<SLanguage>>) -> Self {
         SRepository {
             solutions : RefCell::new(solutions),
             languages : RefCell::new(languages),
         }
     }
 
-    pub fn find_solution_by_name(&self, name: &str) -> Option<Rc<SSolution<'a>>> {
+    pub fn find_solution_by_name(&self, name: &str) -> Option<Rc<SSolution>> {
         let solutions = self.solutions.borrow();
         let found_solution = solutions.iter().find(|&ssolution| ssolution.name.eq(name));
-        if let Some(found_solution) = found_solution {
-            return Some(Rc::clone(found_solution));
-        }
-        None
+        found_solution.map(|s| Rc::clone(s))
     }
 
     /*pub fn get_model_by_uuid(&self, uuid: &str) -> Option<Rc<RefCell<SModel<'a>>>> {        

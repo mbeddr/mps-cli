@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -10,7 +11,7 @@ use crate::model::ssolution::SSolution;
 
 use super::smodel_builder_file_per_root_persistency::SModelBuilderCache;
 
-pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a SLanguageBuilder, model_builder_cache : &'a SModelBuilderCache<'a>) -> SSolution<'a> {
+pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &RefCell<SLanguageBuilder>, model_builder_cache : &RefCell<SModelBuilderCache>) -> SSolution {
     let now = Instant::now();
     
     let path_to_msd_file = path_buf_to_msd_file.to_str().unwrap().to_string();
@@ -36,7 +37,7 @@ pub fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &'a
     return solution;
 }
 
-fn extract_solution_core_info<'a>(path_to_msd_file: String) -> SSolution<'a> {
+fn extract_solution_core_info<'a>(path_to_msd_file: String) -> SSolution {
     //let solution_file = SolutionFile::new(&path_to_msd_file);
 
     let file = std::fs::File::open(path_to_msd_file.clone());  
