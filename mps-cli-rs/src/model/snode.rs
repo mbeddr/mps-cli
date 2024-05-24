@@ -42,7 +42,7 @@ impl<'a> SNode<'a> {
     }
 
     pub fn add_reference(&self, reference_link: &Rc<SReferenceLink>, to: String, resolve : Option<String>) {
-        self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(to, resolve.unwrap())));
+        self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(to, resolve.unwrap_or("".to_string()))));
     }
 
     pub fn get_reference(&self, ref_role_name: &str) -> Option<Rc<SNodeRef<'a>>> {
