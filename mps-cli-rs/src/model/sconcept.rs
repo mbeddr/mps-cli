@@ -5,9 +5,9 @@ use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SConcept {
-    pub(crate) name: String,
-    id: String,
-    pub(crate) properties: RefCell<HashMap<String, Rc<SProperty>>>,
+    pub name: String,
+    pub id: String,
+    pub properties: RefCell<HashMap<String, Rc<SProperty>>>,
     pub containment_links: RefCell<HashMap<String, Rc<SContainmentLink>>>,
     pub reference_links: RefCell<HashMap<String, Rc<SReferenceLink>>>,
 }
