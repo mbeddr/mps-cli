@@ -38,5 +38,14 @@ impl SModel {
         if let Some(nn) = n { return Some(Rc::clone(nn)); }
         None
     }
+
+    pub fn find_root(&self, name : &str) -> Option<Rc<SNode>> {
+        let root = self.root_nodes.iter().find(|r| if let Some(n) = r.get_property("name") { n == name } else { false });
+        if let Some(rn) = root {
+            Some(Rc::clone(rn))
+        } else {
+            None
+        }
+    }
 }
 

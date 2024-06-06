@@ -18,4 +18,12 @@ impl SSolution {
             models: vec![],
         }
     }
+
+    pub fn find_model(&self, name : &str) -> Option<Rc<RefCell<SModel>>> {
+        let model = self.models.iter().find(|m| m.borrow().name == name);
+        if let Some(model) = model {            
+            return Some(Rc::clone(model));
+        }
+        None
+    }
 }

@@ -26,6 +26,30 @@ impl SRepository {
         found_solution.map(|s| Rc::clone(s))
     }
 
+    pub fn find_model_by_name(&self, name: &str) -> Option<Rc<RefCell<SModel>>> {
+        let solutions = self.solutions.borrow();
+        for s in solutions.iter() {
+            for m in s.models.iter() {
+                if let Ok(model) = m.clone().try_borrow() { 
+                    println!("model {}", model.name);
+                    if model.name == name { return Some(Rc::clone(m)); }
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_all_models(&self) -> Vec<Rc<RefCell<SModel>>> {
+        let mut res : Vec<Rc<RefCell<SModel>>> = Vec::new();
+        let solutions = self.solutions.borrow();
+        for s in solutions.iter() {
+            for m in s.models.iter() {
+                res.push(Rc::clone(m));
+            }
+        }
+        res
+    }
+
     /*pub fn get_model_by_uuid(&self, uuid: &str) -> Option<Rc<RefCell<SModel<'a>>>> {        
         let solutions = self.solutions.borrow();
         for sol in solutions.into_iter() {
