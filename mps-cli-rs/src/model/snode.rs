@@ -41,8 +41,8 @@ impl SNode {
         }
     }
 
-    pub fn add_reference(&self, reference_link: &Rc<SReferenceLink>, to: String, resolve : Option<String>) {
-        self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(to, resolve.unwrap_or("".to_string()))));
+    pub fn add_reference(&self, reference_link: &Rc<SReferenceLink>, model_id : String, node_id : String, resolve : Option<String>) {
+        self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(model_id, node_id, resolve.unwrap_or("".to_string()))));
     }
 
     pub fn get_reference(&self, ref_role_name: &str) -> Option<Rc<SNodeRef>> {

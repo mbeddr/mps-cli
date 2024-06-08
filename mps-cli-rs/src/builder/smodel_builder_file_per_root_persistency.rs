@@ -1,4 +1,4 @@
-use std::borrow::BorrowMut;
+use std::borrow::{Borrow, BorrowMut};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::io::Read;
@@ -22,17 +22,19 @@ pub struct SModelBuilderCache {
     pub index_2_reference_link: RefCell<HashMap<String, Rc<SReferenceLink>>>,
     pub index_2_imported_model_uuid: RefCell<HashMap<String, String>>,
     pub index_2_model : RefCell<HashMap<String, Rc<RefCell<SModel>>>>,
+    pub current_model : RefCell<Option<Rc<RefCell<SModel>>>>,
 }
 
 impl SModelBuilderCache {
     pub fn new() -> Self {
         SModelBuilderCache {
-            index_2_concept: RefCell::new(HashMap::new()),
-            index_2_property: RefCell::new(HashMap::new()),
+            index_2_concept : RefCell::new(HashMap::new()),
+            index_2_property : RefCell::new(HashMap::new()),
             index_2_containment_link : RefCell::new(HashMap::new()),
             index_2_reference_link : RefCell::new(HashMap::new()),
-            index_2_imported_model_uuid: RefCell::new(HashMap::new()),
-            index_2_model: RefCell::new(HashMap::new()),
+            index_2_imported_model_uuid : RefCell::new(HashMap::new()),
+            index_2_model : RefCell::new(HashMap::new()),
+            current_model : RefCell::new(None),
         }
     }
 
@@ -57,6 +59,7 @@ impl SModelBuilderFilePerRootPersistency {
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
         let model: Rc<RefCell<SModel>> = Self::extract_model_core_info(model_file, model_builder_cache);
+        model_builder_cache.borrow_mut().current_model.replace(Some(Rc::clone(&model)));
 
         let mpsr_file_walker = WalkDir::new(path_to_model).min_depth(1).max_depth(1);
         let mpsr_files = mpsr_file_walker.into_iter().filter(|entry| {
@@ -270,7 +273,23 @@ impl SModelBuilderFilePerRootPersistency {
 
             let index_2_reference_links = model_builder_cache.index_2_reference_link.borrow();
             let reference_link = index_2_reference_links.get(&role.to_string()).unwrap();
-            current_node.add_reference(reference_link, to.to_string(), resolve);
+            
+            let mut model_id = String::from("");
+            let mut node_id = String::from("");
+            if let Some(index) = to.find(":") {
+                let model_index = &to[0..index];
+                let mm = model_builder_cache.index_2_imported_model_uuid.borrow();
+                model_id = String::from(mm.get(model_index).unwrap());
+                node_id = String::from(&to[index + 1..to.len()]);
+            } else {
+                let crt_model = model_builder_cache.current_model.borrow();
+                let m = crt_model.as_ref().unwrap();
+                let m = m.as_ref().borrow();
+                model_id = String::from(m.uuid.as_str());
+                node_id = String::from(to);
+            };
+
+            current_node.add_reference(reference_link, model_id, node_id, resolve);
         };
 
         let nodes = node.children().filter(|it| it.tag_name().name() == "node");

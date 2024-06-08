@@ -35,8 +35,10 @@ pub (crate) fn check_model_completeness(repo : &SRepository) {
     let authors = tom_sawyer.get_children("authors");
     let mark_twain = authors.first().unwrap().get_reference("person").unwrap();
     assert_eq!(mark_twain.resolve_info, "Mark Twain");
-    assert_eq!(mark_twain.to, "q0v6:4Yb5JA31NUv");
-
+    assert_eq!(mark_twain.model_id, "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed");
+    assert_eq!(mark_twain.node_id, "4Yb5JA31NUv");
+    assert!(mark_twain.resolve(repo).is_some());
+    
     // library_second_solution
     let library_second_solution = repo.find_solution_by_name("mps.cli.lanuse.library_second").unwrap();
     assert_eq!(library_second_solution.models.len(), 1);
