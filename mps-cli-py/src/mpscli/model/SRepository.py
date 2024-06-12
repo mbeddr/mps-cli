@@ -4,6 +4,7 @@ class SRepository:
     def __init__(self):
         self.solutions = []
         self.languages = []
+        self.uuid_2_model = {}
 
     def find_solution_by_name(self, name):
         for sol in self.solutions:
@@ -31,6 +32,12 @@ class SRepository:
                     return concept
         return None
 
+    def get_concepts(self):
+        res = []
+        for lan in self.languages:
+            res.extend(lan.concepts)
+        return res
+
     def get_nodes(self):
         res = []
         for sol in self.solutions:
@@ -38,9 +45,16 @@ class SRepository:
                 res.extend(mod.get_nodes())
         return res
 
+    def get_nodes_of_concept(self, concept_name):
+        res = []
+        for node in self.get_nodes():
+            if node.concept.name == concept_name:
+                res.append(node)
+        return res
+
     def get_model_by_uuid(self, uuid):
-        for sol in self.solutions:
-            for m in sol.models:
-                if m.uuid == uuid:
-                    return m
-        return None
+        if len(self.uuid_2_model) == 0:
+            for sol in self.solutions:
+                for m in sol.models:
+                    self.uuid_2_model[m.uuid] = m
+        return self.uuid_2_model.get(uuid)
