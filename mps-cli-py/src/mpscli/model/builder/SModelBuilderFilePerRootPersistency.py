@@ -24,7 +24,7 @@ class SModelBuilderFilePerRootPersistency(SModelBuilderBase):
         model_xml_node = tree.getroot()
         self.extract_imports_and_registry(model_xml_node)
         root_node = model_xml_node.find("node")
-        return self.extract_node(model, root_node)
+        return self.extract_node(model, root_node, None)
 
 
 

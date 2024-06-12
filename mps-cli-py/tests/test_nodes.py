@@ -25,6 +25,7 @@ class TestNodes(TestBase):
         self.assertEqual('4Yb5JA31NUu', root_node.uuid)
         self.assertEqual("mps.cli.landefs.people.structure.PersonsContainer", root_node.concept.name)
         self.assertEqual("_010_classical_authors", root_node.properties["name"])
+        self.assertEqual(None, root_node.parent)
 
     @parameterized.expand([('mps_cli_lanuse_file_per_root',
                             'mps.cli.lanuse.library_top.library_top'),
@@ -48,6 +49,7 @@ class TestNodes(TestBase):
         self.assertEqual("Tom Sawyer", tom_sawyer.get_property("name"))
         author_of_tom_sawyer = tom_sawyer.get_children("authors")[0].get_reference("person").resolve(self.repo)
         self.assertEqual("Mark Twain", author_of_tom_sawyer.get_property("name"))
+        self.assertEqual(root_node, tom_sawyer.parent)
 
 def get_name(node):
     return node.get_property("name")
