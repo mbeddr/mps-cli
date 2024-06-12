@@ -1,16 +1,17 @@
 
 class SNode:
 
-    def __init__(self, uuid, concept, role_in_parent):
+    def __init__(self, uuid, concept, role_in_parent, parent):
         self.uuid = uuid
         self.concept = concept
         self.role_in_parent = role_in_parent
         self.properties = {}
         self.references = {}
         self.children = []
+        self.parent = parent
 
     def get_property(self, name):
-        return self.properties[name]
+        return self.properties.get(name)
 
     def get_reference(self, name):
         return self.references[name]
