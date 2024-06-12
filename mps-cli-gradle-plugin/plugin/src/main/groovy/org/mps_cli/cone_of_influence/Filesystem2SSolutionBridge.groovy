@@ -25,7 +25,7 @@ class Filesystem2SSolutionBridge {
         boolean foundMissingModels = false
         Set<SModel> models = []
 
-        private boolean registerModulePath(Path path) {
+        private void registerModulePath(Path path) {
             if (Files.notExists(path)) {
                 foundMissingModules = true
             } else {
@@ -40,7 +40,7 @@ class Filesystem2SSolutionBridge {
             }
         }
 
-        private boolean registerModelPath(Path path) {
+        private void registerModelPath(Path path) {
             if (Files.notExists(path)) {
                 foundMissingModels = true
             } else {
@@ -55,7 +55,7 @@ class Filesystem2SSolutionBridge {
             }
         }
 
-        private boolean registerPath(Path path) {
+        private void registerPath(Path path) {
             def filename = path.getFileName().toString()
 
             if (filename.matches(modulePattern)) {

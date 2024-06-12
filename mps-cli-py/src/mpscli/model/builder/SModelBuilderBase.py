@@ -13,7 +13,7 @@ class SModelBuilderBase:
         self.index_2_reference_role = {}
         self.index_2_imported_model_uuid = {}
 
-    def extract_node(self, my_model, node_xml):
+    def extract_node(self, my_model, node_xml, parent):
         root_node_id = node_xml.get("id")
         root_node_concept = self.index_2_concept[node_xml.get("concept")]
         child_role_index = node_xml.get("role")
@@ -21,7 +21,7 @@ class SModelBuilderBase:
             child_role = None
         else:
             child_role = self.index_2_child_role_in_parent[child_role_index]
-        s_node = SNode(root_node_id, root_node_concept, child_role)
+        s_node = SNode(root_node_id, root_node_concept, child_role, parent)
         for property_xml_node in node_xml.findall("property"):
             property_role = property_xml_node.get("role")
             property_value = property_xml_node.get("value")
@@ -40,7 +40,7 @@ class SModelBuilderBase:
             ref_name = self.index_2_reference_role[ref_role]
             s_node.references[ref_name] = s_node_ref
         for child_node_xml in node_xml.findall("node"):
-            child_node = self.extract_node(my_model, child_node_xml)
+            child_node = self.extract_node(my_model, child_node_xml, s_node)
             s_node.children.append(child_node)
 
         return s_node
