@@ -23,3 +23,9 @@ The plugin has currently the following limitations:
 
 - `cd mps-cli-py`
 - `python -m unittest discover`
+
+### Build and upload to pypi.org
+
+- `increae version number`
+- `python3 -m build`
+- `python3 -m twine upload dist/*`
