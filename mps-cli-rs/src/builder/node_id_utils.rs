@@ -9,7 +9,7 @@ struct NodeIdEncodingUtils {
 }
 
 impl NodeIdEncodingUtils {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         let my_index_chars = String::from("0123456789abcdefghijklmnopqrstuvwxyz$_ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         let min_char = '$' as u8;
         let mut myCharToValue : HashMap<usize, usize> = HashMap::new();
@@ -27,7 +27,7 @@ impl NodeIdEncodingUtils {
         }
     }
 
-    pub fn decode(&self, uid_string : String) -> String {
+    pub(crate) fn decode(&self, uid_string : String) -> String {
         let mut res = 0;
         let bytes = uid_string.as_bytes();
         let mut c = bytes[0];

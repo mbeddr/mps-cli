@@ -41,6 +41,7 @@ impl SConcept {
         }
     }
 
+    #[allow(dead_code)]
     pub fn print_concept_details(&self) {
         let properties_string_vector: Vec<String> = self.properties.borrow().iter().map(|prop| format!("{} {}", prop.0, prop.1.name)).collect();
         let properties_info = properties_string_vector.join(", ");

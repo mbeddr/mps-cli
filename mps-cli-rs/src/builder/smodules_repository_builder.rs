@@ -12,7 +12,7 @@ use crate::model::srepository::SRepository;
 use crate::model::ssolution::SSolution;
 use crate::model::slanguage::SLanguage;
 
-pub fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
+pub(crate) fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
     let mut all_solutions : Vec<Rc<SSolution>> = Vec::new();
     let language_builder = RefCell::new(SLanguageBuilder::new());
 
@@ -30,7 +30,7 @@ fn build_solutions_from<'a>(source_dir: String, language_builder : &RefCell<SLan
     println!("{} milli seconds for handling {}", elapsed.as_millis(), source_dir);
 }
 
-pub fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &RefCell<SLanguageBuilder>, solutions : &'a mut Vec<Rc<SSolution>>) {
+fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &RefCell<SLanguageBuilder>, solutions : &'a mut Vec<Rc<SSolution>>) {
     let model_builder_cache = RefCell::new(SModelBuilderCache::new());
 
     let msd_files = find_msd_files(&source_dir, 3);
@@ -41,7 +41,7 @@ pub fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &
             });
 }
 
-pub fn find_msd_files(source_dir: &String, start_depth: usize) -> Vec<PathBuf> {
+fn find_msd_files(source_dir: &String, start_depth: usize) -> Vec<PathBuf> {
     let walk_dir: WalkDir = WalkDir::new(source_dir).max_depth(start_depth);
     let mut msd_files = Vec::new();
     for entry in walk_dir.into_iter() {

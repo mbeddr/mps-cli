@@ -7,7 +7,7 @@ license = "Eclipse Public License - v 2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-path = "src/mps_cli_lib.rs"
+path = "src/lib.rs"
 
 [features]
 default = []

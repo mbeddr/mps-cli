@@ -1,4 +1,4 @@
-use std::borrow::{Borrow, BorrowMut};
+use std::borrow::BorrowMut;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::io::Read;
@@ -26,7 +26,7 @@ pub struct SModelBuilderCache {
 }
 
 impl SModelBuilderCache {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         SModelBuilderCache {
             index_2_concept : RefCell::new(HashMap::new()),
             index_2_property : RefCell::new(HashMap::new()),
@@ -38,7 +38,7 @@ impl SModelBuilderCache {
         }
     }
 
-    pub fn get_model(&self, name : String, uuid : String) -> Rc<RefCell<SModel>> {
+    fn get_model(&self, name : String, uuid : String) -> Rc<RefCell<SModel>> {
         let mut i2m = self.index_2_model.borrow_mut();
         if let Some(model) = i2m.get(&uuid) { 
             Rc::clone(&model) 
@@ -274,8 +274,8 @@ impl SModelBuilderFilePerRootPersistency {
             let index_2_reference_links = model_builder_cache.index_2_reference_link.borrow();
             let reference_link = index_2_reference_links.get(&role.to_string()).unwrap();
             
-            let mut model_id = String::from("");
-            let mut node_id = String::from("");
+            let model_id : String;
+            let node_id  : String;
             if let Some(index) = to.find(":") {
                 let model_index = &to[0..index];
                 let mm = model_builder_cache.index_2_imported_model_uuid.borrow();
@@ -307,11 +307,8 @@ impl SModelBuilderFilePerRootPersistency {
 mod tests {
     use std::cell::RefCell;
     use std::path::PathBuf;
-    use std::rc::Rc;
 
-    use crate::builder::slanguage_builder::SLanguageBuilder;
     use crate::builder::smodel_builder_file_per_root_persistency::{SModelBuilderCache, SModelBuilderFilePerRootPersistency};
-    use crate::model::snode::SNode;
 
     #[test]
     fn test_model_extract_core_info() {
