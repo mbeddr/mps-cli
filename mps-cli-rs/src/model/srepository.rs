@@ -1,15 +1,12 @@
 use crate::model::slanguage::SLanguage;
 use crate::model::smodel::SModel;
-use crate::model::snode::SNode;
 use crate::model::ssolution::SSolution;
-use std::borrow::Borrow;
-use std::ops::Deref;
 use std::rc::Rc;
 use std::cell::RefCell;
 
 pub struct SRepository {
     pub solutions: RefCell<Vec<Rc<SSolution>>>,
-    languages: RefCell<Vec<Rc<SLanguage>>>,
+    pub languages: RefCell<Vec<Rc<SLanguage>>>,
 }
 
 impl SRepository {

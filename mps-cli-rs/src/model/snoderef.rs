@@ -6,7 +6,7 @@ pub struct SNodeRef {
     pub model_id: String,
     pub node_id: String,
     pub resolve_info: String,
-    referenced_node : Option<Rc<SNode>>,
+    pub referenced_node : Option<Rc<SNode>>,
 }
 
 impl SNodeRef {

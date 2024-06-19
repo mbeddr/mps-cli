@@ -42,4 +42,13 @@ pub (crate) fn check_model_completeness(repo : &SRepository) {
     // library_second_solution
     let library_second_solution = repo.find_solution_by_name("mps.cli.lanuse.library_second").unwrap();
     assert_eq!(library_second_solution.models.len(), 1);
+
+    // languages
+    let languages = repo.languages.borrow();
+    assert_eq!(languages.len(), 3);
+    assert!(languages.iter().find(|l| l.name.eq("mps.cli.landefs.library")).is_some());
+    let people_lan = languages.iter().find(|l| l.name.eq("mps.cli.landefs.people"));
+    assert!(people_lan.is_some());
+    assert_eq!(people_lan.unwrap().id, "a7aaae55-aa5e-4a05-b2d0-013745658efa");
+    assert!(languages.iter().find(|l| l.name.eq("jetbrains.mps.lang.core")).is_some());
 }

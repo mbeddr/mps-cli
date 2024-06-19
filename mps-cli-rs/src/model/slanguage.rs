@@ -2,7 +2,6 @@ use crate::model::sconcept::SConcept;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Clone)]
 pub struct SLanguage {
     pub name: String,
     pub id: String,

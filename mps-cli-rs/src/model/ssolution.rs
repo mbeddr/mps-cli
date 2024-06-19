@@ -19,7 +19,6 @@ impl SSolution {
         }
     }
 
-    #[allow(dead_code)]
     pub fn find_model(&self, name : &str) -> Option<Rc<RefCell<SModel>>> {
         let model = self.models.iter().find(|m| m.borrow().name == name);
         if let Some(model) = model {            
