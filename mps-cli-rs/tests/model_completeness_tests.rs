@@ -44,7 +44,7 @@ pub (crate) fn check_model_completeness(repo : &SRepository) {
     assert_eq!(library_second_solution.models.len(), 1);
 
     // languages
-    let languages = repo.languages.borrow();
+    let languages = &repo.languages;
     assert_eq!(languages.len(), 3);
     assert!(languages.iter().find(|l| l.name.eq("mps.cli.landefs.library")).is_some());
     let people_lan = languages.iter().find(|l| l.name.eq("mps.cli.landefs.people"));

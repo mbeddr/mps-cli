@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -87,11 +86,10 @@ mod tests {
         let repository = build_repo_from_directory(src_dir);
 
         //then
-        let required_time = now.elapsed().as_millis();
-        let solutions = repository.solutions.borrow();
-        let models: Vec<&Rc<RefCell<SModel>>> = solutions.iter().flat_map(|solution| &solution.models).collect();
+        let required_time = now.elapsed().as_millis();        
+        let models: Vec<&Rc<RefCell<SModel>>> = repository.solutions.iter().flat_map(|solution| &solution.models).collect();
         let do_not_gen_models: Vec<&&Rc<RefCell<SModel>>> = models.iter().filter(|&model| model.as_ref().borrow().is_do_not_generate).collect();
-        let number_of_solutions = repository.solutions.borrow().len();
+        let number_of_solutions = repository.solutions.len();
         println!("Found {} solutions with {} models (out of which {} are set to do not generate) in {} ms", number_of_solutions, models.len(), do_not_gen_models.len(), required_time);
         assert_eq!(number_of_solutions, 2);
         assert_eq!(models.len(), 3);
