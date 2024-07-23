@@ -7,27 +7,25 @@ use crate::model::slanguage::SLanguage;
 
 
 pub(crate) struct SLanguageBuilder {
-    pub language_id_to_slanguage: RefCell<HashMap<String, Rc<SLanguage>>>,
-    pub concept_id_to_concept : RefCell<HashMap<String, Rc<SConcept>>>,
+    pub language_id_to_slanguage: HashMap<String, Rc<SLanguage>>,
+    pub concept_id_to_concept : HashMap<String, Rc<SConcept>>,
 }
 
 impl<'a> SLanguageBuilder {
     pub(crate) fn new() -> Self {
         SLanguageBuilder {
-            language_id_to_slanguage: RefCell::new(HashMap::new()),
-            concept_id_to_concept: RefCell::new(HashMap::new()),
+            language_id_to_slanguage: HashMap::new(),
+            concept_id_to_concept: HashMap::new(),
         }
     }
 
-    pub(crate) fn get_or_build_language(&self, language_id: &String, language_name: &String) -> Rc<SLanguage> {
-        let mut l = self.language_id_to_slanguage.borrow_mut();
-        let res = l.entry(language_id.to_string()).or_insert_with(|| Rc::new(SLanguage::new(language_name.to_string(), language_id.to_string())));
+    pub(crate) fn get_or_build_language(&mut self, language_id: &String, language_name: &String) -> Rc<SLanguage> {        
+        let res = self.language_id_to_slanguage.entry(language_id.to_string()).or_insert_with(|| Rc::new(SLanguage::new(language_name.to_string(), language_id.to_string())));
         Rc::clone(res)
     }
 
-    pub(crate) fn get_or_create_concept(&'a self, language: Rc<SLanguage>, concept_id: &str, concept_name: &str) -> Rc<SConcept> {
-        let mut concept_id_to_concept = self.concept_id_to_concept.borrow_mut();
-        let concept = concept_id_to_concept.get(concept_id);
+    pub(crate) fn get_or_create_concept(&mut self, language: Rc<SLanguage>, concept_id: &str, concept_name: &str) -> Rc<SConcept> {        
+        let concept = self.concept_id_to_concept.get(concept_id);
         if let Some(c) = concept {
             return Rc::clone(c);
         }
@@ -35,7 +33,7 @@ impl<'a> SLanguageBuilder {
         let mut concepts = language.concepts.borrow_mut();
         let concept = SConcept::new(concept_name.to_string(), concept_id.to_string());
         let rc = Rc::new(concept);
-        concept_id_to_concept.insert(concept_id.to_string(), rc.clone());
+        self.concept_id_to_concept.insert(concept_id.to_string(), rc.clone());
         concepts.push(rc.clone());
         rc
     }

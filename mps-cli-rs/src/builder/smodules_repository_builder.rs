@@ -14,23 +14,23 @@ use crate::model::slanguage::SLanguage;
 
 pub(crate) fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
     let mut all_solutions : Vec<Rc<SSolution>> = Vec::new();
-    let language_builder = RefCell::new(SLanguageBuilder::new());
+    let mut language_builder = SLanguageBuilder::new();
 
-    build_solutions_from(source_dir, &language_builder, & mut all_solutions);
+    build_solutions_from(source_dir, &mut language_builder, & mut all_solutions);
 
     let mut languages: Vec<Rc<SLanguage>> = Vec::new();
-    language_builder.borrow().language_id_to_slanguage.borrow().values().for_each(|v| languages.push(Rc::clone(v)));
+    language_builder.language_id_to_slanguage.values().for_each(|v| languages.push(Rc::clone(v)));
     SRepository::new(all_solutions, languages)
 }
 
-fn build_solutions_from<'a>(source_dir: String, language_builder : &RefCell<SLanguageBuilder>, solutions : &'a mut Vec<Rc<SSolution>>) {
+fn build_solutions_from<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<Rc<SSolution>>) {
     let now = Instant::now();
     collect_modules_from_sources(source_dir.clone(), language_builder, solutions);
     let elapsed = now.elapsed();
     println!("{} milli seconds for handling {}", elapsed.as_millis(), source_dir);
 }
 
-fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &RefCell<SLanguageBuilder>, solutions : &'a mut Vec<Rc<SSolution>>) {
+fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<Rc<SSolution>>) {
     let model_builder_cache = RefCell::new(SModelBuilderCache::new());
 
     let msd_files = find_msd_files(&source_dir, 3);

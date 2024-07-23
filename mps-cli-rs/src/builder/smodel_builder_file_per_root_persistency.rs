@@ -55,7 +55,7 @@ pub struct SModelBuilderFilePerRootPersistency {}
 
 impl SModelBuilderFilePerRootPersistency {
     
-    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &RefCell<SLanguageBuilder>, model_builder_cache : &RefCell<SModelBuilderCache>) -> Rc<RefCell<SModel>> {
+    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &mut SLanguageBuilder, model_builder_cache : &RefCell<SModelBuilderCache>) -> Rc<RefCell<SModel>> {
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
         let model: Rc<RefCell<SModel>> = Self::extract_model_core_info(model_file, model_builder_cache);
@@ -133,7 +133,7 @@ impl SModelBuilderFilePerRootPersistency {
         my_model.clone()
     }
 
-    fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &RefCell<SLanguageBuilder>, model_builder_cache : &RefCell<SModelBuilderCache>) -> Option<Rc<SNode>> {        
+    fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &mut SLanguageBuilder, model_builder_cache : &RefCell<SModelBuilderCache>) -> Option<Rc<SNode>> {        
         let file = std::fs::File::open(dir_entry.path().as_os_str());  
 
         let mut s = String::new();
@@ -142,11 +142,11 @@ impl SModelBuilderFilePerRootPersistency {
           
         let document = parse_res.unwrap();
         Self::parse_imports(&document, &model_builder_cache);
-        Self::parse_registry(&document, &language_builder, &model_builder_cache);
+        Self::parse_registry(&document, language_builder, &model_builder_cache);
         
         let node = document.root_element().children().find(|it| it.tag_name().name() == "node");
         let mut parent: Option<Rc<SNode>> = None;
-        Some(Self::parse_node(&mut parent, &node.unwrap(), &(language_builder.borrow()), &(model_builder_cache.borrow())))    
+        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, &(model_builder_cache.borrow())))    
     }
 
     fn parse_imports(document: &Document, model_builder_cache : &RefCell<SModelBuilderCache>) {
@@ -170,8 +170,7 @@ impl SModelBuilderFilePerRootPersistency {
         }
     }
 
-    fn parse_registry<'a>(document: &Document, language_builder : &RefCell<SLanguageBuilder>, model_builder_cache : &RefCell<SModelBuilderCache>) {
-        let language_builder = language_builder.borrow();
+    fn parse_registry<'a>(document: &Document, language_builder : &mut SLanguageBuilder, model_builder_cache : &RefCell<SModelBuilderCache>) {        
         let model_builder_cache = model_builder_cache.borrow();
         let model_element = document.root_element();
         let registry_element = model_element.children().find(|c| c.tag_name().name() == "registry");
