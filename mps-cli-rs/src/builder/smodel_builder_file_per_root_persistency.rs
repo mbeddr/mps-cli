@@ -238,15 +238,8 @@ impl SModelBuilderFilePerRootPersistency {
             },
             None => None,
         };
-        let current_node : Rc<SNode> = Rc::new(SNode::new(node_id.to_string(), Rc::clone(my_concept), role_human_readable));
+        let mut current_node = SNode::new(node_id.to_string(), Rc::clone(my_concept), role_human_readable);
         
-        if let Some(parent) = parent_node {
-            let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
-            let cl = index_2_containment_link.get(&role.unwrap());
-            parent.borrow_mut().add_child(Rc::clone(cl.unwrap()), Rc::clone(&current_node));
-            current_node.set_parent(Rc::clone(parent));
-        };
-
         let properties = node.children().filter(|it| it.tag_name().name() == "property");
         for property in properties {
             let role = property.attributes().find(|a| a.name() == "role").unwrap().value();
@@ -292,12 +285,25 @@ impl SModelBuilderFilePerRootPersistency {
             current_node.add_reference(reference_link, model_id, node_id, resolve);
         };
 
-        let nodes = node.children().filter(|it| it.tag_name().name() == "node");
-        for node in nodes {
-            Self::parse_node(&mut Some(Rc::clone(&current_node)), &node, language_builder, model_builder_cache);
+        let current_node_rc : Rc<SNode>;
+
+        if let Some(parent) = parent_node {
+            let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
+            let cl = index_2_containment_link.get(&role.unwrap());
+            current_node.set_parent(Rc::clone(parent));
+            current_node_rc = Rc::new(current_node);
+            parent.borrow_mut().add_child(Rc::clone(cl.unwrap()), Rc::clone(&current_node_rc));
+        } else {
+            current_node_rc = Rc::new(current_node);
         };
 
-        Rc::clone(&current_node)
+        let nodes = node.children().filter(|it| it.tag_name().name() == "node");
+        for node in nodes {
+            Self::parse_node(&mut Some(Rc::clone(&current_node_rc)), &node, language_builder, model_builder_cache);
+        };
+
+
+        Rc::clone(&current_node_rc)
     }
 
 

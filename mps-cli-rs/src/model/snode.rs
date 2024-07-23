@@ -9,10 +9,10 @@ pub struct SNode {
     pub id: String,
     pub concept: Rc<SConcept>,
     pub role_in_parent: Option<String>,
-    properties: RefCell<HashMap<Rc<SProperty>, String>>,
+    properties: HashMap<Rc<SProperty>, String>,
     children: RefCell<HashMap<Rc<SContainmentLink>, Vec<Rc<SNode>>>>,
-    references: RefCell<HashMap<Rc<SReferenceLink>, Rc<SNodeRef>>>,
-    pub parent: RefCell<Option<Rc<SNode>>>,
+    references: HashMap<Rc<SReferenceLink>, Rc<SNodeRef>>,
+    pub parent: Option<Rc<SNode>>,
 }
 
 impl SNode {
@@ -21,33 +21,31 @@ impl SNode {
             id,
             concept,
             role_in_parent,
-            properties: RefCell::new(HashMap::new()),
+            properties: HashMap::new(),
             children: RefCell::new(HashMap::new()),
-            references: RefCell::new(HashMap::new()),
-            parent: RefCell::new(None),
+            references: HashMap::new(),
+            parent: None,
         }
     }
 
-    pub fn add_property(&self, property: &Rc<SProperty>, value: String) {
-        self.properties.borrow_mut().insert(Rc::clone(property), value);
+    pub fn add_property(&mut self, property: &Rc<SProperty>, value: String) {
+        self.properties.insert(Rc::clone(property), value);
     }
 
-    pub fn get_property(&self, property_name: &str) -> Option<String> {
-        let properties = self.properties.borrow();
-        let entry = properties.iter().find(|it| it.0.name.eq(property_name));
+    pub fn get_property(&self, property_name: &str) -> Option<String> {        
+        let entry = self.properties.iter().find(|it| it.0.name.eq(property_name));
         return match entry {
             Some(key_val) => { Some(String::clone(key_val.1)) }
             None => None
         }
     }
 
-    pub fn add_reference(&self, reference_link: &Rc<SReferenceLink>, model_id : String, node_id : String, resolve : Option<String>) {
-        self.references.borrow_mut().insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(model_id, node_id, resolve.unwrap_or("".to_string()))));
+    pub fn add_reference(&mut self, reference_link: &Rc<SReferenceLink>, model_id : String, node_id : String, resolve : Option<String>) {
+        self.references.insert(Rc::clone(reference_link), Rc::new(SNodeRef::new(model_id, node_id, resolve.unwrap_or("".to_string()))));
     }
 
-    pub fn get_reference(&self, ref_role_name: &str) -> Option<Rc<SNodeRef>> {
-        let references = self.references.borrow();
-        let entry = references.iter().find(|it| it.0.name.eq(ref_role_name));
+    pub fn get_reference(&self, ref_role_name: &str) -> Option<Rc<SNodeRef>> {        
+        let entry = self.references.iter().find(|it| it.0.name.eq(ref_role_name));
         match entry {
             Some(e) => Some(e.1.clone()),
             None => None
@@ -69,8 +67,8 @@ impl SNode {
         }
     }
 
-    pub fn set_parent(&self, parent : Rc<SNode>) {
-        self.parent.replace(Some(parent));
+    pub fn set_parent(&mut self, parent : Rc<SNode>) {
+        self.parent = Some(parent);
     }    
 
     pub fn get_descendants(node : Rc<SNode>, include_self: bool) -> Vec<Rc<SNode>> {
