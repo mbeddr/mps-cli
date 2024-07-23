@@ -11,7 +11,7 @@ use crate::model::ssolution::SSolution;
 
 use super::smodel_builder_file_per_root_persistency::SModelBuilderCache;
 
-pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &mut SLanguageBuilder, model_builder_cache : &RefCell<SModelBuilderCache>) -> SSolution {
+pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> SSolution {
     let now = Instant::now();
     
     let path_to_msd_file = path_buf_to_msd_file.to_str().unwrap().to_string();

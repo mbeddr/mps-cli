@@ -31,12 +31,12 @@ fn build_solutions_from<'a>(source_dir: String, language_builder : &mut SLanguag
 }
 
 fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<Rc<SSolution>>) {
-    let model_builder_cache = RefCell::new(SModelBuilderCache::new());
+    let mut model_builder_cache = SModelBuilderCache::new();
 
     let msd_files = find_msd_files(&source_dir, 3);
     msd_files.iter()
             .for_each(|msd_file| {
-                let s = build_solution(msd_file, language_builder, &model_builder_cache);
+                let s = build_solution(msd_file, language_builder, &mut model_builder_cache);
                 solutions.push(Rc::new(s));
             });
 }

@@ -16,35 +16,34 @@ use super::slanguage_builder::SLanguageBuilder;
 
 #[derive(Clone)]
 pub struct SModelBuilderCache {
-    pub index_2_concept: RefCell<HashMap<String, Rc<SConcept>>>,
-    pub index_2_property: RefCell<HashMap<String, Rc<SProperty>>>,
-    pub index_2_containment_link: RefCell<HashMap<String, Rc<SContainmentLink>>>,
-    pub index_2_reference_link: RefCell<HashMap<String, Rc<SReferenceLink>>>,
-    pub index_2_imported_model_uuid: RefCell<HashMap<String, String>>,
-    pub index_2_model : RefCell<HashMap<String, Rc<RefCell<SModel>>>>,
-    pub current_model : RefCell<Option<Rc<RefCell<SModel>>>>,
+    pub index_2_concept: HashMap<String, Rc<SConcept>>,
+    pub index_2_property: HashMap<String, Rc<SProperty>>,
+    pub index_2_containment_link: HashMap<String, Rc<SContainmentLink>>,
+    pub index_2_reference_link: HashMap<String, Rc<SReferenceLink>>,
+    pub index_2_imported_model_uuid: HashMap<String, String>,
+    pub index_2_model : HashMap<String, Rc<RefCell<SModel>>>,
+    pub current_model : Option<Rc<RefCell<SModel>>>,
 }
 
 impl SModelBuilderCache {
     pub(crate) fn new() -> Self {
         SModelBuilderCache {
-            index_2_concept : RefCell::new(HashMap::new()),
-            index_2_property : RefCell::new(HashMap::new()),
-            index_2_containment_link : RefCell::new(HashMap::new()),
-            index_2_reference_link : RefCell::new(HashMap::new()),
-            index_2_imported_model_uuid : RefCell::new(HashMap::new()),
-            index_2_model : RefCell::new(HashMap::new()),
-            current_model : RefCell::new(None),
+            index_2_concept : HashMap::new(),
+            index_2_property : HashMap::new(),
+            index_2_containment_link : HashMap::new(),
+            index_2_reference_link : HashMap::new(),
+            index_2_imported_model_uuid : HashMap::new(),
+            index_2_model : HashMap::new(),
+            current_model : None,
         }
     }
 
-    fn get_model(&self, name : String, uuid : String) -> Rc<RefCell<SModel>> {
-        let mut i2m = self.index_2_model.borrow_mut();
-        if let Some(model) = i2m.get(&uuid) { 
+    fn get_model(&mut self, name : String, uuid : String) -> Rc<RefCell<SModel>> {        
+        if let Some(model) = self.index_2_model.get(&uuid) { 
             Rc::clone(&model) 
         } else {
             let temp = Rc::new(RefCell::new(SModel::new(name.clone(), uuid.clone())));
-            i2m.insert(uuid, temp.clone());
+            self.index_2_model.insert(uuid, temp.clone());
             temp.clone()  
         }
     }
@@ -55,11 +54,11 @@ pub struct SModelBuilderFilePerRootPersistency {}
 
 impl SModelBuilderFilePerRootPersistency {
     
-    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &mut SLanguageBuilder, model_builder_cache : &RefCell<SModelBuilderCache>) -> Rc<RefCell<SModel>> {
+    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Rc<RefCell<SModel>> {
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
         let model: Rc<RefCell<SModel>> = Self::extract_model_core_info(model_file, model_builder_cache);
-        model_builder_cache.borrow_mut().current_model.replace(Some(Rc::clone(&model)));
+        model_builder_cache.current_model = Some(Rc::clone(&model));
 
         let mpsr_file_walker = WalkDir::new(path_to_model).min_depth(1).max_depth(1);
         let mpsr_files = mpsr_file_walker.into_iter().filter(|entry| {
@@ -83,7 +82,7 @@ impl SModelBuilderFilePerRootPersistency {
         return model;
     }
 
-    fn extract_model_core_info<'a>(path_to_model: PathBuf, model_builder_cache : &RefCell<SModelBuilderCache>) -> Rc<RefCell<SModel>> {
+    fn extract_model_core_info<'a>(path_to_model: PathBuf, model_builder_cache : &mut SModelBuilderCache) -> Rc<RefCell<SModel>> {
         let path_to_model_file = path_to_model.to_str().unwrap().to_string();        
 
         let file = std::fs::File::open(path_to_model_file.clone());  
@@ -110,8 +109,7 @@ impl SModelBuilderFilePerRootPersistency {
             let do_not_generate_str = do_not_generate_attribute.attributes().find(|aa| aa.name() == "value").unwrap().value();        
             if do_not_generate_str == "true" { is_do_not_generate = true; }                                                        
         }
-        
-        let model_builder_cache = model_builder_cache.borrow();
+          
         let my_model = model_builder_cache.get_model(name, uuid);
         my_model.as_ref().borrow_mut().path_to_model_file = path_to_model_file;
         my_model.as_ref().borrow_mut().is_do_not_generate = is_do_not_generate;
@@ -133,7 +131,7 @@ impl SModelBuilderFilePerRootPersistency {
         my_model.clone()
     }
 
-    fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &mut SLanguageBuilder, model_builder_cache : &RefCell<SModelBuilderCache>) -> Option<Rc<SNode>> {        
+    fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Option<Rc<SNode>> {        
         let file = std::fs::File::open(dir_entry.path().as_os_str());  
 
         let mut s = String::new();
@@ -141,16 +139,15 @@ impl SModelBuilderFilePerRootPersistency {
         let parse_res = roxmltree::Document::parse(&s);
           
         let document = parse_res.unwrap();
-        Self::parse_imports(&document, &model_builder_cache);
-        Self::parse_registry(&document, language_builder, &model_builder_cache);
+        Self::parse_imports(&document, model_builder_cache);
+        Self::parse_registry(&document, language_builder, model_builder_cache);
         
         let node = document.root_element().children().find(|it| it.tag_name().name() == "node");
         let mut parent: Option<Rc<SNode>> = None;
-        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, &(model_builder_cache.borrow())))    
+        Some(Self::parse_node(&mut parent, &node.unwrap(), language_builder, model_builder_cache))    
     }
 
-    fn parse_imports(document: &Document, model_builder_cache : &RefCell<SModelBuilderCache>) {
-        let model_builder_cache = model_builder_cache.borrow();
+    fn parse_imports(document: &Document, model_builder_cache : &mut SModelBuilderCache) {
         let model_element = document.root_element();
         let imports_element = model_element.children().find(|c| c.tag_name().name() == "imports");
         match imports_element {
@@ -162,7 +159,7 @@ impl SModelBuilderFilePerRootPersistency {
                         let uuid = import.attributes().find(|a| a.name() == "ref").unwrap().value();
 
                         let uuid = uuid.to_string()[0..uuid.find('(').unwrap()].to_string();
-                        model_builder_cache.index_2_imported_model_uuid.borrow_mut().insert(index.to_string(), uuid);
+                        model_builder_cache.index_2_imported_model_uuid.insert(index.to_string(), uuid);
                     }
                 }
             },
@@ -170,8 +167,7 @@ impl SModelBuilderFilePerRootPersistency {
         }
     }
 
-    fn parse_registry<'a>(document: &Document, language_builder : &mut SLanguageBuilder, model_builder_cache : &RefCell<SModelBuilderCache>) {        
-        let model_builder_cache = model_builder_cache.borrow();
+    fn parse_registry<'a>(document: &Document, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) {                
         let model_element = document.root_element();
         let registry_element = model_element.children().find(|c| c.tag_name().name() == "registry");
         match registry_element {
@@ -219,19 +215,19 @@ impl SModelBuilderFilePerRootPersistency {
     }
 
 
-    fn parse_node<'a>(parent_node : &mut Option<Rc<SNode>>, node: &Node, language_builder : &SLanguageBuilder, model_builder_cache : &SModelBuilderCache) -> Rc<SNode> {
+    fn parse_node<'a>(parent_node : &mut Option<Rc<SNode>>, node: &Node, language_builder : &SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Rc<SNode> {
         let node_attrs = node.attributes();
         let concept_index = (node_attrs.clone()).into_iter().find(|a| a.name() == "concept").unwrap().value();
         let node_id = (node_attrs.clone()).into_iter().find(|a| a.name() == "id").unwrap().value();
         let role = (node_attrs.clone()).into_iter().find(|a| a.name() == "role");
         let role = if role.is_none() { None } else { Some(role.unwrap().value().to_string()) };
 
-        let index_2_concept = model_builder_cache.index_2_concept.borrow();
+        let index_2_concept = &model_builder_cache.index_2_concept;
         
         let my_concept = index_2_concept.get(concept_index).unwrap();
         let role_human_readable = match role.clone() {
             Some(role_string) => {
-                let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
+                let index_2_containment_link = &model_builder_cache.index_2_containment_link;
                 let r = index_2_containment_link.get(&role_string).unwrap();
                 Some(String::from(&r.name))
             },
@@ -243,7 +239,7 @@ impl SModelBuilderFilePerRootPersistency {
         for property in properties {
             let role = property.attributes().find(|a| a.name() == "role").unwrap().value();
             let value = property.attributes().find(|a| a.name() == "value").unwrap().value();
-            let index_2_properties = model_builder_cache.index_2_property.borrow();
+            let index_2_properties = &model_builder_cache.index_2_property;
             let prop = index_2_properties.get(role).unwrap();
             current_node.add_property(prop, value.to_string());
         };
@@ -263,18 +259,18 @@ impl SModelBuilderFilePerRootPersistency {
                 None
             };
 
-            let index_2_reference_links = model_builder_cache.index_2_reference_link.borrow();
+            let index_2_reference_links = &model_builder_cache.index_2_reference_link;
             let reference_link = index_2_reference_links.get(&role.to_string()).unwrap();
             
             let model_id : String;
             let node_id  : String;
             if let Some(index) = to.find(":") {
                 let model_index = &to[0..index];
-                let mm = model_builder_cache.index_2_imported_model_uuid.borrow();
+                let mm = &model_builder_cache.index_2_imported_model_uuid;
                 model_id = String::from(mm.get(model_index).unwrap());
                 node_id = String::from(&to[index + 1..to.len()]);
             } else {
-                let crt_model = model_builder_cache.current_model.borrow();
+                let crt_model = &model_builder_cache.current_model;
                 let m = crt_model.as_ref().unwrap();
                 let m = m.as_ref().borrow();
                 model_id = String::from(m.uuid.as_str());
@@ -287,7 +283,7 @@ impl SModelBuilderFilePerRootPersistency {
         let current_node_rc : Rc<SNode>;
 
         if let Some(parent) = parent_node {
-            let index_2_containment_link = model_builder_cache.index_2_containment_link.borrow();
+            let index_2_containment_link = &model_builder_cache.index_2_containment_link;
             let cl = index_2_containment_link.get(&role.unwrap());
             current_node.set_parent(Rc::clone(parent));
             current_node_rc = Rc::new(current_node);
@@ -322,8 +318,8 @@ mod tests {
         let path_to_model_file = PathBuf::from(path);
 
         //when
-        let model_builder_cache = RefCell::new(SModelBuilderCache::new());
-        let temp = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file, &model_builder_cache);
+        let mut model_builder_cache = SModelBuilderCache::new();
+        let temp = SModelBuilderFilePerRootPersistency::extract_model_core_info(path_to_model_file, &mut model_builder_cache);
         let model = temp.borrow();
 
         //assert
