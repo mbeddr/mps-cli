@@ -18,7 +18,8 @@ pub(crate) fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
     build_solutions_from(source_dir, &mut language_builder, & mut all_solutions);
 
     let mut languages: Vec<Rc<SLanguage>> = Vec::new();
-    language_builder.language_id_to_slanguage.values().for_each(|v| languages.push(Rc::clone(v)));
+    let slanguages = language_builder.language_id_to_slanguage.into_inner();
+    slanguages.values().for_each(|v| languages.push(Rc::clone(v)));
     SRepository::new(all_solutions, languages)
 }
 
