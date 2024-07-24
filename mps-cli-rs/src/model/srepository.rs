@@ -5,12 +5,12 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 pub struct SRepository {
-    pub solutions: Vec<Rc<SSolution>>,
+    pub solutions: Vec<SSolution>,
     pub languages: Vec<Rc<SLanguage>>,
 }
 
 impl SRepository {
-    pub fn new(solutions: Vec<Rc<SSolution>>, languages: Vec<Rc<SLanguage>>) -> Self {
+    pub fn new(solutions: Vec<SSolution>, languages: Vec<Rc<SLanguage>>) -> Self {
         SRepository {
             solutions : solutions,
             languages : languages,
@@ -18,9 +18,8 @@ impl SRepository {
     }
 
     #[allow(dead_code)]
-    pub fn find_solution_by_name(&self, name: &str) -> Option<Rc<SSolution>> {        
-        let found_solution = self.solutions.iter().find(|&ssolution| ssolution.name.eq(name));
-        found_solution.map(|s| Rc::clone(s))
+    pub fn find_solution_by_name(&self, name: &str) -> Option<&SSolution> {        
+        self.solutions.iter().find(|&ssolution| ssolution.name.eq(name))
     }
 
     #[allow(dead_code)]

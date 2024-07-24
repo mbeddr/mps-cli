@@ -12,7 +12,7 @@ use crate::model::ssolution::SSolution;
 use crate::model::slanguage::SLanguage;
 
 pub(crate) fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
-    let mut all_solutions : Vec<Rc<SSolution>> = Vec::new();
+    let mut all_solutions : Vec<SSolution> = Vec::new();
     let mut language_builder = SLanguageBuilder::new();
 
     build_solutions_from(source_dir, &mut language_builder, & mut all_solutions);
@@ -22,21 +22,21 @@ pub(crate) fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
     SRepository::new(all_solutions, languages)
 }
 
-fn build_solutions_from<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<Rc<SSolution>>) {
+fn build_solutions_from<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let now = Instant::now();
     collect_modules_from_sources(source_dir.clone(), language_builder, solutions);
     let elapsed = now.elapsed();
     println!("{} milli seconds for handling {}", elapsed.as_millis(), source_dir);
 }
 
-fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<Rc<SSolution>>) {
+fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let mut model_builder_cache = SModelBuilderCache::new();
 
     let msd_files = find_msd_files(&source_dir, 3);
     msd_files.iter()
             .for_each(|msd_file| {
                 let s = build_solution(msd_file, language_builder, &mut model_builder_cache);
-                solutions.push(Rc::new(s));
+                solutions.push(s);
             });
 }
 
