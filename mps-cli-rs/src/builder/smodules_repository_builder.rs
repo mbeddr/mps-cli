@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -14,29 +15,28 @@ use crate::model::slanguage::SLanguage;
 pub(crate) fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
     let mut all_solutions : Vec<SSolution> = Vec::new();
     let mut language_builder = SLanguageBuilder::new();
+    let mut language_id_to_slanguage : HashMap<String, SLanguage> = HashMap::new(); 
 
-    build_solutions_from(source_dir, &mut language_builder, & mut all_solutions);
+    build_solutions_from(source_dir, &mut language_id_to_slanguage, &mut language_builder, & mut all_solutions);
 
-    let mut languages: Vec<Rc<SLanguage>> = Vec::new();
-    let slanguages = language_builder.language_id_to_slanguage.into_inner();
-    slanguages.values().for_each(|v| languages.push(Rc::clone(v)));
-    SRepository::new(all_solutions, languages)
+    let all_languages = language_id_to_slanguage.into_iter().map(|(_k, lan)| lan).collect();
+    SRepository::new(all_solutions, all_languages)
 }
 
-fn build_solutions_from<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
+fn build_solutions_from<'a>(source_dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let now = Instant::now();
-    collect_modules_from_sources(source_dir.clone(), language_builder, solutions);
+    collect_modules_from_sources(source_dir.clone(), language_id_to_slanguage, language_builder, solutions);
     let elapsed = now.elapsed();
     println!("{} milli seconds for handling {}", elapsed.as_millis(), source_dir);
 }
 
-fn collect_modules_from_sources<'a>(source_dir: String, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
+fn collect_modules_from_sources<'a>(source_dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let mut model_builder_cache = SModelBuilderCache::new();
 
     let msd_files = find_msd_files(&source_dir, 3);
     msd_files.iter()
             .for_each(|msd_file| {
-                let s = build_solution(msd_file, language_builder, &mut model_builder_cache);
+                let s = build_solution(msd_file, language_id_to_slanguage, language_builder, &mut model_builder_cache);
                 solutions.push(s);
             });
 }

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -6,11 +7,12 @@ use walkdir::WalkDir;
 
 use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderFilePerRootPersistency;
 use crate::builder::slanguage_builder::SLanguageBuilder;
+use crate::model::slanguage::SLanguage;
 use crate::model::ssolution::SSolution;
 
 use super::smodel_builder_file_per_root_persistency::SModelBuilderCache;
 
-pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> SSolution {
+pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> SSolution {
     let now = Instant::now();
     
     let path_to_msd_file = path_buf_to_msd_file.to_str().unwrap().to_string();
@@ -23,7 +25,7 @@ pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_builde
     for model_entry in model_dir.into_iter() {
         let path = model_entry.unwrap().into_path();
         if path.is_dir() {
-            let model = SModelBuilderFilePerRootPersistency::build_model(path, language_builder, model_builder_cache);
+            let model = SModelBuilderFilePerRootPersistency::build_model(path, language_id_to_slanguage, language_builder, model_builder_cache);
             models.push(model)
         } else {
             println!("ERROR: model entry {} is a file not a directory. Cannot be parsed as only file per root persistency is supported.", path.to_str().unwrap().to_string())

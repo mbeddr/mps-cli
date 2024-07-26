@@ -9,9 +9,11 @@ use std::cell::RefCell;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
+use crate::model::slanguage::SLanguage;
 use crate::model::smodel::SModel;
 use crate::model::snode::SNode;
 use super::slanguage_builder::SLanguageBuilder;
+use super::slanguage_builder::get_or_build_language;
 
 
 #[derive(Clone)]
@@ -54,7 +56,7 @@ pub struct SModelBuilderFilePerRootPersistency {}
 
 impl SModelBuilderFilePerRootPersistency {
     
-    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Rc<RefCell<SModel>> {
+    pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Rc<RefCell<SModel>> {
         let mut model_file = path_to_model.clone();
         model_file.push(".model");
         let model: Rc<RefCell<SModel>> = Self::extract_model_core_info(model_file, model_builder_cache);
@@ -73,7 +75,7 @@ impl SModelBuilderFilePerRootPersistency {
         let mut roots = vec!();
         for mpsr_file in mpsr_files.into_iter() {
             let file = mpsr_file.unwrap();
-            if let Some(r) = Self::build_root_node_from_file(file, language_builder, model_builder_cache) {
+            if let Some(r) = Self::build_root_node_from_file(file, language_id_to_slanguage, language_builder, model_builder_cache) {
                 roots.push(r);
             }
         };
@@ -131,7 +133,7 @@ impl SModelBuilderFilePerRootPersistency {
         my_model.clone()
     }
 
-    fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Option<Rc<SNode>> {        
+    fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Option<Rc<SNode>> {        
         let file = std::fs::File::open(dir_entry.path().as_os_str());  
 
         let mut s = String::new();
@@ -140,7 +142,7 @@ impl SModelBuilderFilePerRootPersistency {
           
         let document = parse_res.unwrap();
         Self::parse_imports(&document, model_builder_cache);
-        Self::parse_registry(&document, language_builder, model_builder_cache);
+        Self::parse_registry(&document, language_id_to_slanguage, language_builder, model_builder_cache);
         
         let node = document.root_element().children().find(|it| it.tag_name().name() == "node");
         let mut parent: Option<Rc<SNode>> = None;
@@ -167,7 +169,7 @@ impl SModelBuilderFilePerRootPersistency {
         }
     }
 
-    fn parse_registry<'a>(document: &Document, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) {                
+    fn parse_registry<'a>(document: &Document, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) {                
         let model_element = document.root_element();
         let registry_element = model_element.children().find(|c| c.tag_name().name() == "registry");
         match registry_element {
@@ -178,14 +180,14 @@ impl SModelBuilderFilePerRootPersistency {
                     let language_id = language.attributes().find(|a| a.name() == "id").unwrap().value();
                     let language_name = language.attributes().find(|a| a.name() == "name").unwrap().value();
                     
-                    let lang = language_builder.get_or_build_language(&language_id.to_string(), &language_name.to_string());
+                    let lang = get_or_build_language(&language_id.to_string(), &language_name.to_string(), language_id_to_slanguage);
                     for concept in language.children() {
                         if concept.tag_name().name() != "concept" { continue; }
                                                 
                         let concept_id = concept.attributes().find(|a| a.name() == "id").unwrap().value();
                         let concept_name = concept.attributes().find(|a| a.name() == "name").unwrap().value();
                         let concept_index = concept.attributes().find(|a| a.name() == "index").unwrap().value();
-                        let conc = language_builder.get_or_create_concept(Rc::clone(&lang), concept_id, concept_name);
+                        let conc = language_builder.get_or_create_concept(lang, concept_id, concept_name);
                         model_builder_cache.index_2_concept.borrow_mut().insert(concept_index.to_string(), Rc::clone(&conc));
                        
                         for properties_links_references in concept.children() {

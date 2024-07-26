@@ -6,11 +6,11 @@ use std::cell::RefCell;
 
 pub struct SRepository {
     pub solutions: Vec<SSolution>,
-    pub languages: Vec<Rc<SLanguage>>,
+    pub languages: Vec<SLanguage>,
 }
 
 impl SRepository {
-    pub fn new(solutions: Vec<SSolution>, languages: Vec<Rc<SLanguage>>) -> Self {
+    pub fn new(solutions: Vec<SSolution>, languages: Vec<SLanguage>) -> Self {
         SRepository {
             solutions : solutions,
             languages : languages,
