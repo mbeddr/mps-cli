@@ -5,7 +5,7 @@ use std::rc::Rc;
 pub struct SLanguage {
     pub name: String,
     pub id: String,
-    pub concepts: RefCell<Vec<Rc<SConcept>>>,
+    pub concepts: Vec<Rc<SConcept>>,
 }
 
 impl SLanguage {
@@ -13,7 +13,7 @@ impl SLanguage {
         SLanguage {
             name,
             id,
-            concepts: RefCell::new(vec![]),
+            concepts: vec![],
         }
     }
 }

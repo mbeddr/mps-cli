@@ -24,11 +24,10 @@ impl<'a> SLanguageBuilder {
             return Rc::clone(c);
         }
        
-        let mut concepts = language.concepts.borrow_mut();
         let concept = SConcept::new(concept_name.to_string(), concept_id.to_string());
         let rc = Rc::new(concept);
         concept_id_to_concept.insert(concept_id.to_string(), rc.clone());
-        concepts.push(rc.clone());
+        language.concepts.push(rc.clone());
         rc
     }
 
