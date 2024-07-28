@@ -13,8 +13,9 @@ pub (crate) fn check_model_completeness(repo : &SRepository, library_top_solutio
     let library_top_model = repo.find_model_by_name((library_top_solution_name.to_owned() + ".library_top").as_str()).unwrap();
     let library_top_model : Ref<SModel> = library_top_model.try_borrow().ok().unwrap();
     assert_eq!(library_top_model.root_nodes.len(), 2);
-    let munich_library_root = library_top_model.root_nodes.first().unwrap();
-    assert_eq!(munich_library_root.get_property("name"), Some(String::from("munich_library")));
+    let munich_library_root = library_top_model.root_nodes.iter().find(|r| r.get_property("name") == Some(String::from("munich_library")));
+    assert!(munich_library_root.is_some());
+    let munich_library_root = munich_library_root.unwrap();
     assert_eq!(SNode::get_descendants(Rc::clone(munich_library_root), true).len(), 8);
     assert_eq!(munich_library_root.get_children("entities").len(), 4);
 
