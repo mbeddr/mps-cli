@@ -18,10 +18,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: setup toolchain
-        uses: hecrj/setup-rust-action@v1
-        with:
-          rust-version: stable
-
-    - name: cargo test
-        run: cargo test 
+    - uses: hecrj/setup-rust-action@v1
+      with:
+        rust-version: stable
+    - name: Run tests
+      run: cargo test
