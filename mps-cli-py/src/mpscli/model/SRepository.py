@@ -4,6 +4,7 @@ class SRepository:
     def __init__(self):
         self.solutions = []
         self.languages = []
+        self.uuid_2_model = {}
 
     def find_solution_by_name(self, name):
         for sol in self.solutions:
@@ -52,8 +53,8 @@ class SRepository:
         return res
 
     def get_model_by_uuid(self, uuid):
-        for sol in self.solutions:
-            for m in sol.models:
-                if m.uuid == uuid:
-                    return m
-        return None
+        if len(self.uuid_2_model) == 0:
+            for sol in self.solutions:
+                for m in sol.models:
+                    self.uuid_2_model[m.uuid] = m
+        return self.uuid_2_model.get(uuid)
