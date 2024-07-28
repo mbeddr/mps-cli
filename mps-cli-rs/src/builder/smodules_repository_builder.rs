@@ -11,28 +11,28 @@ use crate::model::srepository::SRepository;
 use crate::model::ssolution::SSolution;
 use crate::model::slanguage::SLanguage;
 
-pub(crate) fn build_repo_from_directory<'a>(source_dir: String) -> SRepository {
+pub(crate) fn build_repo_from_directory<'a>(dir: String) -> SRepository {
     let mut all_solutions : Vec<SSolution> = Vec::new();
     let mut language_builder = SLanguageBuilder::new();
     let mut language_id_to_slanguage : HashMap<String, SLanguage> = HashMap::new(); 
 
-    build_solutions_from(source_dir, &mut language_id_to_slanguage, &mut language_builder, & mut all_solutions);
+    build_solutions_from(dir, &mut language_id_to_slanguage, &mut language_builder, & mut all_solutions);
 
     let all_languages = language_id_to_slanguage.into_iter().map(|(_k, lan)| lan).collect();
     SRepository::new(all_solutions, all_languages)
 }
 
-fn build_solutions_from<'a>(source_dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
+fn build_solutions_from<'a>(dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let now = Instant::now();
-    collect_modules_from_sources(source_dir.clone(), language_id_to_slanguage, language_builder, solutions);
+    collect_modules_from_sources(dir.clone(), language_id_to_slanguage, language_builder, solutions);
     let elapsed = now.elapsed();
-    println!("{} milli seconds for handling {}", elapsed.as_millis(), source_dir);
+    println!("{} milli seconds for handling {}", elapsed.as_millis(), dir);
 }
 
 fn collect_modules_from_sources<'a>(source_dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let mut model_builder_cache = SModelBuilderCache::new();
 
-    let msd_files = find_msd_files(&source_dir, 3);
+    let msd_files = find_files_with_extension(&source_dir, "msd");
     msd_files.iter()
             .for_each(|msd_file| {
                 let s = build_solution(msd_file, language_id_to_slanguage, language_builder, &mut model_builder_cache);
@@ -40,14 +40,14 @@ fn collect_modules_from_sources<'a>(source_dir: String, language_id_to_slanguage
             });
 }
 
-fn find_msd_files(source_dir: &String, start_depth: usize) -> Vec<PathBuf> {
-    let walk_dir: WalkDir = WalkDir::new(source_dir).max_depth(start_depth);
+fn find_files_with_extension(source_dir: &String, searched_ext : &str) -> Vec<PathBuf> {
+    let walk_dir: WalkDir = WalkDir::new(source_dir);
     let mut msd_files = Vec::new();
     for entry in walk_dir.into_iter() {
         let dir_entry = entry.unwrap();
         let path_buf = dir_entry.into_path();
         if let Some(ext) = path_buf.extension() {
-            if ext == "msd" {
+            if ext == searched_ext {
                 msd_files.push(path_buf)
             }
         }
@@ -61,7 +61,7 @@ mod tests {
     use std::cell::RefCell;
     use std::rc::Rc;
 
-    use crate::builder::smodules_repository_builder::{build_repo_from_directory, find_msd_files};
+    use crate::builder::smodules_repository_builder::{build_repo_from_directory, find_files_with_extension};
     use crate::model::smodel::SModel;
 
     #[test]
@@ -69,7 +69,7 @@ mod tests {
         //given
         let src_dir = "../mps_test_projects/mps_cli_lanuse_file_per_root/".to_string();
         //when
-        let msd_files = find_msd_files(&src_dir, 3);
+        let msd_files = find_files_with_extension(&src_dir, "msd");
 
         //then
         assert_eq!(msd_files.len(), 2);
