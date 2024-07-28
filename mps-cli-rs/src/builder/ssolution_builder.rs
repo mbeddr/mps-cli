@@ -5,7 +5,8 @@ use std::time::Instant;
 use std::io::Read;
 use walkdir::WalkDir;
 
-use crate::builder::smodel_builder_file_per_root_persistency::build_model;
+use crate::builder::smodel_builder_file_per_root_persistency;
+use crate::builder::smodel_builder_default_persistency;
 use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::model::slanguage::SLanguage;
 use crate::model::ssolution::SSolution;
@@ -24,12 +25,12 @@ pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_id_to_
     let mut models = vec![];
     for model_entry in model_dir.into_iter() {
         let path = model_entry.unwrap().into_path();
-        if path.is_dir() {
-            let model = build_model(path, language_id_to_slanguage, language_builder, model_builder_cache);
-            models.push(model)
+        let model = if path.is_dir() {
+            smodel_builder_file_per_root_persistency::build_model(path, language_id_to_slanguage, language_builder, model_builder_cache)
         } else {
-            println!("ERROR: model entry {} is a file not a directory. Cannot be parsed as only file per root persistency is supported.", path.to_str().unwrap().to_string())
-        }
+            smodel_builder_default_persistency::build_model(path, language_id_to_slanguage, language_builder, model_builder_cache)
+        };
+        models.push(model)
     }
 
     solution.models.extend(models);

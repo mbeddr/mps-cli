@@ -12,7 +12,6 @@ pub(crate) struct SModelBuilderCache {
     pub index_2_reference_link: HashMap<String, Rc<SReferenceLink>>,
     pub index_2_imported_model_uuid: HashMap<String, String>,
     pub index_2_model : HashMap<String, Rc<RefCell<SModel>>>,
-    pub current_model : Option<Rc<RefCell<SModel>>>,
 }
 
 impl SModelBuilderCache {
@@ -24,8 +23,7 @@ impl SModelBuilderCache {
             index_2_reference_link : HashMap::new(),
             index_2_imported_model_uuid : HashMap::new(),
             index_2_model : HashMap::new(),
-            current_model : None,
-        }
+         }
     }
 
     fn get_model(&mut self, name : String, uuid : String) -> Rc<RefCell<SModel>> {        

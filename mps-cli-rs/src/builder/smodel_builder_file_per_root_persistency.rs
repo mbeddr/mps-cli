@@ -21,8 +21,7 @@ pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_id_to_slanguage: 
     let mut model_file = path_to_model.clone();
     model_file.push(".model");
     let model: Rc<RefCell<SModel>> = extract_model_core_info(model_file, model_builder_cache);
-    model_builder_cache.current_model = Some(Rc::clone(&model));
-
+    
     let mpsr_file_walker = WalkDir::new(path_to_model).min_depth(1).max_depth(1);
     let mpsr_files = mpsr_file_walker.into_iter().filter(|entry| {
         if entry.is_ok() {
@@ -36,7 +35,7 @@ pub(crate) fn build_model<'a>(path_to_model: PathBuf, language_id_to_slanguage: 
     let mut roots = vec!();
     for mpsr_file in mpsr_files.into_iter() {
         let file = mpsr_file.unwrap();
-        if let Some(r) = build_root_node_from_file(file, language_id_to_slanguage, language_builder, model_builder_cache) {
+        if let Some(r) = build_root_node_from_file(file, language_id_to_slanguage, language_builder, model_builder_cache, &model) {
             roots.push(r);
         }
     };
@@ -61,7 +60,7 @@ fn extract_model_core_info<'a>(path_to_model: PathBuf, model_builder_cache : &mu
 }
 
 
-fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Option<Rc<SNode>> {        
+fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache, crt_model : &Rc<RefCell<SModel>>) -> Option<Rc<SNode>> {        
     let file = std::fs::File::open(dir_entry.path().as_os_str());  
 
     let mut s = String::new();
@@ -74,7 +73,7 @@ fn build_root_node_from_file<'a>(dir_entry: DirEntry, language_id_to_slanguage: 
         
     let node = document.root_element().children().find(|it| it.tag_name().name() == "node");
     let mut parent: Option<Rc<SNode>> = None;
-    Some(parse_node(&mut parent, &node.unwrap(), language_builder, model_builder_cache))    
+    Some(parse_node(&mut parent, &node.unwrap(), language_builder, model_builder_cache, crt_model))    
 }
 
 fn parse_imports(document: &Document, model_builder_cache : &mut SModelBuilderCache) {
@@ -145,7 +144,7 @@ fn parse_registry<'a>(document: &Document, language_id_to_slanguage: &'a mut Has
 }
 
 
-fn parse_node<'a>(parent_node : &mut Option<Rc<SNode>>, node: &Node, language_builder : &SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> Rc<SNode> {
+fn parse_node<'a>(parent_node : &mut Option<Rc<SNode>>, node: &Node, language_builder : &SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache, crt_model : &'a Rc<RefCell<SModel>>) -> Rc<SNode> {
     let node_attrs = node.attributes();
     let concept_index = (node_attrs.clone()).into_iter().find(|a| a.name() == "concept").unwrap().value();
     let node_id = (node_attrs.clone()).into_iter().find(|a| a.name() == "id").unwrap().value();
@@ -200,10 +199,7 @@ fn parse_node<'a>(parent_node : &mut Option<Rc<SNode>>, node: &Node, language_bu
             model_id = String::from(mm.get(model_index).unwrap());
             node_id = String::from(&to[index + 1..to.len()]);
         } else {
-            let crt_model = &model_builder_cache.current_model;
-            let m = crt_model.as_ref().unwrap();
-            let m = m.as_ref().borrow();
-            model_id = String::from(m.uuid.as_str());
+            model_id = String::from(crt_model.borrow().uuid.as_str());
             node_id = String::from(to);
         };
 
@@ -224,7 +220,7 @@ fn parse_node<'a>(parent_node : &mut Option<Rc<SNode>>, node: &Node, language_bu
 
     let nodes = node.children().filter(|it| it.tag_name().name() == "node");
     for node in nodes {
-        parse_node(&mut Some(Rc::clone(&current_node_rc)), &node, language_builder, model_builder_cache);
+        parse_node(&mut Some(Rc::clone(&current_node_rc)), &node, language_builder, model_builder_cache, crt_model);
     };
 
     Rc::clone(&current_node_rc)
