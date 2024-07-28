@@ -3,14 +3,14 @@ use std::{cell::Ref, rc::Rc};
 use mps_cli::model::{smodel::SModel, srepository::SRepository, snode::SNode};
 
 #[cfg(test)]
-pub (crate) fn check_model_completeness(repo : &SRepository) {
+pub (crate) fn check_model_completeness(repo : &SRepository, library_top_solution_name : &str, library_second_solution_name : &str) {
     //library_first_solution
-    let library_first_solution = repo.find_solution_by_name("mps.cli.lanuse.library_top").unwrap();
+    let library_first_solution = repo.find_solution_by_name(library_top_solution_name).unwrap();
     assert_eq!(library_first_solution.models.len(), 2);
-    assert!(library_first_solution.find_model("mps.cli.lanuse.library_top.authors_top").is_some());
-    assert!(library_first_solution.find_model("mps.cli.lanuse.library_top.library_top").is_some());
+    assert!(library_first_solution.find_model((library_top_solution_name.to_owned() + ".authors_top").as_str()).is_some());
+    assert!(library_first_solution.find_model((library_top_solution_name.to_owned() + ".library_top").as_str()).is_some());
 
-    let library_top_model = repo.find_model_by_name("mps.cli.lanuse.library_top.library_top").unwrap();
+    let library_top_model = repo.find_model_by_name((library_top_solution_name.to_owned() + ".library_top").as_str()).unwrap();
     let library_top_model : Ref<SModel> = library_top_model.try_borrow().ok().unwrap();
     assert_eq!(library_top_model.root_nodes.len(), 2);
     let munich_library_root = library_top_model.root_nodes.first().unwrap();
@@ -35,12 +35,16 @@ pub (crate) fn check_model_completeness(repo : &SRepository) {
     let authors = tom_sawyer.get_children("authors");
     let mark_twain = authors.first().unwrap().get_reference("person").unwrap();
     assert_eq!(mark_twain.resolve_info, "Mark Twain");
-    assert_eq!(mark_twain.model_id, "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed");
+    if library_top_solution_name.contains("default_persistency") {
+        assert_eq!(mark_twain.model_id, "r:ca00da79-915e-4bdb-9c30-11a341daf779");
+    } else {
+        assert_eq!(mark_twain.model_id, "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed");
+    }
     assert_eq!(mark_twain.node_id, "4Yb5JA31NUv");
     assert!(mark_twain.resolve(repo).is_some());
     
     // library_second_solution
-    let library_second_solution = repo.find_solution_by_name("mps.cli.lanuse.library_second").unwrap();
+    let library_second_solution = repo.find_solution_by_name(library_second_solution_name).unwrap();
     assert_eq!(library_second_solution.models.len(), 1);
 
     // languages

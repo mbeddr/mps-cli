@@ -71,5 +71,8 @@
       <property role="3czhSw" value="34223" />
     </node>
   </node>
+  <node concept="3czhSE" id="7mrGlczwUeR">
+    <property role="TrG5h" value="schwabing library" />
+  </node>
 </model>
 
