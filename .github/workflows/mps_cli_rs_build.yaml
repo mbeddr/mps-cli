@@ -11,7 +11,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.MPSCLI_GITHUB_PKG_REGISTRY }}
 
 jobs:
-  build_mps_cli_py:
+  build_mps_cli_rs:
     runs-on: ubuntu-latest
     env:
       DISPLAY: ':99'
@@ -22,4 +22,5 @@ jobs:
       with:
         rust-version: stable
     - name: Run tests
+      working-directory: ./mps-cli-rs
       run: cargo test
