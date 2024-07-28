@@ -10,7 +10,7 @@ use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::model::slanguage::SLanguage;
 use crate::model::ssolution::SSolution;
 
-use super::smodel_builder_file_per_root_persistency::SModelBuilderCache;
+use super::smodel_builder_base::SModelBuilderCache;
 
 pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache) -> SSolution {
     let now = Instant::now();

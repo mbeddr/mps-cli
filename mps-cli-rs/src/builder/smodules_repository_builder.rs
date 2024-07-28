@@ -5,7 +5,7 @@ use std::time::Instant;
 use walkdir::WalkDir;
 
 use crate::builder::slanguage_builder::SLanguageBuilder;
-use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderCache;
+use crate::builder::smodel_builder_base::SModelBuilderCache;
 use crate::builder::ssolution_builder::build_solution;
 use crate::model::srepository::SRepository;
 use crate::model::ssolution::SSolution;
