@@ -1,0 +1,26 @@
+name: MPS-CLI-RS_CI
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.MPSCLI_GITHUB_PKG_REGISTRY }}
+
+jobs:
+  build_mps_cli_rs:
+    runs-on: ubuntu-latest
+    env:
+      DISPLAY: ':99'
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: hecrj/setup-rust-action@v1
+      with:
+        rust-version: stable
+    - name: Run tests
+      working-directory: ./mps-cli-rs
+      run: cargo test
