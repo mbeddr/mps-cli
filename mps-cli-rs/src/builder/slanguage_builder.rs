@@ -52,10 +52,6 @@ impl<'a> SLanguageBuilder {
 
 }
 
-
-
-
-
 pub(crate) fn get_or_build_language<'a>(language_id: &String, language_name: &String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>) -> &'a mut SLanguage {
     language_id_to_slanguage.entry(language_id.to_string()).or_insert_with(|| SLanguage::new(language_name.to_string(), language_id.to_string()))
 }

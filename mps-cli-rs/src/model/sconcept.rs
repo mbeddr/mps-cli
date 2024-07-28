@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub struct SConcept {
     pub name: String,
     pub id: String,
@@ -12,19 +12,19 @@ pub struct SConcept {
     pub reference_links: RefCell<HashMap<String, Rc<SReferenceLink>>>,
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct SProperty {
     pub(crate) name: String,
     pub id: String,
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct SContainmentLink {
     pub(crate) name: String,
     id: String,
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct SReferenceLink {
     pub(crate) name: String,
     id: String,

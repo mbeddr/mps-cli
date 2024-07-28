@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use walkdir::WalkDir;
-use std::rc::Rc;
 
 use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderCache;
@@ -97,7 +96,6 @@ mod tests {
         assert_eq!(do_not_gen_models.len(), 1);
 
         assert!(repository.find_solution_by_name("mps.cli.lanuse.library_top").is_some());
-
         
         //assert!(repository.get_model_by_uuid("r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed").is_some());
     }

@@ -5,7 +5,7 @@ use std::time::Instant;
 use std::io::Read;
 use walkdir::WalkDir;
 
-use crate::builder::smodel_builder_file_per_root_persistency::SModelBuilderFilePerRootPersistency;
+use crate::builder::smodel_builder_file_per_root_persistency::build_model;
 use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::model::slanguage::SLanguage;
 use crate::model::ssolution::SSolution;
@@ -25,7 +25,7 @@ pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_id_to_
     for model_entry in model_dir.into_iter() {
         let path = model_entry.unwrap().into_path();
         if path.is_dir() {
-            let model = SModelBuilderFilePerRootPersistency::build_model(path, language_id_to_slanguage, language_builder, model_builder_cache);
+            let model = build_model(path, language_id_to_slanguage, language_builder, model_builder_cache);
             models.push(model)
         } else {
             println!("ERROR: model entry {} is a file not a directory. Cannot be parsed as only file per root persistency is supported.", path.to_str().unwrap().to_string())
@@ -39,8 +39,6 @@ pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_id_to_
 }
 
 fn extract_solution_core_info<'a>(path_to_msd_file: String) -> SSolution {
-    //let solution_file = SolutionFile::new(&path_to_msd_file);
-
     let file = std::fs::File::open(path_to_msd_file.clone());  
     let mut s = String::new();
     let _ = file.unwrap().read_to_string(&mut s);
