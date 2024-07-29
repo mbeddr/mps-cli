@@ -1,15 +1,15 @@
-## MPS CLI Python Library
+## MPS CLI Rust Library
 
-This project provides a Python library which parses MPS files and builds the object model.
+This project provides a Rust library which parses MPS files and builds the object model.
 
 ### Features
 The following features are available:
-- load MPS files (*.mpsr, *.mps, *.jar) and expose their content as Python object model 
+- load MPS files (*.mpsr, *.mps, *.jar) and expose their content as Rust object model 
   - solutions, models, root nodes, nodes, children, references, properties
-- extract the meta-information and expose it as Python object model
+- extract the meta-information and expose it as Rust object model
   - list of languages, their concepts with information about properties, references, children
 
-The core of the Python object model is given by the following classes:
+The core of the Rust object model is given by the following structures
 - `SNode` - represents a node
 - `SModel` - represents a model
 - `SSolution` - represents a solution
@@ -21,11 +21,5 @@ The library has currently the following limitations:
 
 ### Run tests
 
-- `cd mps-cli-py`
-- `python -m unittest discover`
-
-### Build and upload to pypi.org
-
-- `increae version number`
-- `python3 -m build`
-- `python3 -m twine upload dist/*`
+- `cd mps-cli-rs`
+- `cargo test`
