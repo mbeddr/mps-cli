@@ -16,6 +16,7 @@ std = []
 [dependencies]
 walkdir = "2.5.0"
 roxmltree = "0.20.0"
+zip = "2.1.5"
 
 [profile.release]
 lto = "fat"

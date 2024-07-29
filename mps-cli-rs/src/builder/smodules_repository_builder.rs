@@ -1,8 +1,11 @@
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Error;
 use std::path::PathBuf;
 use std::time::Instant;
 
 use walkdir::WalkDir;
+use zip::ZipArchive;
 
 use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::builder::smodel_builder_base::SModelBuilderCache;
@@ -10,6 +13,8 @@ use crate::builder::ssolution_builder::build_solution;
 use crate::model::srepository::SRepository;
 use crate::model::ssolution::SSolution;
 use crate::model::slanguage::SLanguage;
+
+use super::smodule_builder_from_jars::build_from_jars;
 
 pub(crate) fn build_repo_from_directory<'a>(dir: String) -> SRepository {
     let mut all_solutions : Vec<SSolution> = Vec::new();
@@ -24,20 +29,34 @@ pub(crate) fn build_repo_from_directory<'a>(dir: String) -> SRepository {
 
 fn build_solutions_from<'a>(dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let now = Instant::now();
-    collect_modules_from_sources(dir.clone(), language_id_to_slanguage, language_builder, solutions);
+    collect_modules(dir.clone(), language_id_to_slanguage, language_builder, solutions);
     let elapsed = now.elapsed();
     println!("{} milli seconds for handling {}", elapsed.as_millis(), dir);
 }
 
-fn collect_modules_from_sources<'a>(source_dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
+fn collect_modules<'a>(dir: String, language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, language_builder : &mut SLanguageBuilder, solutions : &'a mut Vec<SSolution>) {
     let mut model_builder_cache = SModelBuilderCache::new();
 
-    let msd_files = find_files_with_extension(&source_dir, "msd");
+    collect_modules_from_source(&dir, language_id_to_slanguage, language_builder, &mut model_builder_cache, solutions);
+    collect_modules_from_jars(dir, language_id_to_slanguage, language_builder, &mut model_builder_cache, solutions);
+}
+
+pub(crate) fn collect_modules_from_source(dir: &String, language_id_to_slanguage: &mut HashMap<String, SLanguage>, language_builder: &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache, solutions: &mut Vec<SSolution>) {
+    let msd_files = find_files_with_extension(dir, "msd");
     msd_files.iter()
             .for_each(|msd_file| {
-                let s = build_solution(msd_file, language_id_to_slanguage, language_builder, &mut model_builder_cache);
+                let s = build_solution(msd_file, language_id_to_slanguage, language_builder, model_builder_cache);
                 solutions.push(s);
             });
+}
+
+fn collect_modules_from_jars(dir: String, language_id_to_slanguage: &mut HashMap<String, SLanguage>, language_builder: &mut SLanguageBuilder, model_builder_cache : &mut SModelBuilderCache, solutions: &mut Vec<SSolution>) {
+    let jar_files = find_files_with_extension(&dir, "jar");
+    let res = build_from_jars(&dir, jar_files, language_id_to_slanguage, language_builder, model_builder_cache);
+    match res {
+        Ok(mut s) => solutions.append(&mut s),
+        Err(err) => println!("error {}", err),
+    }
 }
 
 fn find_files_with_extension(source_dir: &String, searched_ext : &str) -> Vec<PathBuf> {
