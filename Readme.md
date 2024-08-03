@@ -6,7 +6,8 @@ This repository contains tooling for reading MPS models from command line - with
 ### Projects
 - A Gradle plugin for reading MPS files and building an object model - [here](mps-cli-gradle-plugin/Readme.md).
 - A Python library for reading MPS files and building an object model - [here](mps-cli-py/Readme.md).
-- A Typescript libeary for reading MPS files and building an object model - [here](mps-cli-ts/Readme.md).
+- A Typescript library for reading MPS files and building an object model - [here](mps-cli-ts/Readme.md).
+- A Rust library for reading MPS files and building an object model - [here](mps-cli-rs/Readme.md).
 
 ### Repository Structure
 - `mps-cli-gradle-plugin` - the gradle plugin to read MPS models
