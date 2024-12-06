@@ -4,7 +4,7 @@ sys.path.insert(1, '..\..\mps-cli-py\src')
 from mpscli.model.builder.SSolutionsRepositoryBuilder import SSolutionsRepositoryBuilder
 
 builder = SSolutionsRepositoryBuilder()
-repo = builder.build('..\\..\\mps_test_projects\\mps_cli_lanuse_file_per_root')
+repo = builder.build('../../mps_test_projects/mps_cli_lanuse_file_per_root')
 
 print("\n\n##### Incremental Iteration through Models #####")
 print("number of parsed solutions: " + str(len(repo.solutions)))
@@ -45,3 +45,6 @@ authors = five_weeks_in_baloon.get_children("authors")
 print(authors[0].concept.name)
 repo.find_concept_by_name("mps.cli.landefs.people.structure.PersonRef").print_concept_details()
 print ("The author of 'Five Weeks in Baloon' is '" + authors[0].get_reference("person").resolve(repo).get_property("name") + "'")
+
+magazine = repo.get_nodes_of_concept("mps.cli.landefs.library.structure.Magazine")[0]
+print ("The magazine " + magazine.get_property("name") + "has the periodicity of " + magazine.get_property("periodicity") )

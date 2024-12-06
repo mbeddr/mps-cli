@@ -2,16 +2,18 @@ from mpscli.model.SNodeRef import SNodeRef
 from mpscli.model.SModel import SModel
 from mpscli.model.SNode import SNode
 from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
-
+from mpscli.model.builder.SNodeClassFinder import SNodeClassFinder
 
 class SModelBuilderBase:
 
-    def __init__(self):
+    def __init__(self, snode_class_finder=None):
         self.index_2_concept = {}
         self.index_2_property = {}
         self.index_2_child_role_in_parent = {}
         self.index_2_reference_role = {}
         self.index_2_imported_model_uuid = {}
+
+        self.snode_class_finder = snode_class_finder
 
     def extract_node(self, my_model, node_xml, parent):
         root_node_id = node_xml.get("id")
@@ -21,7 +23,13 @@ class SModelBuilderBase:
             child_role = None
         else:
             child_role = self.index_2_child_role_in_parent[child_role_index]
-        s_node = SNode(root_node_id, root_node_concept, child_role, parent)
+
+        if self.snode_class_finder is None:
+            s_node = SNode(root_node_id, root_node_concept, child_role, parent)
+        else:
+            s_node_class = self.snode_class_finder.get_snode_class(root_node_concept)
+            s_node = s_node_class(root_node_id, root_node_concept, child_role, parent)
+
         for property_xml_node in node_xml.findall("property"):
             property_role = property_xml_node.get("role")
             property_value = property_xml_node.get("value")

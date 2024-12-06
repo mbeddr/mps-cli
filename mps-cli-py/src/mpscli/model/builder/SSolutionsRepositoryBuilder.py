@@ -9,10 +9,12 @@ from mpscli.model.SRepository import SRepository
 from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 from mpscli.model.builder.SSolutionBuilder import SSolutionBuilder
 
+
 class SSolutionsRepositoryBuilder:
 
-    def __init__(self):
+    def __init__(self, snode_class_finder=None):
         self.repo = SRepository()
+        self.snode_class_finder = snode_class_finder
 
     def build(self, path):
         if not os.path.exists(path):
@@ -35,7 +37,7 @@ class SSolutionsRepositoryBuilder:
     def collect_solutions_from_sources(self, path):
         for pth in Path(path).rglob('*.msd'):
             solutionBuilder = SSolutionBuilder()
-            solution = solutionBuilder.build_solution(pth)
+            solution = solutionBuilder.build_solution(pth, self.snode_class_finder)
             if solution is not None:
                 self.repo.solutions.append(solution)
 

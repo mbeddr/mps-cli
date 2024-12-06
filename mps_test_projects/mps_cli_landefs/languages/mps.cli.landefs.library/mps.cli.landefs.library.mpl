@@ -6,7 +6,7 @@
     </modelRoot>
   </models>
   <facets>
-    <facet type="java">
+    <facet type="java" compile="mps" classes="mps" ext="yes">
       <classes generated="true" path="${module}/classes_gen" />
     </facet>
   </facets>
@@ -19,7 +19,7 @@
         </modelRoot>
       </models>
       <facets>
-        <facet type="java">
+        <facet type="java" compile="mps" classes="mps" ext="no">
           <classes generated="true" path="${module}/generator/classes_gen" />
         </facet>
       </facets>
@@ -54,7 +54,6 @@
       <mapping-priorities />
     </generator>
   </generators>
-  <sourcePath />
   <dependencies>
     <dependency reexport="false">a7aaae55-aa5e-4a05-b2d0-013745658efa(mps.cli.landefs.people)</dependency>
   </dependencies>
