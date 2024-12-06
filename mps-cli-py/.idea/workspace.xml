@@ -4,10 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="py: restructured to enable PIP packaging">
+    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="py: first manual implementation of a class hierarchy based on the SNode implementation">
+      <change afterPath="$PROJECT_DIR$/src/mpscli/model/SModule.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModuleBuilder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModuleRepositoryBuilder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/StructureFromLanguageGenerator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/SLanguageStructure.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/builder/SLanguageStructureBuilder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/builder/SLanguageStructureRepositoryBuilder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/builder/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../mps-cli-ts/src/file_parser.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../mps-cli-ts/src/file_parser.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../mps-cli-ts/src/model/smodel.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../mps-cli-ts/src/model/smodel.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/SSolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/SSolution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionsRepositoryBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionsRepositoryBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/structure/test_structure_aware_node_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/structure/test_structure_aware_node_finder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_modules_and_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_modules_and_models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,23 +49,61 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "MichaelLanghammer"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/mbeddr/mps-cli.git",
+    "accountId": "8522b469-a2c8-4612-9761-851b322600d9"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 6
+}]]></component>
   <component name="ProjectId" id="2Kem352SR6Mn1BwBZmbNA4SQmvX" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../ArchitectureModelingFramework_Qualification/QKit_ArchE/QKit/TAU/IntraTAU/arxml_compare/arxml_compare.py" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests for test_base.TestBase.executor": "Run",
+    "Python tests.Python tests for test_language_extraction.TestLanguageExtraction.executor": "Run",
+    "Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.executor": "Run",
+    "Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.test_parse_with_structure_aware_concepts.executor": "Run",
+    "Python tests.Python tests for test_structure_aware_node_finder.TestStructureAwareNodeFinder.executor": "Run",
+    "Python tests.Python tests in structure.executor": "Run",
+    "Python tests.Python tests in test_language_extraction.py.executor": "Run",
+    "Python tests.Python tests in test_nodes.py.executor": "Debug",
+    "Python tests.Python tests in test_parse_with_structure_aware_classes.py.executor": "Run",
+    "Python tests.Python tests in test_structure_nodes.py.executor": "Debug",
+    "Python tests.Python tests in tests.executor": "Run",
+    "git-widget-placeholder": "feature/generate__phyton__structure",
+    "last_opened_file_path": "/Users/d3iqhe7/repos/mps-cli/mps-cli-py/src/mpscli/structuregen/model/builder"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/mpscli/structuregen/model/builder" />
       <recent name="C:\work\mps-cli\mps-cli-py\model\builder" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/mpscli/structuregen/model/builder" />
+      <recent name="$PROJECT_DIR$/src/mpscli/structuregen/builder" />
+      <recent name="$PROJECT_DIR$/src/mpscli/structuregen/model" />
+      <recent name="$PROJECT_DIR$/tests/structure/library/personsstructure" />
+      <recent name="$PROJECT_DIR$/tests/structure/library/libstructure" />
+    </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for test_modules_and_models.TestModulesAndModels">
+  <component name="RunManager" selected="Python tests.Python tests in tests">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
@@ -73,7 +126,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for test_language_extraction.TestLanguageExtraction" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests for test_language_extraction.TestLanguageExtraction" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -88,7 +141,37 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for test_modules_and_models.TestModulesAndModels" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in structure" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_language_extraction.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -99,41 +182,11 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_modules_and_models.TestModulesAndModels&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_language_extraction.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for test_modules_and_models.TestModulesAndModels.test_build_modules_and_models" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="mps-cli-py" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_modules_and_models.TestModulesAndModels.test_build_modules_and_models&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for test_nodes.TestNodes" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="mps-cli-py" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_nodes.TestNodes&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests in tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in tests" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -150,13 +203,20 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests for test_modules_and_models.TestModulesAndModels" />
-        <item itemvalue="Python tests.Unittests for test_modules_and_models.TestModulesAndModels.test_build_modules_and_models" />
-        <item itemvalue="Python tests.Unittests for test_nodes.TestNodes" />
-        <item itemvalue="Python tests.Unittests for test_language_extraction.TestLanguageExtraction" />
-        <item itemvalue="Python tests.Unittests in tests" />
+        <item itemvalue="Python tests.Python tests in tests" />
+        <item itemvalue="Python tests.Python tests in structure" />
+        <item itemvalue="Python tests.Python tests in test_language_extraction.py" />
+        <item itemvalue="Python tests.Python tests for test_language_extraction.TestLanguageExtraction" />
+        <item itemvalue="Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-5b207ade9991-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.17890.14" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -209,7 +269,15 @@
       <option name="project" value="LOCAL" />
       <updated>1676825289577</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="py: first manual implementation of a class hierarchy based on the SNode implementation">
+      <option name="closed" value="true" />
+      <created>1733478068087</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1733478068087</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -230,7 +298,8 @@
     <MESSAGE value="Readme.md: updated to reflect mps_cli_py improvements" />
     <MESSAGE value="py: added information about path (location on harddisk) to SSolution and SModel objects" />
     <MESSAGE value="py: restructured to enable PIP packaging" />
-    <option name="LAST_COMMIT_MESSAGE" value="py: restructured to enable PIP packaging" />
+    <MESSAGE value="py: first manual implementation of a class hierarchy based on the SNode implementation" />
+    <option name="LAST_COMMIT_MESSAGE" value="py: first manual implementation of a class hierarchy based on the SNode implementation" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -240,7 +309,17 @@
           <line>1</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/mpscli/model/structure/StructureAwareSNodeClassFinder.py</url>
+          <line>37</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="tests">
+        <watch expression="root_node_concept.name" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

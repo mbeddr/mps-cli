@@ -37,3 +37,5 @@ class TestParseWithStructureAwareClasses(TestBase):
         self.assertTrue(len(instances) > min_occurrence, f"expected at least {min_occurrence} instances, but found {len(instances)}")
 
 
+if __name__ == '__main__':
+    unittest.main()

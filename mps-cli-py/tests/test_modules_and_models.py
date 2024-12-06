@@ -38,7 +38,7 @@ class TestModulesAndModels(TestBase):
 
         library_top = self.repo.find_solution_by_name(library_top_solution_name)
         self.assertNotEqual(None, library_top)
-        self.assertTrue(library_top_solution_path in library_top.path_to_solution_file.as_posix())
+        self.assertTrue(library_top_solution_path in library_top.path_to_solution_file().as_posix())
 
         library_second = self.repo.find_solution_by_name(library_second_solution_name)
         self.assertNotEqual(None, library_second)

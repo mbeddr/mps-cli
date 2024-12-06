@@ -1,9 +1,10 @@
+from mpscli.model.SModule import SModule
 
 
-class SSolution:
+class SSolution(SModule):
 
     def __init__(self, name, uuid):
-        self.name = name
-        self.uuid = uuid
-        self.path_to_solution_file = ""
-        self.models = []
+        super().__init__(name, uuid)
+
+    def path_to_solution_file(self):
+        return self.path_to_module_file
