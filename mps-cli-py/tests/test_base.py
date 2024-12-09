@@ -1,7 +1,6 @@
 import os
 import unittest
 
-import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
@@ -21,7 +20,7 @@ class TestBase(unittest.TestCase):
         SLanguageBuilder.languages = {}
         builder = SSolutionsRepositoryBuilder(snode_class_finder)
 
-        test_data_location = '../../mps_test_projects/' + test_data_location
+        test_data_location = '../../../mps_test_projects/' + test_data_location
         print("test data location ", test_data_location)
         path = os.path.abspath(test_data_location)
         self.repo = builder.build(path)

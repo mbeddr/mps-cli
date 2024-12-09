@@ -1,3 +1,5 @@
+from typing import Optional
+
 from tests.structure.library.libstructure.TestEPeriodicity import TestEPeriodicity
 from tests.structure.library.libstructure.TestLibraryEntityBase import TestLibraryEntityBase
 
@@ -5,9 +7,11 @@ from tests.structure.library.libstructure.TestLibraryEntityBase import TestLibra
 class TestMagazine(TestLibraryEntityBase):
 
 
-    def periodicity(self) -> TestEPeriodicity:
+    def periodicity(self) -> Optional[TestEPeriodicity]:
         value = self.get_property("periodicity")
         index = value.rfind('/')
+        if index == -1:
+            return None
         return TestEPeriodicity(value[index + 1:])
 
 class TestMagazineImpl(TestMagazine):

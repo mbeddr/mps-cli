@@ -8,5 +8,8 @@ class SLanguageStructureBuilder(SModuleBuilder):
     def build_language(self, path_to_module_file, snode_class_finder=None):
         self.build_module(path_to_module_file, snode_class_finder)
 
-    def create_module(self, module_name, module_uuid) -> SModule:
-        return SLanguageStructure(module_name, module_uuid)
+    def create_module(self, module_name, module_uuid, module_model_folder) -> SModule:
+        return SLanguageStructure(module_name, module_uuid, module_model_folder)
+
+    def tag_for_name_attribute(self):
+        return "namespace"

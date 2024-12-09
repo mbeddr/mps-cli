@@ -1,3 +1,5 @@
+from mpscli.model.NodeList import NodeList
+
 
 class SNode:
 
@@ -7,14 +9,14 @@ class SNode:
         self.role_in_parent = role_in_parent
         self.properties = {}
         self.references = {}
-        self.children = []
+        self.children = NodeList()
         self.parent = parent
 
     def get_property(self, name):
         return self.properties.get(name)
 
     def get_reference(self, name):
-        return self.references[name]
+        return self.references.get(name)
 
     def get_children(self, role):
         return list(filter(lambda c : c.role_in_parent == role, self.children))
@@ -28,4 +30,3 @@ class SNode:
         res.extend(node.children)
         for c in node.children:
             self.__do_collect_descendants(c, res)
-

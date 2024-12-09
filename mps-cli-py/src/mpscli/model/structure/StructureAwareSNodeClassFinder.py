@@ -1,7 +1,6 @@
 import fnmatch
 import os
 import inspect
-import sys
 import importlib.util
 
 from mpscli.model.builder.SNodeClassFinder import SNodeClassFinder

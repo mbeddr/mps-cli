@@ -1,3 +1,5 @@
+from mpscli.model.NodeList import NodeList
+
 
 class SRepository:
 
@@ -39,7 +41,7 @@ class SRepository:
         return res
 
     def get_nodes(self):
-        res = []
+        res = NodeList()
         for sol in self.solutions:
             for mod in sol.models:
                 res.extend(mod.get_nodes())

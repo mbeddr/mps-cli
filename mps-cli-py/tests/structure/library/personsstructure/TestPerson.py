@@ -1,4 +1,4 @@
-from mpscli.model.structure.SNodeStructure import AbstractSNodeWithStructure
+from mpscli.model.structure.AbstractSNodeWithStructure import AbstractSNodeWithStructure
 from tests.structure.library.libstructure.TestINamedConcept import TestINamedConcept
 
 

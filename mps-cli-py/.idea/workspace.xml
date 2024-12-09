@@ -4,25 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="py: first manual implementation of a class hierarchy based on the SNode implementation">
-      <change afterPath="$PROJECT_DIR$/src/mpscli/model/SModule.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModuleBuilder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModuleRepositoryBuilder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/StructureFromLanguageGenerator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/SLanguageStructure.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/builder/SLanguageStructureBuilder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/builder/SLanguageStructureRepositoryBuilder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/model/builder/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="py: add generator for structure hierarchy">
+      <change afterPath="$PROJECT_DIR$/src/mpscli/model/NodeList.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mpscli/model/SSolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/SSolution.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionBuilder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionsRepositoryBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SSolutionsRepositoryBuilder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/structure/test_structure_aware_node_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/structure/test_structure_aware_node_finder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_modules_and_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_modules_and_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/SNode.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/SNode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/SRepository.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/SRepository.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/structure/ListOperationsExtensions.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/structure/ListOperationsExtensions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/structure/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/structure/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/structure/test_language_structure_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/structure/test_language_structure_generator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,22 +38,22 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "MichaelLanghammer"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;MichaelLanghammer&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/mbeddr/mps-cli.git",
-    "accountId": "8522b469-a2c8-4612-9761-851b322600d9"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/mbeddr/mps-cli.git&quot;,
+    &quot;accountId&quot;: &quot;8522b469-a2c8-4612-9761-851b322600d9&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 6
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="2Kem352SR6Mn1BwBZmbNA4SQmvX" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -77,33 +66,47 @@
   "keyToString": {
     "Python tests.Python tests for test_base.TestBase.executor": "Run",
     "Python tests.Python tests for test_language_extraction.TestLanguageExtraction.executor": "Run",
+    "Python tests.Python tests for test_language_structure_builder.TestLanguageBuilder.executor": "Run",
+    "Python tests.Python tests for test_language_structure_builder.TestLanguageBuilder.test_building_languages.executor": "Run",
+    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.executor": "Run",
+    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_building_languages.executor": "Run",
+    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist.executor": "Run",
+    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes.executor": "Run",
     "Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.executor": "Run",
     "Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.test_parse_with_structure_aware_concepts.executor": "Run",
     "Python tests.Python tests for test_structure_aware_node_finder.TestStructureAwareNodeFinder.executor": "Run",
     "Python tests.Python tests in structure.executor": "Run",
     "Python tests.Python tests in test_language_extraction.py.executor": "Run",
+    "Python tests.Python tests in test_language_structure_builder.py.executor": "Run",
+    "Python tests.Python tests in test_language_structure_generator.py.executor": "Debug",
     "Python tests.Python tests in test_nodes.py.executor": "Debug",
     "Python tests.Python tests in test_parse_with_structure_aware_classes.py.executor": "Run",
+    "Python tests.Python tests in test_structure_aware_node_finder.py.executor": "Run",
     "Python tests.Python tests in test_structure_nodes.py.executor": "Debug",
     "Python tests.Python tests in tests.executor": "Run",
+    "Python.demo.executor": "Run",
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "feature/generate__phyton__structure",
-    "last_opened_file_path": "/Users/d3iqhe7/repos/mps-cli/mps-cli-py/src/mpscli/structuregen/model/builder"
+    "last_opened_file_path": "/Users/d3iqhe7/repos/mps-cli/mps-cli-py/src/mpscli/model/structure",
+    "settings.editor.selected.configurable": "preferences.pathVariables"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/mpscli/model/structure" />
+      <recent name="$PROJECT_DIR$/src/mpscli/structuregen/gen" />
       <recent name="$PROJECT_DIR$/src/mpscli/structuregen/model/builder" />
       <recent name="C:\work\mps-cli\mps-cli-py\model\builder" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/mpscli/structuregen/gen" />
       <recent name="$PROJECT_DIR$/src/mpscli/structuregen/model/builder" />
       <recent name="$PROJECT_DIR$/src/mpscli/structuregen/builder" />
       <recent name="$PROJECT_DIR$/src/mpscli/structuregen/model" />
       <recent name="$PROJECT_DIR$/tests/structure/library/personsstructure" />
-      <recent name="$PROJECT_DIR$/tests/structure/library/libstructure" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Python tests in tests">
+  <component name="RunManager" selected="Python tests.Python tests in test_language_structure_generator.py">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
@@ -126,22 +129,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests for test_language_extraction.TestLanguageExtraction" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="mps-cli-py" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_language_extraction.TestLanguageExtraction&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests for test_language_structure_generator.TestLanguageStructureGenerator" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -152,11 +140,11 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses&quot;" />
+      <option name="_new_target" value="&quot;test_language_structure_generator.TestLanguageStructureGenerator&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in structure" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -167,54 +155,80 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in test_language_extraction.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_language_extraction.py&quot;" />
+      <option name="_new_target" value="&quot;test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_language_structure_generator.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="path_to_mps" value="$PROJECT_DIR$/../../MPS" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure/test_language_structure_generator.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in tests" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_parse_with_structure_aware_classes.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure/test_parse_with_structure_aware_classes.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.main" />
+      <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist" />
+      <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes" />
+      <item itemvalue="Python tests.Python tests in test_language_structure_generator.py" />
+      <item itemvalue="Python tests.Python tests in test_parse_with_structure_aware_classes.py" />
+      <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator" />
+    </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Python tests in tests" />
-        <item itemvalue="Python tests.Python tests in structure" />
-        <item itemvalue="Python tests.Python tests in test_language_extraction.py" />
-        <item itemvalue="Python tests.Python tests for test_language_extraction.TestLanguageExtraction" />
-        <item itemvalue="Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses" />
+        <item itemvalue="Python tests.Python tests in test_language_structure_generator.py" />
+        <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes" />
+        <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist" />
+        <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator" />
+        <item itemvalue="Python tests.Python tests in test_parse_with_structure_aware_classes.py" />
       </list>
     </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-5b207ade9991-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.17890.14" />
+        <option value="bundled-python-sdk-a5bc9544c897-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.23654.177" />
       </set>
     </attachedChunks>
   </component>
@@ -277,15 +291,154 @@
       <option name="project" value="LOCAL" />
       <updated>1733478068087</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="py: add possibility to parse language files">
+      <option name="closed" value="true" />
+      <created>1733505347026</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1733505347026</updated>
+    </task>
+    <task id="LOCAL-00009" summary="py: add possibility to parse language files">
+      <option name="closed" value="true" />
+      <created>1733529876951</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1733529876951</updated>
+    </task>
+    <task id="LOCAL-00010" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1733784383068</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1733784383068</updated>
+    </task>
+    <task id="LOCAL-00011" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1733823099321</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1733823099321</updated>
+    </task>
+    <task id="LOCAL-00012" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1733872527306</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1733872527306</updated>
+    </task>
+    <task id="LOCAL-00013" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1738076738100</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1738076738100</updated>
+    </task>
+    <task id="LOCAL-00014" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1739481509467</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1739481509467</updated>
+    </task>
+    <task id="LOCAL-00015" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1739485304708</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1739485304708</updated>
+    </task>
+    <task id="LOCAL-00016" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1739746859336</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1739746859336</updated>
+    </task>
+    <task id="LOCAL-00017" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1739811747549</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1739811747549</updated>
+    </task>
+    <task id="LOCAL-00018" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1739831956752</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1739831956752</updated>
+    </task>
+    <task id="LOCAL-00019" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1740092609802</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1740092609802</updated>
+    </task>
+    <task id="LOCAL-00020" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1740262008418</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1740262008418</updated>
+    </task>
+    <task id="LOCAL-00021" summary="py: add generator for structure hierarchy">
+      <option name="closed" value="true" />
+      <created>1740353657789</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1740353657789</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="HEAD" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -299,7 +452,9 @@
     <MESSAGE value="py: added information about path (location on harddisk) to SSolution and SModel objects" />
     <MESSAGE value="py: restructured to enable PIP packaging" />
     <MESSAGE value="py: first manual implementation of a class hierarchy based on the SNode implementation" />
-    <option name="LAST_COMMIT_MESSAGE" value="py: first manual implementation of a class hierarchy based on the SNode implementation" />
+    <MESSAGE value="py: add possibility to parse language files" />
+    <MESSAGE value="py: add generator for structure hierarchy" />
+    <option name="LAST_COMMIT_MESSAGE" value="py: add generator for structure hierarchy" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -311,15 +466,20 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/mpscli/model/structure/StructureAwareSNodeClassFinder.py</url>
-          <line>37</line>
+          <line>36</line>
           <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/mpscli/structuregen/gen/StructureFromLanguageGenerator.py</url>
+          <line>69</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/structure/test_language_structure_generator.py</url>
+          <line>65</line>
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="tests">
-        <watch expression="root_node_concept.name" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>

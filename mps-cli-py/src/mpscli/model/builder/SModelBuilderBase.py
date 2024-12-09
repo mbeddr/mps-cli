@@ -2,7 +2,6 @@ from mpscli.model.SNodeRef import SNodeRef
 from mpscli.model.SModel import SModel
 from mpscli.model.SNode import SNode
 from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
-from mpscli.model.builder.SNodeClassFinder import SNodeClassFinder
 
 class SModelBuilderBase:
 

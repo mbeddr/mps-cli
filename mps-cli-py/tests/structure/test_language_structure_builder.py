@@ -32,6 +32,6 @@ class TestLanguageBuilder(unittest.TestCase):
         self.assertTrue(len(nodes_of_concept) > minimal_concept_occurrence,
                         f"Found only {len(nodes_of_concept)} instances of concept {concept_name}. Expected at least {minimal_concept_occurrence} instances.")
 
-def test_language_builder(self):
-    if __name__ == '__main__':
-        unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()

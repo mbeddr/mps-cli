@@ -16,23 +16,27 @@ class SModuleRepositoryBuilder:
         self.module_file_extension = module_file_extension
         self.snode_class_finder = snode_class_finder
 
-    def build(self, path):
-        if not os.path.exists(path):
-            print("ERROR: path", path, "does not exist!")
-            sys.exit(1)
-        if not os.path.isdir(path):
-            print("ERROR: path", path, "is not a directory!")
-            sys.exit(1)
-
-        print("building model from path:", path)
+    def build_from_multiple_path(self, paths):
         start = timer()
-        self.collect_modules_from_sources(path)
-        self.collect_modules_from_jars(path)
+        for path in paths:
+            if not os.path.exists(path):
+                print("ERROR: path", path, "does not exist!")
+                sys.exit(1)
+            if not os.path.isdir(path):
+                print("ERROR: path", path, "is not a directory!")
+                sys.exit(1)
+
+            print("building model from path:", path)
+            self.collect_modules_from_sources(path)
+            self.collect_modules_from_jars(path)
         self.repo.languages = list(SLanguageBuilder.languages.values())
         stop = timer()
         duration = (stop - start)
         print('duration is: ' + str(duration) + ' seconds')
         return self.repo
+
+    def build(self, path):
+        return self.build_from_multiple_path([path])
 
     def collect_modules_from_sources(self, path):
         for pth in Path(path).rglob('*.' + self.module_file_extension):

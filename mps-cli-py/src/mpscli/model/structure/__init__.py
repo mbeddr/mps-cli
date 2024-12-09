@@ -1,0 +1,3 @@
+from mpscli.model.structure.ListOperationsExtensions import add_list_operation_extensions
+
+add_list_operation_extensions()
