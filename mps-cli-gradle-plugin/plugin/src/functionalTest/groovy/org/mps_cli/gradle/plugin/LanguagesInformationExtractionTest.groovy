@@ -3,8 +3,6 @@
  */
 package org.mps_cli.gradle.plugin
 
-import org.gradle.internal.impldep.org.glassfish.jaxb.runtime.v2.runtime.property.StructureLoaderBuilder
-
 class LanguagesInformationExtractionTest extends TestBase {
 
     def "languages information extraction test"() {

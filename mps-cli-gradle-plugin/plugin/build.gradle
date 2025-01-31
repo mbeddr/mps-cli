@@ -22,8 +22,10 @@ plugins {
 ext.major = '0'
 ext.minor = '18'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
 
 repositories {
     mavenLocal()
