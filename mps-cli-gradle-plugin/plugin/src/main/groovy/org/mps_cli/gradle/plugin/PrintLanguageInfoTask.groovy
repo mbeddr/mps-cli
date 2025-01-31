@@ -12,8 +12,8 @@ class PrintLanguageInfoTask extends DefaultTask {
     String destinationDir;
 
     PrintLanguageInfoTask() {
-        group "MPS-CLI"
-        description "print information about the DSLs"
+        group = "MPS-CLI"
+        description = "print information about the DSLs"
         dependsOn "buildModel"
     }
 

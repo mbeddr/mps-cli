@@ -21,8 +21,8 @@ class ModuleDependenciesBuilderTask extends DefaultTask {
     Map<SModuleBase, Set<SModuleBase>> module2AllDownstreamDependencies = [:];
 
     ModuleDependenciesBuilderTask() {
-        group("MPS-CLI")
-        description("build the upstream/downstream dependencies for all modules based on MPS files from 'sourceDir' list")
+        group = "MPS-CLI"
+        description = "build the upstream/downstream dependencies for all modules based on MPS files from 'sourceDir' list"
     }
 
     @TaskAction

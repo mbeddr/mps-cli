@@ -21,8 +21,8 @@ class ModelDependenciesBuilderTask extends DefaultTask {
     Map<SModel, Set<SModel>> model2AllDownstreamDependencies = [:];
 
     ModelDependenciesBuilderTask() {
-        group("MPS-CLI")
-        description("build the upstream/downstream dependencies for all models based on MPS files from 'sourceDir' list")
+        group = "MPS-CLI"
+        description = "build the upstream/downstream dependencies for all models based on MPS files from 'sourceDir' list"
     }
 
     @TaskAction

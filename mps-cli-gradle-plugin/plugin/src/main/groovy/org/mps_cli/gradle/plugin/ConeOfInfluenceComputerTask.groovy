@@ -39,8 +39,8 @@ class ConeOfInfluenceComputerTask extends DefaultTask {
     List<SModuleBase> affectedSolutionsAndUpstreamDependencies
 
     ConeOfInfluenceComputerTask() {
-        group "MPS-CLI"
-        description "computes the solutions potentially affected (and their dependencies) of the changes from current branch compared to 'referenceBranchName' from the 'gitRootRepoLocation'"
+        group = "MPS-CLI"
+        description = "computes the solutions potentially affected (and their dependencies) of the changes from current branch compared to 'referenceBranchName' from the 'gitRootRepoLocation'"
     }
 
     @TaskAction
