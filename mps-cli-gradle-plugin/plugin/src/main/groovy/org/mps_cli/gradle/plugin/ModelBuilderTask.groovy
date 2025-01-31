@@ -16,8 +16,8 @@ class ModelBuilderTask extends DefaultTask {
     SRepository repository;
 
     ModelBuilderTask() {
-        group("MPS-CLI")
-        description("build the object model based on MPS files from 'sourceDir'")
+        group = "MPS-CLI"
+        description = "build the object model based on MPS files from 'sourceDir'"
     }
 
     @TaskAction

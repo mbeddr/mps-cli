@@ -20,7 +20,7 @@ plugins {
 
 // Project versions
 ext.major = '0'
-ext.minor = '17'
+ext.minor = '18'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -97,22 +97,22 @@ application {
 publishing {
     repositories {
         maven {
-			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/mbeddr/mps-cli")
-			if(project.hasProperty("gpr.token")) {
-				credentials {
-					username = project.findProperty("gpr.user")
-					password = project.findProperty("gpr.token")
-				}
-			}
-		}
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/mbeddr/mps-cli")
+            if (project.hasProperty("gpr.token")) {
+                credentials {
+                    username = project.findProperty("gpr.user")
+                    password = project.findProperty("gpr.token")
+                }
+            }
+        }
     }
 
     publications {
         maven(MavenPublication) {
             groupId = 'com.mbeddr.mps_cli'
             artifactId = 'gradle.plugin'
-            
+
             from components.java
         }
     }
