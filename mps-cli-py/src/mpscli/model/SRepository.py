@@ -48,7 +48,7 @@ class SRepository:
         return res
 
     def get_nodes_of_concept(self, concept_name):
-        res = []
+        res = NodeList()
         for node in self.get_nodes():
             if node.concept.name == concept_name:
                 res.append(node)

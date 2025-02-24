@@ -1,5 +1,4 @@
-
-from mpscli.model.structure.AbstractSNodeWithStructure import AbstractSNodeInterfaceWithStructure
+from mpscli.model.structure.AbstractSNodeInterfaceWithStructure import AbstractSNodeInterfaceWithStructure
 
 
 class TestINamedConcept(AbstractSNodeInterfaceWithStructure):

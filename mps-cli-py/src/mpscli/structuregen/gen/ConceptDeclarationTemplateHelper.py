@@ -41,6 +41,12 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
             imports.append(("mpscli.model.structure", "AbstractSNodeInterfaceWithStructure"))
         return imports
 
+    def get_imports_for_type_checking(self):
+        imports_for_type_checking = []
+        for used_class_in_link in self.get_used_classes_in_links():
+            imports_for_type_checking.append((self.get_module_name(used_class_in_link), used_class_in_link.get_property("name")))
+        return imports_for_type_checking
+
     def is_base_concept(self):
         return get_concept_fqn(self.snode, self.snode_to_model_map) == BASE_CONCEPT_FQN
 
@@ -63,13 +69,18 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
             if data_type_declaration.concept.name == ENUM_DECLARATION_CONCEPT_NAME:
                 used_classes.append(data_type_declaration)
         if inlcude_classes_in_links:
-            for links_declaration in self.snode.get_children("linkDeclaration"):
-                target = get_and_resolve_reference(links_declaration, "target", self.repo)
-                if target is not None:
-                    used_classes.append(target)
-                else:
-                    print(f"Error: cannot get target for link declaration {links_declaration}")
+            used_classes.extend(self.get_used_classes_in_links())
         return used_classes
+
+    def get_used_classes_in_links(self):
+        used_classes_in_links = []
+        for links_declaration in self.snode.get_children("linkDeclaration"):
+            target = get_and_resolve_reference(links_declaration, "target", self.repo)
+            if target is not None:
+                used_classes_in_links.append(target)
+            else:
+                print(f"Error: cannot get target for link declaration {links_declaration}")
+        return used_classes_in_links
 
     def get_properties(self):
         property_declarations = self.snode.get_children("propertyDeclaration")

@@ -22,7 +22,7 @@ class SNode:
         return list(filter(lambda c : c.role_in_parent == role, self.children))
 
     def get_descendants(self):
-        res = []
+        res = NodeList()
         self.__do_collect_descendants(self, res)
         return res
 

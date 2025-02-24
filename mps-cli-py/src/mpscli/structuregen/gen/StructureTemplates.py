@@ -3,10 +3,16 @@ from jinja2 import Template
 
 def get_class_template(concept_declaration_snode):
     template = Template(
-        '''from __future__ import annotations
-from typing import Optional       
-{% for my_import in concept_declaration_snode.get_imports() %}from {{ my_import[0] }}.{{ my_import[1] }} import {{ my_import[1] }}
+        '''from typing import Optional, List, TYPE_CHECKING       
+{% for my_import in concept_declaration_snode.get_imports() -%}
+from {{ my_import[0] }}.{{ my_import[1] }} import {{ my_import[1] }}
 {% endfor %}
+{% if concept_declaration_snode.get_imports_for_type_checking() %}
+if TYPE_CHECKING:
+{%- for my_import in concept_declaration_snode.get_imports_for_type_checking() %}
+    from {{ my_import[0] }}.{{ my_import[1] }} import {{ my_import[1] }}
+{%- endfor %}
+{% endif %}
 class {{ concept_declaration_snode.get_class_name() }}({{ concept_declaration_snode.get_base_classes_names() }}):
     
     def can_be_root(self) -> bool:
@@ -31,10 +37,10 @@ class {{ concept_declaration_snode.get_class_name() }}({{ concept_declaration_sn
     {% endfor -%}
     {% for child in concept_declaration_snode.get_children_and_references() %}
     {%- if child[2] %}
-    def {{ child[0] }}(self) -> list['{{ child[1] }}']:
+    def {{ child[0] }}(self) -> List["{{ child[1] }}"]:
           return self.get_children("{{ child[0] }}")
     {% else %}
-    def {{ child[0] }}(self) -> Optional['{{ child[1] }}']:
+    def {{ child[0] }}(self) -> Optional["{{ child[1] }}"]:
           my_children = self.get_children("{{ child[0] }}")
           if my_children is None:
             return self.get_reference("{{ child[0] }}").resolve(self.repo)

@@ -1,3 +1,4 @@
+from mpscli.model.NodeList import NodeList
 
 
 class SModel:
@@ -5,13 +6,13 @@ class SModel:
     def __init__(self, name, uuid, is_do_not_generate):
         self.name = name
         self.uuid = uuid
-        self.root_nodes = []
+        self.root_nodes = NodeList()
         self.path_to_model_file = ""
         self.is_do_not_generate = is_do_not_generate
         self.uuid_2_nodes = {}
 
     def get_nodes(self):
-        res = []
+        res = NodeList()
         for r in self.root_nodes:
             res.append(r)
             res.extend(r.get_descendants())
