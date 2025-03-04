@@ -1,3 +1,5 @@
+import logging
+
 from mpscli.model.SNode import SNode
 from mpscli.structuregen.gen.GenerationConstants import ENUM_DECLARATION_CONCEPT_NAME, CONCEPT_DECLARATION_CONCEPT_NAME, BASE_CONCEPT_FQN, INTERFACE_DECLARATION_CONCEPT_NAME
 from mpscli.structuregen.gen.StructureGenUtil import get_and_resolve_reference, get_concept_fqn
@@ -54,23 +56,28 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
         return self.snode_to_model_map[self.snode].name, self.snode.get_property("name")
 
     def get_base_classes_names(self):
-        names = [base_concept.get_property("name") for base_concept in self.get_base_concept_and_implementing_interfaces()]
+        names = [base_concept.get_property("name") for base_concept in [bc for bc in self.get_base_concept_and_implementing_interfaces() if bc is not None]]
         if self.is_base_concept():
             names.append("AbstractSNodeWithStructure")
         if self.is_top_interface():
             names.append("AbstractSNodeInterfaceWithStructure")
         return ', '.join(names)
 
-    def get_used_classes(self, inlcude_classes_in_links):
+    def get_used_classes(self, include_classes_in_links):
         used_classes = []
         used_classes.extend(self.get_base_concept_and_implementing_interfaces())
         for property_declaration in self.snode.get_children("propertyDeclaration"):
             data_type_declaration = property_declaration.get_reference("dataType").resolve(self.repo)
+            if data_type_declaration is None:
+                continue
             if data_type_declaration.concept.name == ENUM_DECLARATION_CONCEPT_NAME:
                 used_classes.append(data_type_declaration)
-        if inlcude_classes_in_links:
+        if include_classes_in_links:
             used_classes.extend(self.get_used_classes_in_links())
-        return used_classes
+        none_elements = [uc for uc in used_classes if uc is None]
+        if none_elements:
+            logging.error(f"{len(none_elements)} none elements found during finding used classes of {self.get_class_name()}")
+        return [uc for uc in used_classes if uc is not None]
 
     def get_used_classes_in_links(self):
         used_classes_in_links = []
@@ -79,7 +86,7 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
             if target is not None:
                 used_classes_in_links.append(target)
             else:
-                print(f"Error: cannot get target for link declaration {links_declaration}")
+                logging.error(f"Error: cannot get target for link declaration {links_declaration}")
         return used_classes_in_links
 
     def get_properties(self):
@@ -101,16 +108,22 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
 
     def get_module_name(self, snode):
         if snode is None:
-            print("Error: cannot get module name for None snode.")
+            logging.error("Error: cannot get module name for None snode.")
             return ""
         model = self.snode_to_model_map.get(snode)
         if model is None:
             snode_name = snode.get_property("name")
-            print(f"Cannot find model for snode with name {snode_name}")
+            logging.warning(f"Cannot find model for snode with name {snode_name}")
             return ""
         return model.name
 
     def get_base_concept_and_implementing_interfaces(self) -> list[SNode]:
+        pass
+
+    def create_concept_methods(self):
+        pass
+
+    def has_no_content(self):
         pass
 
     def generate_class(self):
@@ -121,12 +134,14 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
 
     def is_enum_declaration(self, property_declaration) -> bool:
         datatype_declaration = get_and_resolve_reference(property_declaration, "dataType", self.repo)
+        if datatype_declaration is None:
+            return False
         return datatype_declaration.concept.name == ENUM_DECLARATION_CONCEPT_NAME
 
     def get_primitive_datatype(self, property_declaration):
         datatype_declaration = get_and_resolve_reference(property_declaration, "dataType", self.repo)
         if datatype_declaration is None:
-            print("Error: Cannot find dataType declaration for property declaration.")
+            logging.error("Error: Cannot find dataType declaration for property declaration.")
             return "str"
         type_name = datatype_declaration.get_property("name")
         if type_name == "string":
@@ -166,18 +181,31 @@ class ConceptDeclarationTemplateHelper(AbstractConceptDeclarationTemplateHelper)
         if super_concept is None:
             snode_name = self.snode.get_property("name")
             if snode_name != "BaseConcept":
-                print(f"Info: Cannot find BaseConcept for concept {snode_name}")
+                logging.error(f"Info: Cannot find BaseConcept for concept {snode_name}")
         else:
             base_classes.append(super_concept)
         for implements_interface in self.snode.get_children("implements"):
             base_classes.append(get_and_resolve_reference(implements_interface, "intfc", self.repo))
         return [item for item in base_classes if item is not None]
 
+    def create_concept_methods(self):
+        return True
+
+    def has_no_content(self):
+        return False
+
 
 class InterfaceDeclarationTemplateHelper(AbstractConceptDeclarationTemplateHelper):
 
     def get_base_concept_and_implementing_interfaces(self):
-        return [get_and_resolve_reference(implements_interface, "intfc", self.repo) for implements_interface in self.snode.get_children("extends")]
+        children = [child for child in self.snode.get_children("extends") if child is not None]
+        return [get_and_resolve_reference(implements_interface, "intfc", self.repo) for implements_interface in children]
+
+    def create_concept_methods(self):
+        return False
+
+    def has_no_content(self):
+        return not self.get_properties() and not self.get_children_and_references()
 
 
 def create_helper_by_declaration_name(declaration_name, concept_to_generate, snode_to_model_map, repo) -> AbstractConceptDeclarationTemplateHelper:

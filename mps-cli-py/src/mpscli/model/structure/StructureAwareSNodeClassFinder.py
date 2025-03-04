@@ -1,4 +1,5 @@
 import fnmatch
+import logging
 import os
 import inspect
 import importlib.util
@@ -34,7 +35,7 @@ class StructureAwareSNodeClassFinder(SNodeClassFinder):
     def get_snode_class(self, concept) -> type[SNode]:
         clazz = self.concept_name_2_snode_class.get(concept.name)
         if clazz is None:
-            print("No class for concept '" + concept.name + "' found. Using BaseConcept instead.")
+            logging.info("No class for concept '" + concept.name + "' found. Using BaseConcept instead.")
             return self.concept_name_2_snode_class.get(self.DEFAULT_CONCEPT_NAME)
         return clazz
 

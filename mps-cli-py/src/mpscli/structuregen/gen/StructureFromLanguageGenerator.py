@@ -1,5 +1,6 @@
+import logging
 import os
-from typing import Set
+from typing import Set, List
 
 from mpscli.structuregen.gen.ConceptDeclarationTemplateHelper import create_helper_by_declaration_name
 from mpscli.structuregen.gen.EnumDeclarationTemplateHelper import EnumDeclarationTemplateHelper
@@ -41,7 +42,7 @@ class StructureFromLanguageGenerator:
         duration_repo_build = stop_repo_build - start
         duration_generation = stop_all - stop_repo_build
         overall_duration = stop_all - start
-        print(f'''
+        logging.info(f'''
         Created {len(self.already_created_concepts)} classes in {overall_duration} s (used {duration_repo_build} s for building the repo and {duration_generation} s for the generation.)
         Repo statistics:
             Found: {len(self.lang_repo.get_nodes_of_concept(CONCEPT_DECLARATION_CONCEPT_NAME))} concept declarations
@@ -67,7 +68,7 @@ class StructureFromLanguageGenerator:
     def create_concept_class(self, concept_name):
         concept_to_generate = self.name_to_concept_declaration.get(concept_name)
         if concept_to_generate is None:
-            print(f"Can not generate concept with name '{concept_name}' as its definition has not been found in the language folder")
+            logging.error(f"Can not generate concept with name '{concept_name}' as its definition has not been found in the language folder")
             return
         if concept_to_generate in self.already_created_concepts:
             return
@@ -86,7 +87,7 @@ class StructureFromLanguageGenerator:
             self.write_to_file(enum_declaration_helper.get_concept_file_path() + ".py", enum_declaration_helper.generate_enum_class())
             self.write_init_file(enum_declaration_helper.get_concept_folder_path())
         else:
-            print(f"ERROR: Can not concept of type {concept_to_gen_name} as it is an unknown definition")
+            logging.error(f"Can not get concept of type {concept_to_gen_name} as it is an unknown definition")
 
     def write_to_file(self, path, content):
         file_path = self.output_folder + "/" + path

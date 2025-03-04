@@ -14,7 +14,10 @@ if TYPE_CHECKING:
 {%- endfor %}
 {% endif %}
 class {{ concept_declaration_snode.get_class_name() }}({{ concept_declaration_snode.get_base_classes_names() }}):
-    
+    {% if concept_declaration_snode.has_no_content() %}
+    pass
+    {% endif %}
+    {% if concept_declaration_snode.create_concept_methods() %}
     def can_be_root(self) -> bool:
         return {{ concept_declaration_snode.can_be_root() }}
     
@@ -23,6 +26,7 @@ class {{ concept_declaration_snode.get_class_name() }}({{ concept_declaration_sn
     
     def short_description(self) -> str:
         return "{{ concept_declaration_snode.get_short_description() }}"
+    {% endif %}
     {% for property in concept_declaration_snode.get_properties() %}
     def {{ property[0] }}(self) -> Optional[{{ property[1] }}]:
       {%- if property[2] %}
