@@ -28,7 +28,7 @@ class TestLanguageStructureGenerator(TestBase):
             pass
 
         # when: the generator is created and executed
-        structure_generator = StructureFromLanguageGenerator([path_to_mps, path_to_core_lang, language_path], concepts_to_generate, CLASS_OUTPUT_FOLDER)
+        structure_generator = StructureFromLanguageGenerator.init_generate_generate_concepts([path_to_mps, path_to_core_lang, language_path], concepts_to_generate, CLASS_OUTPUT_FOLDER)
         number_of_generated_classes = structure_generator.generate_classes()
 
         # then: we should have the expected class hierarchy

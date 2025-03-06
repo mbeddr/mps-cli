@@ -1,5 +1,10 @@
 import logging
 
+def has_reference(snode, reference_name):
+    if snode is None:
+        return False
+    reference = snode.get_reference(reference_name)
+    return reference is not None
 
 def get_and_resolve_reference(snode, reference_name, repo):
     reference = snode.get_reference(reference_name)

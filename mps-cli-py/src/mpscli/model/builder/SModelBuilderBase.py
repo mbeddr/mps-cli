@@ -65,8 +65,11 @@ class SModelBuilderBase:
 
     def extract_model_core_info(self, model_xml_node):
         model_ref = model_xml_node.get("ref")
-        model_name = model_ref[model_ref.find("(") + 1 : len(model_ref) - 1]
-        model_uuid = model_ref[0 : model_ref.find("(")]
+        model_name = ""
+        model_uuid = ""
+        if model_ref is not None:
+            model_name = model_ref[model_ref.find("(") + 1 : len(model_ref) - 1]
+            model_uuid = model_ref[0: model_ref.find("(")]
         model_is_do_not_generate = self.is_model_generatable(model_xml_node)
         model = SModel(model_name, model_uuid, model_is_do_not_generate)
         return model

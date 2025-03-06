@@ -10,11 +10,21 @@ from mpscli.structuregen.model.builder.SLanguageStructureRepositoryBuilder impor
 from timeit import default_timer as timer
 
 
+
 class StructureFromLanguageGenerator:
 
-    def __init__(self, language_folders, concept_names_to_generate: Set[str], output_folder):
+    class GenerationMode:
+        GENERATE_ALL = "GENERATE_ALL"
+        GENERATE_CONCEPTS = "GENERATE_CONCEPTS"
+        GENERATE_CONCEPTS_IN_LANGUAGE_FOLDERS = "GENERATE_CONCEPTS_IN_LANGUAGE_FOLDERS"
+
+        def __init__(self, gen_mode, concepts):
+            self.gen_mode = gen_mode
+            self.concepts = concepts
+
+    def __init__(self, language_folders, generate_mode: GenerationMode, output_folder):
         self.language_folders = language_folders
-        self.concept_names_to_generate = concept_names_to_generate
+        self.generation_mode = generate_mode
         self.output_folder = output_folder
         self.already_created_concepts = set()
         self.name_to_concept_declaration = {}
@@ -22,20 +32,33 @@ class StructureFromLanguageGenerator:
         self.lang_repo = None
         self.folder_with_init_py = set()
 
+    @classmethod
+    def init_generate_all(cls, language_folders, output_folder):
+        return cls(language_folders, cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_ALL, None), output_folder)
+    
+    @classmethod
+    def init_generate_generate_concepts(cls, language_folders, concepts_to_generate, output_folder):
+        mode_for_concepts = cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_CONCEPTS, concepts_to_generate)
+        return cls(language_folders, mode_for_concepts, output_folder)
+
+    @classmethod
+    def init_generate_concepts_from_folder(cls, language_folders_to_generate, additional_language_folders, output_folder):
+        mode_for_folder = cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_CONCEPTS_IN_LANGUAGE_FOLDERS, language_folders_to_generate)
+        all_language_folders = language_folders_to_generate + additional_language_folders
+        return cls(all_language_folders, mode_for_folder, output_folder)
+
     def generate_classes(self):
         start = timer()
         lang_repo_builder = SLanguageStructureRepositoryBuilder()
         self.lang_repo = lang_repo_builder.build_from_multiple_path(self.language_folders)
         stop_repo_build = timer()
+
         self.create_concept_declaration_dicts()
+        concepts_to_generate = self.get_concepts_to_generate()
+
         # ensure that base concept is the first concept to be generated:
         self.create_concept_class(BASE_CONCEPT_FQN)
-        if not self.concept_names_to_generate:
-            self.concept_names_to_generate = set()
-            for concept_declaration in self.lang_repo.get_nodes_of_concept(CONCEPT_DECLARATION_CONCEPT_NAME):
-                fqn = get_concept_fqn(concept_declaration, self.snode_to_model_map)
-                self.concept_names_to_generate.add(fqn)
-        for name_of_concept in self.concept_names_to_generate:
+        for name_of_concept in concepts_to_generate:
             self.create_concept_class(name_of_concept)
 
         stop_all = timer()
@@ -54,6 +77,29 @@ class StructureFromLanguageGenerator:
 
         return len(self.already_created_concepts)
 
+    def get_concepts_to_generate(self):
+        concept_names_to_generate = []
+        if self.generation_mode.gen_mode == self.GenerationMode.GENERATE_CONCEPTS:
+            concept_names_to_generate.extend(self.generation_mode.concepts)
+        else:
+            if self.generation_mode.gen_mode == self.GenerationMode.GENERATE_ALL:
+                concepts_to_generate = self.lang_repo.get_nodes_of_concept(CONCEPT_DECLARATION_CONCEPT_NAME)
+            else:
+                concepts_to_generate = []
+                for solution in self.lang_repo.solutions:
+                    module_path = os.path.abspath(solution.path_to_module_file)
+                    paths_to_generate = [os.path.abspath(dir_path) for dir_path in self.generation_mode.concepts]
+                    for path_to_generate in paths_to_generate:
+                        if os.path.commonpath([module_path, path_to_generate]) == path_to_generate:
+                            for model in solution.models:
+                                concept_declarations = [cd for cd in model.root_nodes if cd.concept.name == CONCEPT_DECLARATION_CONCEPT_NAME]
+                                concepts_to_generate.extend(concept_declarations)
+            for concept_declaration in concepts_to_generate:
+                fqn = get_concept_fqn(concept_declaration, self.snode_to_model_map)
+                concept_names_to_generate.append(fqn)
+        if not concept_names_to_generate:
+            logging.error("No concepts for generation found")
+        return concept_names_to_generate
 
     def create_concept_declaration_dicts(self):
         for solution in self.lang_repo.solutions:

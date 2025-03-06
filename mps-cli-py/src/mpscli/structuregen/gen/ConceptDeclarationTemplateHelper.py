@@ -2,7 +2,7 @@ import logging
 
 from mpscli.model.SNode import SNode
 from mpscli.structuregen.gen.GenerationConstants import ENUM_DECLARATION_CONCEPT_NAME, CONCEPT_DECLARATION_CONCEPT_NAME, BASE_CONCEPT_FQN, INTERFACE_DECLARATION_CONCEPT_NAME
-from mpscli.structuregen.gen.StructureGenUtil import get_and_resolve_reference, get_concept_fqn
+from mpscli.structuregen.gen.StructureGenUtil import get_and_resolve_reference, get_concept_fqn, has_reference
 from mpscli.structuregen.gen.StructureTemplates import get_class_template
 from mpscli.structuregen.gen.StructureTemplates import get_impl_class_template
 
@@ -177,13 +177,14 @@ class ConceptDeclarationTemplateHelper(AbstractConceptDeclarationTemplateHelper)
 
     def get_base_concept_and_implementing_interfaces(self):
         base_classes = []
-        super_concept = get_and_resolve_reference(self.snode, "extends", self.repo)
-        if super_concept is None:
-            snode_name = self.snode.get_property("name")
-            if snode_name != "BaseConcept":
-                logging.error(f"Info: Cannot find BaseConcept for concept {snode_name}")
-        else:
-            base_classes.append(super_concept)
+        if has_reference(self.snode, "extends"):
+            super_concept = get_and_resolve_reference(self.snode, "extends", self.repo)
+            if super_concept is not None:
+                base_classes.append(super_concept)
+            else:
+                snode_name = self.snode.get_property("name")
+                if snode_name != "BaseConcept":
+                    logging.error(f"Cannot find BaseConcept for concept {snode_name}")
         for implements_interface in self.snode.get_children("implements"):
             base_classes.append(get_and_resolve_reference(implements_interface, "intfc", self.repo))
         return [item for item in base_classes if item is not None]
