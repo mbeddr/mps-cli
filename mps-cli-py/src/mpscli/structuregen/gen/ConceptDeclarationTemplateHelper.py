@@ -1,6 +1,7 @@
 import logging
 
 from mpscli.model.SNode import SNode
+from mpscli.structuregen.gen.EscapeUtil import escape_quotes, escape_if_python_keyword
 from mpscli.structuregen.gen.GenerationConstants import ENUM_DECLARATION_CONCEPT_NAME, CONCEPT_DECLARATION_CONCEPT_NAME, BASE_CONCEPT_FQN, INTERFACE_DECLARATION_CONCEPT_NAME
 from mpscli.structuregen.gen.StructureGenUtil import get_and_resolve_reference, get_concept_fqn, has_reference
 from mpscli.structuregen.gen.StructureTemplates import get_class_template
@@ -13,10 +14,12 @@ class AbstractDeclarationTemplateHelper:
         self.snode_to_model_map = snode_to_model_map
 
     def get_class_name(self):
-        return self.snode.get_property("name")
+        return escape_if_python_keyword(self.snode.get_property("name"))
 
     def get_concept_file_path(self):
-        return self.get_snode_concept_fqn().replace(".", "/")
+        fqn = self.get_snode_concept_fqn()
+        escaped_fqn_segments = [escape_if_python_keyword(segment) for segment in fqn.split(".")]
+        return "/".join(escaped_fqn_segments)
 
     def get_concept_folder_path(self):
         file_path = self.get_concept_file_path()
@@ -36,7 +39,7 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
     def get_imports(self):
         imports = []
         for used_class in self.get_used_classes(False):
-            imports.append((self.get_module_name(used_class), used_class.get_property("name")))
+            imports.append((self.get_model_name(used_class), escape_if_python_keyword(used_class.get_property("name"))))
         if self.is_base_concept():
             imports.append(("mpscli.model.structure", "AbstractSNodeWithStructure"))
         if self.is_top_interface():
@@ -46,14 +49,14 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
     def get_imports_for_type_checking(self):
         imports_for_type_checking = []
         for used_class_in_link in self.get_used_classes_in_links():
-            imports_for_type_checking.append((self.get_module_name(used_class_in_link), used_class_in_link.get_property("name")))
+            imports_for_type_checking.append((self.get_model_name(used_class_in_link), used_class_in_link.get_property("name")))
         return imports_for_type_checking
 
     def is_base_concept(self):
         return get_concept_fqn(self.snode, self.snode_to_model_map) == BASE_CONCEPT_FQN
 
     def get_impl_import(self):
-        return self.snode_to_model_map[self.snode].name, self.snode.get_property("name")
+        return self.snode_to_model_map[self.snode].name, escape_if_python_keyword(self.snode.get_property("name"))
 
     def get_base_classes_names(self):
         names = [base_concept.get_property("name") for base_concept in [bc for bc in self.get_base_concept_and_implementing_interfaces() if bc is not None]]
@@ -91,7 +94,9 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
 
     def get_properties(self):
         property_declarations = self.snode.get_children("propertyDeclaration")
-        return tuple((property_declaration.get_property("name"), self.get_primitive_datatype(property_declaration), self.is_enum_declaration(property_declaration) ) for property_declaration in property_declarations)
+        return tuple((property_declaration.get_property("name"), self.get_primitive_datatype(property_declaration),
+                      self.is_enum_declaration(property_declaration), escape_if_python_keyword(property_declaration.get_property("name")))
+                     for property_declaration in property_declarations)
 
     def get_children_and_references(self):
         links_declarations = self.snode.get_children("linkDeclaration")
@@ -102,11 +107,11 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
             target_str = ""
             if target is not None:
                 target_str = target.get_property("name")
-            children_and_refs.append((role, target_str, self.is_many(links_declaration)))
+            children_and_refs.append((role, target_str, self.is_many(links_declaration), escape_if_python_keyword(role)))
 
         return children_and_refs
 
-    def get_module_name(self, snode):
+    def get_model_name(self, snode):
         if snode is None:
             logging.error("Error: cannot get module name for None snode.")
             return ""
@@ -144,11 +149,11 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
             logging.error("Error: Cannot find dataType declaration for property declaration.")
             return "str"
         type_name = datatype_declaration.get_property("name")
-        if type_name == "string":
+        if type_name == "string" or type_name == "_Identifier_String" or type_name == "_FPNumber_String" or "_HexNumberValue":
             return "str"
         if type_name == "boolean":
             return "bool"
-        if type_name == "integer":
+        if type_name == "integer" or type_name == "IDNumber":
             return "int"
         return type_name
 
@@ -158,11 +163,11 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
 
     def get_alias(self):
         alias = self.snode.get_property("conceptAlias")
-        return alias if alias is not None else ""
+        return escape_quotes(alias) if alias is not None else ""
 
     def get_short_description(self):
         short_description = self.snode.get_property("conceptShortDescription")
-        return short_description if short_description is not None else ""
+        return escape_quotes(short_description) if short_description is not None else ""
 
     @staticmethod
     def is_many(links_declaration):
@@ -177,14 +182,19 @@ class ConceptDeclarationTemplateHelper(AbstractConceptDeclarationTemplateHelper)
 
     def get_base_concept_and_implementing_interfaces(self):
         base_classes = []
+        super_concept = None
         if has_reference(self.snode, "extends"):
             super_concept = get_and_resolve_reference(self.snode, "extends", self.repo)
-            if super_concept is not None:
-                base_classes.append(super_concept)
-            else:
+            if super_concept is None:
                 snode_name = self.snode.get_property("name")
                 if snode_name != "BaseConcept":
-                    logging.error(f"Cannot find BaseConcept for concept {snode_name}")
+                    logging.error(f"Cannot find BaseConcept for concept {snode_name}.")
+        elif self.snode.get_property("name") != "BaseConcept":
+            # implicit usage of base concept if we are not base concept
+            super_concept = [base_concept for base_concept in self.repo.get_nodes_of_concept(CONCEPT_DECLARATION_CONCEPT_NAME)
+                             if base_concept.get_property("name") == "BaseConcept"][0]
+        if super_concept is not None:
+            base_classes.append(super_concept)
         for implements_interface in self.snode.get_children("implements"):
             base_classes.append(get_and_resolve_reference(implements_interface, "intfc", self.repo))
         return [item for item in base_classes if item is not None]

@@ -28,7 +28,7 @@ class {{ concept_declaration_snode.get_class_name() }}({{ concept_declaration_sn
         return "{{ concept_declaration_snode.get_short_description() }}"
     {% endif %}
     {% for property in concept_declaration_snode.get_properties() %}
-    def {{ property[0] }}(self) -> Optional[{{ property[1] }}]:
+    def {{ property[3] }}(self) -> Optional[{{ property[1] }}]:
       {%- if property[2] %}
       value = self.get_property("{{ property[0] }}")
       index = value.rfind('/')
@@ -41,10 +41,10 @@ class {{ concept_declaration_snode.get_class_name() }}({{ concept_declaration_sn
     {% endfor -%}
     {% for child in concept_declaration_snode.get_children_and_references() %}
     {%- if child[2] %}
-    def {{ child[0] }}(self) -> List["{{ child[1] }}"]:
+    def {{ child[3] }}(self) {% if child[1] %}-> List["{{ child[1] }}"]{% endif %}:
           return self.get_children("{{ child[0] }}")
     {% else %}
-    def {{ child[0] }}(self) -> Optional["{{ child[1] }}"]:
+    def {{ child[3] }}(self) {% if child[1] %}-> Optional["{{ child[1] }}"]{% endif %}:
           my_children = self.get_children("{{ child[0] }}")
           if my_children is None:
             return self.get_reference("{{ child[0] }}").resolve(self.repo)

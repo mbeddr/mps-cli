@@ -33,7 +33,8 @@ class SModuleBuilder:
                 else:
                     builder = SModelBuilderDefaultPersistency(snode_class_finder)
                 model = builder.build(path_to_model)
-                module.models.append(model)
+                if model is not None:
+                    module.models.append(model)
 
         return module
 

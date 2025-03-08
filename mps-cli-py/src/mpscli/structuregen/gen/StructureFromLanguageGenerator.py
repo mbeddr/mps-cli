@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 from typing import Set, List
 
 from mpscli.structuregen.gen.ConceptDeclarationTemplateHelper import create_helper_by_declaration_name
@@ -17,10 +18,12 @@ class StructureFromLanguageGenerator:
         GENERATE_ALL = "GENERATE_ALL"
         GENERATE_CONCEPTS = "GENERATE_CONCEPTS"
         GENERATE_CONCEPTS_IN_LANGUAGE_FOLDERS = "GENERATE_CONCEPTS_IN_LANGUAGE_FOLDERS"
+        GENERATE_CONCEPTS_AND_IN_LANGUAGE_FOLDERS = "GENERATE_CONCEPTS_AND_IN_LANGUAGE_FOLDERS"
 
-        def __init__(self, gen_mode, concepts):
+        def __init__(self, gen_mode, concepts_to_generate, folders_to_generate):
             self.gen_mode = gen_mode
-            self.concepts = concepts
+            self.concepts_to_generate = concepts_to_generate
+            self.folders_to_generate = folders_to_generate
 
     def __init__(self, language_folders, generate_mode: GenerationMode, output_folder):
         self.language_folders = language_folders
@@ -34,16 +37,22 @@ class StructureFromLanguageGenerator:
 
     @classmethod
     def init_generate_all(cls, language_folders, output_folder):
-        return cls(language_folders, cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_ALL, None), output_folder)
+        return cls(language_folders, cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_ALL, None, None), output_folder)
     
     @classmethod
-    def init_generate_generate_concepts(cls, language_folders, concepts_to_generate, output_folder):
-        mode_for_concepts = cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_CONCEPTS, concepts_to_generate)
+    def init_generate_concepts(cls, language_folders, concepts_to_generate, output_folder):
+        mode_for_concepts = cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_CONCEPTS, concepts_to_generate, None)
         return cls(language_folders, mode_for_concepts, output_folder)
 
     @classmethod
     def init_generate_concepts_from_folder(cls, language_folders_to_generate, additional_language_folders, output_folder):
-        mode_for_folder = cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_CONCEPTS_IN_LANGUAGE_FOLDERS, language_folders_to_generate)
+        mode_for_folder = cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_CONCEPTS_IN_LANGUAGE_FOLDERS, None, language_folders_to_generate)
+        all_language_folders = language_folders_to_generate + additional_language_folders
+        return cls(all_language_folders, mode_for_folder, output_folder)
+
+    @classmethod
+    def init_generate_concepts_and_folder(cls, concepts_to_generate, language_folders_to_generate, additional_language_folders, output_folder):
+        mode_for_folder = cls.GenerationMode(StructureFromLanguageGenerator.GenerationMode.GENERATE_CONCEPTS_AND_IN_LANGUAGE_FOLDERS, concepts_to_generate, language_folders_to_generate)
         all_language_folders = language_folders_to_generate + additional_language_folders
         return cls(all_language_folders, mode_for_folder, output_folder)
 
@@ -80,15 +89,19 @@ class StructureFromLanguageGenerator:
     def get_concepts_to_generate(self):
         concept_names_to_generate = []
         if self.generation_mode.gen_mode == self.GenerationMode.GENERATE_CONCEPTS:
-            concept_names_to_generate.extend(self.generation_mode.concepts)
+            concept_names_to_generate.extend(self.generation_mode.concepts_to_generate)
         else:
             if self.generation_mode.gen_mode == self.GenerationMode.GENERATE_ALL:
                 concepts_to_generate = self.lang_repo.get_nodes_of_concept(CONCEPT_DECLARATION_CONCEPT_NAME)
             else:
+                # either generate folders or generate concepts and folders --> folders need to be added in both cases
+                if self.generation_mode.gen_mode == self.GenerationMode.GENERATE_CONCEPTS_AND_IN_LANGUAGE_FOLDERS:
+                    # in case of concept and folders, add the concepts
+                    concept_names_to_generate.extend(self.generation_mode.concepts_to_generate)
                 concepts_to_generate = []
                 for solution in self.lang_repo.solutions:
                     module_path = os.path.abspath(solution.path_to_module_file)
-                    paths_to_generate = [os.path.abspath(dir_path) for dir_path in self.generation_mode.concepts]
+                    paths_to_generate = [os.path.abspath(dir_path) for dir_path in self.generation_mode.folders_to_generate]
                     for path_to_generate in paths_to_generate:
                         if os.path.commonpath([module_path, path_to_generate]) == path_to_generate:
                             for model in solution.models:
@@ -124,14 +137,14 @@ class StructureFromLanguageGenerator:
             concept_declaration_helper = create_helper_by_declaration_name(concept_to_gen_name, concept_to_generate, self.snode_to_model_map, self.lang_repo)
             self.write_to_file(concept_declaration_helper.get_concept_file_path() + ".py", concept_declaration_helper.generate_class())
             self.write_to_file(concept_declaration_helper.get_concept_file_path() + "Impl.py", concept_declaration_helper.generate_class_impl())
-            self.write_init_file(concept_declaration_helper.get_concept_folder_path())
+            self.write_init_file_in_folder_and_parents(concept_declaration_helper.get_concept_folder_path())
             for base in concept_declaration_helper.get_used_classes(True):
                 concept_name = get_concept_fqn(base, self.snode_to_model_map)
                 self.create_concept_class(concept_name)
         elif concept_to_gen_name == ENUM_DECLARATION_CONCEPT_NAME:
             enum_declaration_helper = EnumDeclarationTemplateHelper(concept_to_generate, self.snode_to_model_map)
             self.write_to_file(enum_declaration_helper.get_concept_file_path() + ".py", enum_declaration_helper.generate_enum_class())
-            self.write_init_file(enum_declaration_helper.get_concept_folder_path())
+            self.write_init_file_in_folder_and_parents(enum_declaration_helper.get_concept_folder_path())
         else:
             logging.error(f"Can not get concept of type {concept_to_gen_name} as it is an unknown definition")
 
@@ -142,8 +155,10 @@ class StructureFromLanguageGenerator:
             if content is not None:
                 file.write(content)
 
-    def write_init_file(self, folder):
-        if folder in self.folder_with_init_py:
+    def write_init_file_in_folder_and_parents(self, folder):
+        if folder in self.folder_with_init_py or folder == "." or folder is None:
             return
         self.write_to_file(folder + "/" + "__init__.py", None)
         self.folder_with_init_py.add(folder)
+        parent_path = Path(folder).parent
+        self.write_init_file_in_folder_and_parents(str(parent_path))

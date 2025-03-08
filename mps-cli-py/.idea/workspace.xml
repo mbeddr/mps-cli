@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a348a4a-cd4a-44fd-85fd-0fcdc612aac1" name="Default Changelist" comment="adding and testing list functions">
+      <change afterPath="$PROJECT_DIR$/src/mpscli/structuregen/gen/EscapeUtil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderBase.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderBase.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderDefaultPersistency.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModelBuilderDefaultPersistency.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/model/builder/SModuleBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/model/builder/SModuleBuilder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mpscli/structuregen/gen/ConceptDeclarationTemplateHelper.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/structuregen/gen/ConceptDeclarationTemplateHelper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpscli/structuregen/gen/EnumDeclarationTemplateHelper.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/structuregen/gen/EnumDeclarationTemplateHelper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mpscli/structuregen/gen/StructureTemplates.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpscli/structuregen/gen/StructureTemplates.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -58,37 +63,38 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.Python tests for test_base.TestBase.executor": "Run",
-    "Python tests.Python tests for test_language_extraction.TestLanguageExtraction.executor": "Run",
-    "Python tests.Python tests for test_language_structure_builder.TestLanguageBuilder.executor": "Run",
-    "Python tests.Python tests for test_language_structure_builder.TestLanguageBuilder.test_building_languages.executor": "Run",
-    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.executor": "Run",
-    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_building_languages.executor": "Run",
-    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist.executor": "Run",
-    "Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes.executor": "Run",
-    "Python tests.Python tests for test_list_extensions.TestBase.executor": "Run",
-    "Python tests.Python tests for test_list_extensions.TestBase.test_of_concept.executor": "Run",
-    "Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.executor": "Run",
-    "Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.test_parse_with_structure_aware_concepts.executor": "Run",
-    "Python tests.Python tests for test_structure_aware_node_finder.TestStructureAwareNodeFinder.executor": "Run",
-    "Python tests.Python tests in structure.executor": "Run",
-    "Python tests.Python tests in test_language_extraction.py.executor": "Run",
-    "Python tests.Python tests in test_language_structure_builder.py.executor": "Run",
-    "Python tests.Python tests in test_language_structure_generator.py.executor": "Run",
-    "Python tests.Python tests in test_nodes.py.executor": "Debug",
-    "Python tests.Python tests in test_parse_with_structure_aware_classes.py.executor": "Run",
-    "Python tests.Python tests in test_structure_aware_node_finder.py.executor": "Run",
-    "Python tests.Python tests in test_structure_nodes.py.executor": "Debug",
-    "Python tests.Python tests in tests.executor": "Run",
-    "Python.demo.executor": "Run",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/generate__phyton__structure",
-    "last_opened_file_path": "/Users/d3iqhe7/repos/mps-cli/mps-cli-py/src/mpscli/model/structure",
-    "settings.editor.selected.configurable": "preferences.pathVariables"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Python tests for test_base.TestBase.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_language_extraction.TestLanguageExtraction.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_language_structure_builder.TestLanguageBuilder.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_language_structure_builder.TestLanguageBuilder.test_building_languages.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_building_languages.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_list_extensions.TestBase.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_list_extensions.TestBase.test_of_concept.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_parse_with_structure_aware_classes.TestParseWithStructureAwareClasses.test_parse_with_structure_aware_concepts.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_structure_aware_node_finder.TestStructureAwareNodeFinder.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in structure.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_language_extraction.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_language_structure_builder.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_language_structure_generator.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_list_extensions.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_nodes.py.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.Python tests in test_parse_with_structure_aware_classes.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_structure_aware_node_finder.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_structure_nodes.py.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.Python tests in tests.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demo.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/generate__phyton__structure&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/d3iqhe7/repos/mps-cli/mps-cli-py/src/mpscli/model/structure&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pathVariables&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/mpscli/model/structure" />
@@ -104,7 +110,7 @@
       <recent name="$PROJECT_DIR$/src/mpscli/structuregen/model" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Python tests in test_language_structure_generator.py">
+  <component name="RunManager" selected="Python tests.Python tests in test_structure_aware_node_finder.py">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
@@ -127,7 +133,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_language_structure_builder.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="mps-cli-py" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -138,53 +144,8 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="mps-cli-py" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Python tests for test_list_extensions.TestBase" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="mps-cli-py" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_list_extensions.TestBase&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Python tests for test_list_extensions.TestBase.test_of_concept" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="mps-cli-py" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_list_extensions.TestBase.test_of_concept&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure/test_language_structure_builder.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <configuration name="Python tests in test_language_structure_generator.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
@@ -205,21 +166,66 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="Python tests in test_list_extensions.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure/test_list_extensions.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_parse_with_structure_aware_classes.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure/test_parse_with_structure_aware_classes.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_structure_aware_node_finder.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="mps-cli-py" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/structure" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/structure/test_structure_aware_node_finder.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.main" />
-      <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist" />
-      <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes" />
-      <item itemvalue="Python tests.Python tests for test_list_extensions.TestBase" />
-      <item itemvalue="Python tests.Python tests for test_list_extensions.TestBase.test_of_concept" />
+      <item itemvalue="Python tests.Python tests in test_language_structure_builder.py" />
+      <item itemvalue="Python tests.Python tests in test_list_extensions.py" />
+      <item itemvalue="Python tests.Python tests in test_parse_with_structure_aware_classes.py" />
+      <item itemvalue="Python tests.Python tests in test_structure_aware_node_finder.py" />
       <item itemvalue="Python tests.Python tests in test_language_structure_generator.py" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Python tests in test_structure_aware_node_finder.py" />
+        <item itemvalue="Python tests.Python tests in test_parse_with_structure_aware_classes.py" />
+        <item itemvalue="Python tests.Python tests in test_list_extensions.py" />
+        <item itemvalue="Python tests.Python tests in test_language_structure_builder.py" />
         <item itemvalue="Python tests.Python tests in test_language_structure_generator.py" />
-        <item itemvalue="Python tests.Python tests for test_list_extensions.TestBase" />
-        <item itemvalue="Python tests.Python tests for test_list_extensions.TestBase.test_of_concept" />
-        <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_using_classes" />
-        <item itemvalue="Python tests.Python tests for test_language_structure_generator.TestLanguageStructureGenerator.test_smoke_class_exist" />
       </list>
     </recent_temporary>
   </component>
@@ -481,12 +487,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/mpscli/model/structure/StructureAwareSNodeClassFinder.py</url>
-          <line>36</line>
+          <line>37</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/mpscli/structuregen/gen/StructureFromLanguageGenerator.py</url>
-          <line>69</line>
+          <line>116</line>
           <option name="timeStamp" value="36" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
