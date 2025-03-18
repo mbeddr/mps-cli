@@ -33,10 +33,10 @@ class SSolutionsRepositoryBuilder:
             print("building model from path:", path)
             self.collect_solutions_from_sources(path)
             self.collect_solutions_from_jars(path)
-            self.repo.languages = list(SLanguageBuilder.languages.values())
+        self.repo.languages = list(SLanguageBuilder.languages.values())
         stop = timer()
         duration = (stop - start)
-        print('duration for parsing solutions: ' + str(duration) + ' seconds')
+        print('duration for parsing modules: ' + str(duration) + ' seconds')
         return self.repo
 
     def collect_solutions_from_sources(self, path):
