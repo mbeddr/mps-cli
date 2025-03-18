@@ -11,10 +11,11 @@ from mpscli.model.builder.SModuleBuilder import SModuleBuilder
 
 
 class SModuleRepositoryBuilder:
-    def __init__(self, module_file_extension, snode_class_finder):
+    def __init__(self, module_file_extension, snode_class_finder, builder_filter):
         self.repo = SRepository()
         self.module_file_extension = module_file_extension
         self.snode_class_finder = snode_class_finder
+        self.builder_filter = builder_filter
 
     def build_from_multiple_path(self, paths):
         start = timer()
@@ -41,7 +42,7 @@ class SModuleRepositoryBuilder:
     def collect_modules_from_sources(self, path):
         for pth in Path(path).rglob('*.' + self.module_file_extension):
             module_builder = self.create_module_builder()
-            module = module_builder.build_module(pth, self.snode_class_finder)
+            module = module_builder.build_module(pth, self.repo, self.snode_class_finder)
             if module is not None:
                 self.repo.solutions.append(module)
 

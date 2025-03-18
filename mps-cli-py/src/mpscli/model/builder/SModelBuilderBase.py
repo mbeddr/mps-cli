@@ -5,7 +5,7 @@ from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 
 class SModelBuilderBase:
 
-    def __init__(self, snode_class_finder=None):
+    def __init__(self, repo=None, snode_class_finder=None):
         self.index_2_concept = {}
         self.index_2_property = {}
         self.index_2_child_role_in_parent = {}
@@ -13,6 +13,7 @@ class SModelBuilderBase:
         self.index_2_imported_model_uuid = {}
 
         self.snode_class_finder = snode_class_finder
+        self.repo = repo
 
     def extract_node(self, my_model, node_xml, parent):
         root_node_id = node_xml.get("id")
@@ -27,7 +28,7 @@ class SModelBuilderBase:
             s_node = SNode(root_node_id, root_node_concept, child_role, parent)
         else:
             s_node_class = self.snode_class_finder.get_snode_class(root_node_concept)
-            s_node = s_node_class(root_node_id, root_node_concept, child_role, parent)
+            s_node = s_node_class(root_node_id, root_node_concept, child_role, parent, self.repo)
 
         for property_xml_node in node_xml.findall("property"):
             property_role = property_xml_node.get("role")
@@ -78,34 +79,36 @@ class SModelBuilderBase:
 
     def extract_imports_and_registry(self, model_xml_node):
         imports_xml_node = model_xml_node.find("imports")
-        for import_xml_node in imports_xml_node.findall("import"):
-            import_index = import_xml_node.get("index")
-            imported_model_ref = import_xml_node.get("ref")
-            imported_model_uuid = imported_model_ref[0: imported_model_ref.find("(")]
-            self.index_2_imported_model_uuid[import_index] = imported_model_uuid
+        if imports_xml_node:
+            for import_xml_node in imports_xml_node.findall("import"):
+                import_index = import_xml_node.get("index")
+                imported_model_ref = import_xml_node.get("ref")
+                imported_model_uuid = imported_model_ref[0: imported_model_ref.find("(")]
+                self.index_2_imported_model_uuid[import_index] = imported_model_uuid
         registry_xml_node = model_xml_node.find("registry")
-        for language_xml_node in registry_xml_node.findall("language"):
-            language_id = language_xml_node.get("id")
-            language_name = language_xml_node.get("name")
-            language = SLanguageBuilder.get_language(language_name, language_id)
-            for concept_xml_node in language_xml_node.findall("concept"):
-                concept_id = concept_xml_node.get("id")
-                concept_name = concept_xml_node.get("name")
-                concept = SLanguageBuilder.get_concept(language, concept_name, concept_id)
-                concept_index = concept_xml_node.get("index")
-                self.index_2_concept[concept_index] = concept
-                for property_xml_node in concept_xml_node.findall("property"):
-                    property_name = property_xml_node.get("name")
-                    property_index = property_xml_node.get("index")
-                    node_property = SLanguageBuilder.get_property(concept, property_name)
-                    self.index_2_property[property_index] = node_property
-                for child_xml_node in concept_xml_node.findall("child"):
-                    child_name = child_xml_node.get("name")
-                    child_index = child_xml_node.get("index")
-                    child = SLanguageBuilder.get_child(concept, child_name)
-                    self.index_2_child_role_in_parent[child_index] = child
-                for reference_xml_node in concept_xml_node.findall("reference"):
-                    reference_name = reference_xml_node.get("name")
-                    reference_index = reference_xml_node.get("index")
-                    reference = SLanguageBuilder.get_reference(concept, reference_name)
-                    self.index_2_reference_role[reference_index] = reference
+        if registry_xml_node:
+            for language_xml_node in registry_xml_node.findall("language"):
+                language_id = language_xml_node.get("id")
+                language_name = language_xml_node.get("name")
+                language = SLanguageBuilder.get_language(language_name, language_id)
+                for concept_xml_node in language_xml_node.findall("concept"):
+                    concept_id = concept_xml_node.get("id")
+                    concept_name = concept_xml_node.get("name")
+                    concept = SLanguageBuilder.get_concept(language, concept_name, concept_id)
+                    concept_index = concept_xml_node.get("index")
+                    self.index_2_concept[concept_index] = concept
+                    for property_xml_node in concept_xml_node.findall("property"):
+                        property_name = property_xml_node.get("name")
+                        property_index = property_xml_node.get("index")
+                        node_property = SLanguageBuilder.get_property(concept, property_name)
+                        self.index_2_property[property_index] = node_property
+                    for child_xml_node in concept_xml_node.findall("child"):
+                        child_name = child_xml_node.get("name")
+                        child_index = child_xml_node.get("index")
+                        child = SLanguageBuilder.get_child(concept, child_name)
+                        self.index_2_child_role_in_parent[child_index] = child
+                    for reference_xml_node in concept_xml_node.findall("reference"):
+                        reference_name = reference_xml_node.get("name")
+                        reference_index = reference_xml_node.get("index")
+                        reference = SLanguageBuilder.get_reference(concept, reference_name)
+                        self.index_2_reference_role[reference_index] = reference

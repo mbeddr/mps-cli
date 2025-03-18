@@ -19,7 +19,7 @@ class SNode:
         return self.references.get(name)
 
     def get_children(self, role):
-        return list(filter(lambda c : c.role_in_parent == role, self.children))
+        return NodeList(filter(lambda c : c.role_in_parent == role, self.children))
 
     def get_descendants(self):
         res = NodeList()

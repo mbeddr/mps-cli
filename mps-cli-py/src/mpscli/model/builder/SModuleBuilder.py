@@ -4,13 +4,19 @@ from collections import deque
 from pathlib import Path
 
 from mpscli.model.SModule import SModule
+from mpscli.model.builder.BuilderFilter import BuilderFilter
 from mpscli.model.builder.SModelBuilderDefaultPersistency import SModelBuilderDefaultPersistency
 from mpscli.model.builder.SModelBuilderFilePerRootPersistency import SModelBuilderFilePerRootPersistency
 
 
 class SModuleBuilder:
 
-    def build_module(self, path_to_module_file, snode_class_finder=None):
+    def __init__(self, builder_filter):
+        self.builder_filter = builder_filter
+
+    def build_module(self, path_to_module_file, repo=None, snode_class_finder=None):
+        if self.builder_filter and not self.builder_filter.build_module(path_to_module_file):
+            return None
         module = self.extract_module_core_info(path_to_module_file)
         path_to_module_dir = path_to_module_file.parent
         module.path_to_module_file = path_to_module_file
@@ -24,14 +30,16 @@ class SModuleBuilder:
         while paths_to_models_dir:
             model_dir = paths_to_models_dir.popleft()
             for path_to_model in model_dir.iterdir():
+                if self.builder_filter and not self.builder_filter.build_model(path_to_model):
+                    continue
                 if path_to_model.is_dir():
                     if self.is_file_per_root_persistency_dir(path_to_model):
-                        builder = SModelBuilderFilePerRootPersistency(snode_class_finder)
+                        builder = SModelBuilderFilePerRootPersistency(repo, snode_class_finder, self.builder_filter)
                     else:
                         paths_to_models_dir.append(path_to_model)
                         continue
                 else:
-                    builder = SModelBuilderDefaultPersistency(snode_class_finder)
+                    builder = SModelBuilderDefaultPersistency(repo, snode_class_finder)
                 model = builder.build(path_to_model)
                 if model is not None:
                     module.models.append(model)

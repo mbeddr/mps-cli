@@ -4,4 +4,7 @@ from mpscli.model.structure.SNodeConceptDeclaration import SNodeConceptDeclarati
 
 
 class AbstractSNodeWithStructure(SNodeConceptDeclaration):
-    pass
+
+    def __init__(self, uuid, concept, role_in_parent, parent, repo):
+        super().__init__(uuid,concept, role_in_parent, parent)
+        self.repo = repo

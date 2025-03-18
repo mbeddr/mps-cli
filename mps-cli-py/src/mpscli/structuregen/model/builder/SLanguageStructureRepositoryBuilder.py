@@ -5,8 +5,8 @@ from mpscli.structuregen.model.builder.SLanguageStructureBuilder import SLanguag
 
 class SLanguageStructureRepositoryBuilder(SModuleRepositoryBuilder):
 
-    def __init__(self, snode_class_finder=None):
-        super().__init__("mpl", snode_class_finder)
+    def __init__(self, snode_class_finder=None, builder_filter=None):
+        super().__init__("mpl", snode_class_finder, builder_filter)
 
     def create_module_builder(self) -> SModuleBuilder:
-        return SLanguageStructureBuilder()
+        return SLanguageStructureBuilder(self.builder_filter)

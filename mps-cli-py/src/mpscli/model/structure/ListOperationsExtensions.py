@@ -17,7 +17,8 @@ def select(self, function):
     return NodeList(function(node) for node in self)
 
 def select_many(self, function):
-    return self.flatten(self).select(function)
+    result = self.flatten(self).select(function)
+    return result.flatten(result)
 
 def flatten(self, node_or_list):
     if isinstance(node_or_list, NodeList):

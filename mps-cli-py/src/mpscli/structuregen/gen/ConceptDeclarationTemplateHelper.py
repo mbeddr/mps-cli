@@ -37,33 +37,34 @@ class AbstractConceptDeclarationTemplateHelper(AbstractDeclarationTemplateHelper
         self.repo = repo
 
     def get_imports(self):
-        imports = []
-        for used_class in self.get_used_classes(False):
-            imports.append((self.get_model_name(used_class), escape_if_python_keyword(used_class.get_property("name"))))
-        if self.is_base_concept():
+        imports = [self.build_import(used_class) for used_class in self.get_used_classes(False)]
+        if self.is_base_concept() or self.is_top_interface():
             imports.append(("mpscli.model.structure", "AbstractSNodeWithStructure"))
-        if self.is_top_interface():
-            imports.append(("mpscli.model.structure", "AbstractSNodeInterfaceWithStructure"))
         return imports
 
     def get_imports_for_type_checking(self):
-        imports_for_type_checking = []
-        for used_class_in_link in self.get_used_classes_in_links():
-            imports_for_type_checking.append((self.get_model_name(used_class_in_link), used_class_in_link.get_property("name")))
-        return imports_for_type_checking
+        return [self.build_import(used_class) for used_class in self.get_used_classes_in_links()]
+
+    def build_import(self, used_class):
+        class_name = used_class.get_property("name")
+        model_name = self.get_model_name(used_class)
+        return self.build_import_for_model_and_class(model_name, class_name)
+
+    @staticmethod
+    def build_import_for_model_and_class(model_name, class_name):
+        escaped_model_part = [escape_if_python_keyword(segment) for segment in model_name.split(".")]
+        return ".".join(escaped_model_part), escape_if_python_keyword(class_name)
 
     def is_base_concept(self):
         return get_concept_fqn(self.snode, self.snode_to_model_map) == BASE_CONCEPT_FQN
 
     def get_impl_import(self):
-        return self.snode_to_model_map[self.snode].name, escape_if_python_keyword(self.snode.get_property("name"))
+        return self.build_import_for_model_and_class(self.snode_to_model_map[self.snode].name, self.snode.get_property("name"))
 
     def get_base_classes_names(self):
         names = [base_concept.get_property("name") for base_concept in [bc for bc in self.get_base_concept_and_implementing_interfaces() if bc is not None]]
-        if self.is_base_concept():
+        if self.is_base_concept() or self.is_top_interface():
             names.append("AbstractSNodeWithStructure")
-        if self.is_top_interface():
-            names.append("AbstractSNodeInterfaceWithStructure")
         return ', '.join(names)
 
     def get_used_classes(self, include_classes_in_links):
@@ -189,6 +190,8 @@ class ConceptDeclarationTemplateHelper(AbstractConceptDeclarationTemplateHelper)
                 snode_name = self.snode.get_property("name")
                 if snode_name != "BaseConcept":
                     logging.error(f"Cannot find BaseConcept for concept {snode_name}.")
+                    super_concept = [base_concept for base_concept in self.repo.get_nodes_of_concept(CONCEPT_DECLARATION_CONCEPT_NAME)
+                                     if base_concept.get_property("name") == "BaseConcept"][0]
         elif self.snode.get_property("name") != "BaseConcept":
             # implicit usage of base concept if we are not base concept
             super_concept = [base_concept for base_concept in self.repo.get_nodes_of_concept(CONCEPT_DECLARATION_CONCEPT_NAME)
@@ -197,7 +200,8 @@ class ConceptDeclarationTemplateHelper(AbstractConceptDeclarationTemplateHelper)
             base_classes.append(super_concept)
         for implements_interface in self.snode.get_children("implements"):
             base_classes.append(get_and_resolve_reference(implements_interface, "intfc", self.repo))
-        return [item for item in base_classes if item is not None]
+        base_classes = [item for item in base_classes if item is not None]
+        return base_classes
 
     def create_concept_methods(self):
         return True

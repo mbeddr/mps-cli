@@ -27,9 +27,10 @@ class StructureAwareSNodeClassFinder(SNodeClassFinder):
     def __private_find_all_classes(self) :
         modules = self.__private_import_all_modules()
         classes = []
-        for module_name, module in modules.items():
-            module_classes_tuple = inspect.getmembers(module, inspect.isclass)
-            classes.extend([item[1] for item in module_classes_tuple])
+        for module_name, module_list in modules.items():
+            for module in module_list:
+                module_classes_tuple = inspect.getmembers(module, inspect.isclass)
+                classes.extend([item[1] for item in module_classes_tuple])
         return classes
 
     def get_snode_class(self, concept) -> type[SNode]:
@@ -58,5 +59,7 @@ class StructureAwareSNodeClassFinder(SNodeClassFinder):
         python_files = self.__private_find_python_modules()
         for file_path in python_files:
             module_name = os.path.splitext(os.path.basename(file_path))[0]
-            modules[module_name] = self.__private_import_module_from_path(module_name, file_path)
+            if module_name not in modules:
+                modules[module_name] = []
+            modules[module_name].append(self.__private_import_module_from_path(module_name, file_path))
         return modules

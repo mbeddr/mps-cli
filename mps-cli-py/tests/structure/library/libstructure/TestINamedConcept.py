@@ -1,7 +1,7 @@
-from mpscli.model.structure.AbstractSNodeInterfaceWithStructure import AbstractSNodeInterfaceWithStructure
+from mpscli.model.structure.AbstractSNodeWithStructure import AbstractSNodeWithStructure
 
 
-class TestINamedConcept(AbstractSNodeInterfaceWithStructure):
+class TestINamedConcept(AbstractSNodeWithStructure):
 
     def name(self) -> str:
         return self.get_property("name")

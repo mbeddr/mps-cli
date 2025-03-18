@@ -12,13 +12,13 @@ from tests.structure.library.libstructure.TestLibraryImpl import TestLibraryImpl
 class TestBase(unittest.TestCase):
 
     def setUp(self):
-        library = TestLibraryImpl("TLI1", TestLibraryImpl.get_concept_fqn(), None, None)
+        library = TestLibraryImpl("TLI1", TestLibraryImpl.get_concept_fqn(), None, None, None)
         library.name = "TestLib"
-        book1 = TestBookImpl("TB1", TestBookImpl.get_concept_fqn(), "entities", library)
+        book1 = TestBookImpl("TB1", TestBookImpl.get_concept_fqn(), "entities", library, None)
         book1.properties["name"] = "TestBook1Name"
-        book2 = TestBookImpl("TB2", TestBookImpl.get_concept_fqn(), "entities", library)
+        book2 = TestBookImpl("TB2", TestBookImpl.get_concept_fqn(), "entities", library, None)
         book2.properties["name"] = "TestBook2Name"
-        book3 = TestBookImpl("TB3", TestBookImpl.get_concept_fqn(), "entities", library)
+        book3 = TestBookImpl("TB3", TestBookImpl.get_concept_fqn(), "entities", library, None)
         book3.properties["name"] = "TestBook3Name"
         library.children.append(book1)
         library.children.append(book2)
