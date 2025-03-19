@@ -26,6 +26,16 @@ The library has currently the following limitations:
 
 ### Build and upload to pypi.org
 
-- `increae version number`
+#### Mac
+- `increase version number`
 - `python3 -m build`
 - `python3 -m twine upload dist/*`
+
+### Win
+- `increase version number`
+- `py -m build`
+- `py -m twine upload dist/*`
+
+To install build and twine:
+- `py -m pip install --upgrade build`
+- `py -m pip install --upgrade twine`
