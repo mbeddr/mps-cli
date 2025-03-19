@@ -14,22 +14,29 @@ class SSolutionsRepositoryBuilder:
     def __init__(self):
         self.repo = SRepository()
 
-    def build(self, path):
-        if not os.path.exists(path):
-            print("ERROR: path", path, "does not exist!")
-            sys.exit(1)
-        if not os.path.isdir(path):
-            print("ERROR: path", path, "is not a directory!")
+    def build(self, paths):
+        if isinstance(paths, str):
+            paths = [paths]
+        elif not isinstance(paths, list):
+            print("ERROR: paths should be either a string or a list of strings!")
             sys.exit(1)
 
-        print("building model from path:", path)
         start = timer()
-        self.collect_solutions_from_sources(path)
-        self.collect_solutions_from_jars(path)
+        for path in paths:
+            if not os.path.exists(path):
+                print("ERROR: path", path, "does not exist!")
+                continue
+            if not os.path.isdir(path):
+                print("ERROR: path", path, "is not a directory!")
+                continue
+
+            print("building model from path:", path)
+            self.collect_solutions_from_sources(path)
+            self.collect_solutions_from_jars(path)
         self.repo.languages = list(SLanguageBuilder.languages.values())
         stop = timer()
         duration = (stop - start)
-        print('duration is: ' + str(duration) + ' seconds')
+        print('duration for parsing modules: ' + str(duration) + ' seconds')
         return self.repo
 
     def collect_solutions_from_sources(self, path):
