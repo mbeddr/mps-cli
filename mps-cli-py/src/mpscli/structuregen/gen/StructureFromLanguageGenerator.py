@@ -166,7 +166,7 @@ class StructureFromLanguageGenerator:
     def write_to_file(self, path, content):
         file_path = self.output_folder + "/" + path
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             if content is not None:
                 file.write(content)
 
