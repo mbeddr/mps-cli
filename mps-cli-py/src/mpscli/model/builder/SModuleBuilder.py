@@ -53,7 +53,10 @@ class SModuleBuilder:
         module_uuid = module_xml_node.get("uuid")
         source_root = module_xml_node.find('.//sourceRoot')
         if source_root is not None:
-            module_model_folder = source_root.get("location")
+            if source_root.get('location'):
+                module_model_folder = source_root.get("location")
+            elif source_root.get('path'):
+                module_model_folder = source_root.get('path').replace('${module}/', "")
         else:
             module_model_folder = "models"
         module = self.create_module(module_name, module_uuid, module_model_folder)
