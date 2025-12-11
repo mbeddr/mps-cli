@@ -39,6 +39,9 @@ class SModuleBuilder:
                         paths_to_models_dir.append(path_to_model)
                         continue
                 else:
+                    if path_to_model.suffix == '.mpb':
+                        # skip binary model files
+                        continue
                     builder = SModelBuilderDefaultPersistency(repo, snode_class_finder)
                 model = builder.build(path_to_model)
                 if model is not None:
