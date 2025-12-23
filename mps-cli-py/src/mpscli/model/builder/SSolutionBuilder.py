@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from mpscli.model.SSolution import SSolution
 from mpscli.model.builder.SModelBuilderDefaultPersistency import SModelBuilderDefaultPersistency
 from mpscli.model.builder.SModelBuilderFilePerRootPersistency import SModelBuilderFilePerRootPersistency
-
+from mpscli.model.builder.SModelBuilderBinaryPersistency import SModelBuilderBinaryPersistency      
 
 class SSolutionBuilder:
 
@@ -20,6 +20,8 @@ class SSolutionBuilder:
         for path_to_model in path_to_models_dir.iterdir():
             if path_to_model.is_dir():
                 builder = SModelBuilderFilePerRootPersistency()
+            elif path_to_model.suffix == ".mpb":
+                builder = SModelBuilderBinaryPersistency()
             else:
                 builder = SModelBuilderDefaultPersistency()
             model = builder.build(path_to_model)

@@ -11,7 +11,9 @@ class TestNodes(TestBase):
                            ('mps_cli_lanuse_default_persistency',
                             'mps.cli.lanuse.library_top.default_persistency.authors_top'),
                            ('mps_cli_lanuse_binary',
-                            'mps.cli.lanuse.library_top.authors_top')])
+                            'mps.cli.lanuse.library_top.authors_top'),
+                           ('mps_cli_binary_persistency_generated',
+                            'mps.cli.lanuse_binary_persistency.library_top.authors_top')])
     def test_build_root_nodes(self, test_data_location, library_top_authors_top_model_name):
         """
         Test the building of root nodes
