@@ -50,7 +50,8 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         tailBits = self.readLong(fileContent, pos + 8)
         uuid_val = uuid.UUID(int=(headBits << 64) | tailBits)
         print("------------ UUID:", uuid_val)
-        return (headBits, tailBits)
+        #return (headBits, tailBits)
+        return str(uuid_val)
 
     def readLong(self, fileContent, pos):
         return int.from_bytes(fileContent[pos:pos+8], byteorder='big')
