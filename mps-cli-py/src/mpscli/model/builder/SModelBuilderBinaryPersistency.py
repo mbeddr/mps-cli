@@ -24,7 +24,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
             if streamId != self.STREAM_ID_V2:
                 raise ValueError("Unsupported stream ID")
             modelRef = self.readModelReference(fileContent, 8)
-        # Implement the binary persistency model building logic here
+            # Implement the binary persistency model building logic here
         pass
 
 
@@ -50,7 +50,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         tailBits = self.readLong(fileContent, pos + 8)
         uuid_val = uuid.UUID(int=(headBits << 64) | tailBits)
         print("------------ UUID:", uuid_val)
-        return (headBits, tailBits)
+        return str(uuid_val)
 
     def readLong(self, fileContent, pos):
         return int.from_bytes(fileContent[pos:pos+8], byteorder='big')
