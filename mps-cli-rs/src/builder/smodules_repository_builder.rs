@@ -1,11 +1,8 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::Error;
 use std::path::PathBuf;
 use std::time::Instant;
 
 use walkdir::WalkDir;
-use zip::ZipArchive;
 
 use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::builder::smodel_builder_base::SModelBuilderCache;

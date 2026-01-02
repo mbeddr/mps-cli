@@ -31,7 +31,7 @@ impl SModelBuilderCache {
          }
     }
 
-    fn get_model(&mut self, name : String, uuid : String) -> Rc<RefCell<SModel>> {        
+    pub(crate) fn get_model(&mut self, name : String, uuid : String) -> Rc<RefCell<SModel>> {        
         if let Some(model) = self.index_2_model.get(&uuid) { 
             Rc::clone(&model) 
         } else {

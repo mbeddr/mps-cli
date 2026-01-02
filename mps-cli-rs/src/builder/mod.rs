@@ -4,5 +4,6 @@ mod ssolution_builder;
 mod smodel_builder_base;
 mod smodel_builder_default_persistency;
 mod smodel_builder_file_per_root_persistency;
+mod smodel_builder_binary_persistency;
 mod slanguage_builder;
 mod node_id_utils;

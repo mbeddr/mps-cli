@@ -7,8 +7,10 @@ use walkdir::WalkDir;
 
 use crate::builder::smodel_builder_file_per_root_persistency;
 use crate::builder::smodel_builder_default_persistency;
+use crate::builder::smodel_builder_binary_persistency;
 use crate::builder::slanguage_builder::SLanguageBuilder;
 use crate::model::slanguage::SLanguage;
+use crate::model::smodel;
 use crate::model::ssolution::SSolution;
 
 use super::smodel_builder_base::SModelBuilderCache;
@@ -27,8 +29,10 @@ pub(crate) fn build_solution<'a>(path_buf_to_msd_file: &PathBuf, language_id_to_
         let path = model_entry.unwrap().into_path();
         let model = if path.is_dir() {
             smodel_builder_file_per_root_persistency::build_model(path, language_id_to_slanguage, language_builder, model_builder_cache)
-        } else {
+        } else if path.extension().is_some_and(|e| e.eq_ignore_ascii_case("mps")) {
             smodel_builder_default_persistency::build_model(path, language_id_to_slanguage, language_builder, model_builder_cache)
+        } else {
+            smodel_builder_binary_persistency::build_model(path, language_id_to_slanguage, language_builder, model_builder_cache)
         };
         models.push(model)
     }
