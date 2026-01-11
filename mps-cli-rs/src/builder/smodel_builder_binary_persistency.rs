@@ -97,6 +97,7 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<&mut SNod
         }
         if kind == 1 {
           let reference_nodeid = read_node_id(cursor, my_strings);
+          println!("......reference node id: {}", reference_nodeid);
           let mut target_model_kind: u8 = cursor.read_u8().expect("failed to read u8");
           if (target_model_kind != REF_OTHER_MODEL && target_model_kind != REF_THIS_MODEL) {
               panic!("unknown target model kind: {}", target_model_kind);
@@ -135,7 +136,11 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<&mut SNod
 // ToDo: we currently only SKIP over module references
 pub(crate) fn read_module_reference(cursor: &mut Cursor<&Vec<u8>>, my_strings: &mut Vec<String>) {
     let c = cursor.read_u8().expect("failed to read u8");
-    if c == MODULEREF_INDEX {
+    if c == NULL {
+      // do nothing
+    } else if c == MODULEREF_NAMEONLY {
+      read_string(cursor, my_strings);
+    } else if c == MODULEREF_INDEX {
       cursor.read_u32::<BigEndian>().expect("failed to read u32");
       // we do nothing with this information
     } else if c == MODULEREF_MODULEID {
@@ -156,13 +161,14 @@ pub(crate) fn read_model_reference(cursor: &mut Cursor<&Vec<u8>>, model_builder_
     let c = cursor.read_u8().expect("failed to read u8");
     if c == MODELREF_INDEX {
       let model_index: u32 = cursor.read_u32::<BigEndian>().expect("failed to read u32");
+      println!("......model reference by index: {}", model_index);
       return model_builder_cache.index_2_imported_model_uuid.get(&model_index.to_string()).expect("model id not found by index").to_string();
     } else {
       panic!("unexpected model reference format 0x{:X}", c);
     }
 }
 
-pub(crate) fn read_and_add_model_reference(cursor: &mut Cursor<&Vec<u8>>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, index : String) -> String {
+pub(crate) fn read_and_add_model_reference(cursor: &mut Cursor<&Vec<u8>>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, index : String) -> (String, String) {
   let c = cursor.read_u8().expect("failed to read u8");
   if c == MODELREF_INDEX {
     panic!("unexpected MODELREF_INDEX when reading and adding model reference");
@@ -171,8 +177,10 @@ pub(crate) fn read_and_add_model_reference(cursor: &mut Cursor<&Vec<u8>>, model_
   let model_id = read_model_id(cursor);
   let _model_name = read_string(cursor, my_strings);
   read_module_reference(cursor, my_strings);
-  model_builder_cache.index_2_imported_model_uuid.insert(index, model_id.clone());
-  return model_id;
+  model_builder_cache.index_2_imported_model_uuid.insert(index.clone(), model_id.clone());
+  println!("......imported model: {} - {}", model_id, _model_name);
+  println!("......imported model reference added at index: {}", index);
+  return (model_id, _model_name);
 }
 
 pub(crate) fn read_node_id(cursor: &mut Cursor<&Vec<u8>>, my_strings: &mut Vec<String>) -> String {
@@ -205,23 +213,32 @@ pub(crate) fn load_model_properties(cursor: &mut Cursor<&Vec<u8>>,
     for _ in 0..used_languages_count {
         let lang_id = read_uuid(cursor);
         let lang_name = read_string(cursor, my_strings);
+        println!("...used language: {} - {}", lang_id, lang_name);
         // we do nothing with this information
     }
 
-    //BinaryPersistence::loadModuleRefList
+    //engaged in generation
+    load_module_ref_list(cursor, my_strings);
+    //used devkits
+    load_module_ref_list(cursor, my_strings);
+
+    //BinaryPersistence::loadImports
+    let imports_count : u32 = cursor.read_u32::<BigEndian>().expect("failed to read u32 imports count");
+    println!("...imports count: {}", imports_count);
+    for import_index in 0..imports_count {
+        //TODO: FIXME we use "import_index + 1" since the first element is the current model
+        read_and_add_model_reference(cursor, model_builder_cache, my_strings, (import_index + 1).to_string());
+    }
+
+}
+
+//BinaryPersistence::loadModuleRefList
+pub(crate) fn load_module_ref_list(cursor: &mut Cursor<&Vec<u8>>, my_strings: &mut Vec<String>) {
     let modules_ref_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 modules ref count");
     println!("...modules ref count: {}", modules_ref_count);
     for _ in 0..modules_ref_count {
         read_module_reference(cursor, my_strings)
     }
-
-    //BinaryPersistence::loadImports
-    let imports_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 imports count");
-    println!("...imports count: {}", imports_count);
-    for import_index in 0..imports_count {
-        read_and_add_model_reference(cursor, model_builder_cache, my_strings, import_index.to_string());
-    }
-
 }
 
 pub(crate) fn load_registry(cursor: &mut Cursor<&Vec<u8>>, 
@@ -321,7 +338,9 @@ pub(crate) fn read_model_header(cursor: &mut Cursor<&Vec<u8>>,
     } else {
       let model_id = read_model_id(cursor);
       let model_name = read_string(cursor, my_strings);
-      crt_model = model_builder_cache.get_model(model_name, model_id);    
+      crt_model = model_builder_cache.get_model(model_name.clone(), model_id.clone());    
+      println!("...model: {} - {}", model_id, model_name);
+      model_builder_cache.index_2_imported_model_uuid.insert("0".to_string(), model_id.clone());
 
       advance_cursor_until_after(cursor, HEADER_END);
 
