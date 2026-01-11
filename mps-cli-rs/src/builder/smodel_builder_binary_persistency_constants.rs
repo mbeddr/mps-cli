@@ -9,9 +9,27 @@ pub const STREAM_ID : u32   = STREAM_ID_V2;
 pub const REGISTRY_START : u32 = 0x5a5a5a5a;
 pub const REGISTRY_END : u32   = 0xa5a5a5a5;
 
+pub const MODEL_START:u32    = 0xbabababa;
+
 // the following constants are taken from 
 // https://github.com/JetBrains/MPS/blob/f9075b2832077358fd85a15a52bba76a9dad07a3/core/kernel/source/jetbrains/mps/util/io/ModelOutputStream.java
 pub const NULL: u8 = 0x70;
 pub const MODELREF_INDEX: u8 = 9;
-
 pub const MODELID_REGULAR: u8 = 0x28;
+pub const CONCEPT_INDEX: u8 = 0x33;
+pub const NODEID_STRING: u8 = 0x17;
+pub const NODEID_LONG: u8 = 0x18;
+pub const PROPERTY: u8 = 0x34;
+pub const PROPERTY_INDEX: u8 = 0x35;
+
+pub const MODULEID_FOREIGN: u8 = 0x47;
+pub const MODULEID_REGULAR: u8 = 0x48;
+pub const MODULEREF_MODULEID: u8 = 0x17;
+pub const MODULEREF_NAMEONLY: u8 = 0x18;
+pub const MODULEREF_INDEX: u8 = 0x19;
+
+
+// the following constants are taken from
+// https://github.com/JetBrains/MPS/blob/master/core/persistence/source/jetbrains/mps/persistence/binary/BareNodeWriter.java
+pub const REF_THIS_MODEL: u8 = 17;
+pub const REF_OTHER_MODEL: u8 = 18;
