@@ -39,22 +39,24 @@ pub(crate) fn build_model<'a>(mpb_file: PathBuf,
     load_model_properties(&mut cursor, &mpb_file, model_builder_cache, language_builder, language_id_to_slanguage, crt_model.clone(), &mut my_strings);
 
     advance_cursor_until_after(&mut cursor, MODEL_START);
-    read_children(&mut cursor, model_builder_cache, &mut my_strings, crt_model.clone());
+    read_children(&mut cursor, None, model_builder_cache, &mut my_strings, crt_model.clone());
 
     return crt_model;
 }
 
 
-pub(crate) fn read_children(cursor: &mut Cursor<&Vec<u8>>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, model : Rc<RefCell<SModel>>) {
+pub(crate) fn read_children(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, model : Rc<RefCell<SModel>>) {
     let child_count : u32 = cursor.read_u32::<BigEndian>().expect("failed to read u32 child count");
     println!("...child count: {}", child_count);
     for _ in 0..child_count {
-        let rootNode: Rc<SNode> = read_node(cursor, None, model_builder_cache, my_strings, model.clone());
-        model.borrow_mut().root_nodes.push(rootNode);
+        let rootNode: Rc<SNode> = read_node(cursor, parent.clone(), model_builder_cache, my_strings, model.clone());
+        if parent.is_none() {
+          model.borrow_mut().root_nodes.push(rootNode);
+        }
     }
 }
 
-pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<&mut SNode>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, model : Rc<RefCell<SModel>>) -> Rc<SNode> {
+pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, model : Rc<RefCell<SModel>>) -> Rc<SNode> {
     let concept_index: u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 concept index");
     let concept: &Rc<SConcept> = model_builder_cache.index_2_concept.get(&concept_index.to_string()).expect("concept not found by index");
 
@@ -123,7 +125,7 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<&mut SNod
         parent.add_child(link.clone(), node_rc.clone());
     }
 
-    read_children(cursor, model_builder_cache, my_strings, model);
+    read_children(cursor, Some(node_rc.clone()), model_builder_cache, my_strings, model);
 
     let closed_curly: char = cursor.read_u8().expect("failed to read u8") as char;
     if closed_curly != '}' {
