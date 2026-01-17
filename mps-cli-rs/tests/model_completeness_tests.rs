@@ -38,6 +38,8 @@ pub (crate) fn check_model_completeness(repo : &SRepository, library_top_solutio
     assert_eq!(mark_twain.resolve_info, "Mark Twain");
     if library_top_solution_name.contains("default_persistency") {
         assert_eq!(mark_twain.model_id, "r:ca00da79-915e-4bdb-9c30-11a341daf779");
+    } else if library_top_solution_name.contains("binary_persistency") {
+        assert_eq!(mark_twain.model_id, "r:cf91f372-8bfd-44b8-8e34-024eb23e64a8");
     } else {
         assert_eq!(mark_twain.model_id, "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed");
     }

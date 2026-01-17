@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-struct NodeIdEncodingUtils {
+pub(crate) struct NodeIdEncodingUtils {
     my_index_chars : String,
     min_char : u8,
     my_char_to_value : HashMap<usize, usize>,       
@@ -24,7 +24,8 @@ impl NodeIdEncodingUtils {
             my_char_to_value : my_char_to_value,
         }
     }
-
+    // transforms from a string representing java friendly base 64 encoding 
+    //  a string representing its decimal encoding
     pub(crate) fn decode(&self, uid_string : String) -> String {
         let mut res = 0;
         let bytes = uid_string.as_bytes();
@@ -41,6 +42,38 @@ impl NodeIdEncodingUtils {
         return res.to_string();
     }
 
+    // transforms from a string representing a decimal number to 
+    //  a string representing its java friendly base 64 encoding
+    pub(crate) fn encode(&self, uid_string : String) -> String {
+        let uid_number = match uid_string.parse::<u64>() {
+            Ok(val) => val,
+            Err(_) => return String::from("Invalid decimal input"),
+        };
+
+        let mut num = uid_number;
+        let mut res_size = 0;
+        while num > 0 {
+            res_size += 1;
+            num /= 64;
+        }
+        if res_size == 0 {
+            res_size = 1;
+        }
+        let mut res: Vec<char> = Vec::with_capacity(res_size as usize);
+
+        let mut num = uid_number;
+        while num > 0 {
+            let pos = num % 64;
+            let crt_char= self.my_index_chars.chars().nth(pos as usize).unwrap();
+            res.push(crt_char);
+            num /= 64;
+        }
+
+        res.reverse();
+        let res: String = res.into_iter().collect();
+        return res;
+    }
+
 }
     
 #[cfg(test)]
@@ -52,5 +85,6 @@ mod tests {
         let node_id_utils = NodeIdEncodingUtils::new();
 
         assert_eq!("5731700211660045983", node_id_utils.decode(String::from("4Yb5JA31NUv")));
+        assert_eq!("4Yb5JA31NUv", node_id_utils.encode(String::from("5731700211660045983")));
     }
 }   

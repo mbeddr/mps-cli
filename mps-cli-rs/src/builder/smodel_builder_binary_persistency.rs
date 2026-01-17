@@ -9,6 +9,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 use crate::builder::smodel_builder_binary_persistency_constants::*;
 use crate::builder::smodel_builder_binary_persistency_utils::*;
 use super::slanguage_builder::{get_or_build_language};
+use crate::builder::node_id_utils::NodeIdEncodingUtils;
 
 pub(crate) fn build_model<'a>(mpb_file: PathBuf, 
                               language_id_to_slanguage: &'a mut HashMap<String, SLanguage>, 
@@ -56,12 +57,16 @@ pub(crate) fn read_children(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SN
     }
 }
 
+
 pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, model : Rc<RefCell<SModel>>) -> Rc<SNode> {
+    let node_id_utils : NodeIdEncodingUtils = NodeIdEncodingUtils::new();
+
     let concept_index: u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 concept index");
     let concept: &Rc<SConcept> = model_builder_cache.index_2_concept.get(&concept_index.to_string()).expect("concept not found by index");
 
     let mut nodeid: String = read_node_id(cursor, my_strings);
 
+    nodeid = node_id_utils.encode(nodeid);
     let mut node= SNode::new(nodeid.clone(), concept.clone(), None);
     println!("...node: {} - {}", nodeid, concept.name);
 
@@ -98,7 +103,8 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>
             panic!("unknown reference kind: {}", kind);
         }
         if kind == 1 {
-          let reference_nodeid = read_node_id(cursor, my_strings);
+          let mut reference_nodeid = read_node_id(cursor, my_strings);
+          reference_nodeid = node_id_utils.encode(reference_nodeid);
           println!("......reference node id: {}", reference_nodeid);
           let mut target_model_kind: u8 = cursor.read_u8().expect("failed to read u8");
           if (target_model_kind != REF_OTHER_MODEL && target_model_kind != REF_THIS_MODEL) {
@@ -119,10 +125,14 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>
         }
     }
 
-    let node_rc = Rc::new(node);
+    let node_rc : Rc<SNode> ;
     if let Some(parent) = parent {
         let link: &Rc<SContainmentLink> = model_builder_cache.index_2_containment_link.get(&aggregation_index.to_string()).expect("link not found by index");
+        node.role_in_parent = Some(link.name.clone());
+        node_rc = Rc::new(node);
         parent.add_child(link.clone(), node_rc.clone());
+    } else {
+        node_rc = Rc::new(node);
     }
 
     read_children(cursor, Some(node_rc.clone()), model_builder_cache, my_strings, model);
@@ -176,7 +186,7 @@ pub(crate) fn read_and_add_model_reference(cursor: &mut Cursor<&Vec<u8>>, model_
     panic!("unexpected MODELREF_INDEX when reading and adding model reference");
   }  
   
-  let model_id = read_model_id(cursor);
+  let mut model_id = read_model_id(cursor);
   let _model_name = read_string(cursor, my_strings);
   read_module_reference(cursor, my_strings);
   model_builder_cache.index_2_imported_model_uuid.insert(index.clone(), model_id.clone());
@@ -272,7 +282,8 @@ pub(crate) fn load_registry(cursor: &mut Cursor<&Vec<u8>>,
             let stub_token = cursor.read_u8().expect("failed to read u8 stubToken");
             print!("...concept flags: 0x{:X}, stubToken: 0x{:X}", flags, stub_token);
 
-            let conc = language_builder.get_or_create_concept(lang, concept_id.to_string().as_str(), concept_name.as_str());
+            let full_concept_name = format!("{}.structure.{}", lan_name, concept_name);
+            let conc = language_builder.get_or_create_concept(lang, concept_id.to_string().as_str(), full_concept_name.as_str());
             model_builder_cache.index_2_concept.insert(concept_index.to_string(), Rc::clone(&conc));
             concept_index += 1;
             println!("......concept: {} - {}", conc.name, concept_name);
@@ -354,10 +365,12 @@ pub(crate) fn read_model_header(cursor: &mut Cursor<&Vec<u8>>,
  
 pub(crate) fn read_model_id(cursor: &mut Cursor<&Vec<u8>>) -> String {
     let c = cursor.read_u8().expect("failed to read u8");
-    if (c == NULL) {
+    if c == NULL {
       return "".to_string();
-    } else if (c == MODELID_REGULAR) {
-      return read_uuid(cursor);
+    } else if c == MODELID_REGULAR {
+      let uuid = read_uuid(cursor);
+      let model_id = format!("r:{}", uuid);
+      return model_id;
     } else {
       panic!("unknown id format 0x{:X}", c);
     }
@@ -366,27 +379,33 @@ pub(crate) fn read_model_id(cursor: &mut Cursor<&Vec<u8>>) -> String {
 #[cfg(test)]
 mod tests {
   use byteorder::WriteBytesExt;
+  use uuid::Uuid;
 
 use super::*;
 
   #[test]
   fn test_read_model_header_regular_model() {
     let model_name = "TestModel";
-    let model_id = "12345678-1234-5678-1234-567812345678";
+    let model_id = "31323334-3536-3738-3334-323334326565";
 
     let mut buf = Vec::new();
     // HEADER_START
     buf.write_u32::<BigEndian>(HEADER_START).unwrap();
     // STREAM_ID
     buf.write_u32::<BigEndian>(STREAM_ID).unwrap();
+    
     // Not NULL, not MODELREF_INDEX, so use MODELID_REGULAR
     buf.write_u8(MODELID_REGULAR).unwrap();
+    // use MODELID_REGULAR (not MODELID_FOREIGN, or MODELID_STRING)
+    buf.write_u8(MODELID_REGULAR).unwrap();
     // Write UUID (simulate)
-    let uuid_bytes = model_id.as_bytes( );
+    let uuid = Uuid::parse_str(&model_id).unwrap();
+    let uuid_bytes = uuid.as_bytes();
     buf.extend_from_slice(uuid_bytes);
     // Write model name as string (simulate)
+    buf.write_u8(2).unwrap(); // 1 means string taken from index, we use 2
     let name_bytes = model_name.as_bytes();
-    buf.write_u32::<BigEndian>(name_bytes.len() as u32).unwrap();
+    buf.write_u16::<BigEndian>(name_bytes.len() as u16).unwrap();
     buf.extend_from_slice(name_bytes);
     // HEADER_END
     buf.write_u32::<BigEndian>(HEADER_END).unwrap();
@@ -403,7 +422,7 @@ use super::*;
 
     let model = model_rc.borrow();
     assert_eq!(model.name, model_name);
-    assert_eq!(model.uuid, model_id);
+    assert_eq!(model.uuid, format!("r:{}", model_id));
   }
 
   #[test]
