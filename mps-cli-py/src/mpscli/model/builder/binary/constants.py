@@ -1,0 +1,25 @@
+# mpscli/model/builder/binary/constants.py
+
+# BinaryPersistence.java
+HEADER_START = 0x91ABABA9
+HEADER_END   = 0xABABABAB
+STREAM_ID_V2 = 0x00000400
+STREAM_ID    = STREAM_ID_V2
+
+REGISTRY_START = 0x5A5A5A5A
+REGISTRY_END   = 0xA5A5A5A5
+MODEL_START    = 0xBABABABA
+
+# ModelOutputStream.java
+NULL            = 0x70
+MODELREF_INDEX  = 9
+MODELID_REGULAR = 0x28
+
+STRING_INDEX = 1
+
+# BareNodeWriter.java
+REF_THIS_MODEL  = 17
+REF_OTHER_MODEL = 18
+
+NODEID_STRING = 0x17
+NODEID_LONG   = 0x18
