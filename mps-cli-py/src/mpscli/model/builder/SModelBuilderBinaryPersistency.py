@@ -4,6 +4,9 @@ from mpscli.model.builder.binary.constants import *
 from mpscli.model.builder.binary.utils import *
 from mpscli.model.builder.binary.reader import BinaryReader
 from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
+from mpscli.model.builder.binary.constants import REGISTRY_START, REGISTRY_END
+from mpscli.model.builder.binary.utils import advance_until_after
+from mpscli.model.builder.binary.registry import load_registry
 
 
 class SModelBuilderBinaryPersistency(SModelBuilderBase):
@@ -11,6 +14,12 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
     def __init__(self):
         super().__init__()
         self.model_refs = []
+        self.registry = {
+            "concepts": {},
+            "properties": {},
+            "references": {},
+            "containments": {},
+        }
 
     def build(self, path_to_model: str):
         with open(path_to_model, "rb") as f:
@@ -24,7 +33,14 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         if stream_id != STREAM_ID:
             raise ValueError(f"Unsupported stream id: 0x{stream_id:X}")
 
-        return self.read_model_header(reader)
+        model = self.read_model_header(reader)
+
+        # --- registry ---
+        advance_until_after(reader, REGISTRY_START)
+        load_registry(reader, self.registry)
+        advance_until_after(reader, REGISTRY_END)
+
+        return model
 
     def read_model_header(self, reader):
         ref_kind = reader.read_u8()
