@@ -50,3 +50,38 @@ class TestBinaryPersistencyLowLevelAccess(TestBase):
         # properties
         property_names = {p["name"] for p in registry["properties"].values()}
         self.assertIn("name", property_names)
+
+    def test_imports_loading(self):
+        reader = SModelBuilderBinaryPersistency()
+        model = reader.build(self.MPB_PATH)
+
+        imported = reader.imported_models
+
+        self.assertIsNotNone(imported)
+        self.assertIsInstance(imported, dict)
+
+        self.assertIn("0", imported)
+
+        current = imported["0"]
+        self.assertEqual(
+            "r:cf91f372-8bfd-44b8-8e34-024eb23e64a8",
+            current["uuid"],
+        )
+        self.assertEqual(
+            "mps.cli.lanuse.library_top.binary_persistency.authors_top",
+            current["name"],
+        )
+
+        self.assertGreaterEqual(len(imported), 1)
+
+        for index, imp in imported.items():
+            self.assertIn("uuid", imp)
+            self.assertIn("name", imp)
+
+            self.assertTrue(
+                imp["uuid"].startswith("r:"),
+                f"Invalid model uuid at index {index}",
+            )
+
+            self.assertIsInstance(imp["name"], str)
+            self.assertGreater(len(imp["name"]), 0)

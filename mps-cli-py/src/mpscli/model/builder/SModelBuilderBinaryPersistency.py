@@ -7,6 +7,9 @@ from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
 from mpscli.model.builder.binary.constants import REGISTRY_START, REGISTRY_END
 from mpscli.model.builder.binary.utils import advance_until_after
 from mpscli.model.builder.binary.registry import load_registry
+from mpscli.model.builder.binary.imports import load_imports
+from mpscli.model.builder.binary.used_languages import load_used_languages
+from mpscli.model.builder.binary.module_refs import load_module_ref_list
 
 
 class SModelBuilderBinaryPersistency(SModelBuilderBase):
@@ -20,6 +23,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
             "references": {},
             "containments": {},
         }
+        self.imported_models = {}
 
     def build(self, path_to_model: str):
         with open(path_to_model, "rb") as f:
@@ -35,10 +39,20 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         model = self.read_model_header(reader)
 
+        self.imported_models["0"] = model
+
         # --- registry ---
         advance_until_after(reader, REGISTRY_START)
         load_registry(reader, self.registry)
         advance_until_after(reader, REGISTRY_END)
+
+        load_used_languages(reader)
+
+        load_module_ref_list(reader)
+
+        load_module_ref_list(reader)
+
+        load_imports(reader, self.imported_models)
 
         return model
 
@@ -64,11 +78,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         advance_until_after(reader, HEADER_END)
 
-        model = {
-            "uuid": model_id,
-            "name": model_name
-        }
+        model = {"uuid": model_id, "name": model_name}
 
         self.model_refs.append(model)
         return model
-
