@@ -85,3 +85,32 @@ class TestBinaryPersistencyLowLevelAccess(TestBase):
 
             self.assertIsInstance(imp["name"], str)
             self.assertGreater(len(imp["name"]), 0)
+
+    def test_node_loading(self):
+        reader = SModelBuilderBinaryPersistency()
+        reader.build(self.MPB_PATH)
+
+        self.assertGreater(len(reader.root_nodes), 0)
+
+        root = reader.root_nodes[0]
+
+        self.assertEqual(
+            "mps.cli.landefs.people.structure.PersonsContainer",
+            root["concept"],
+        )
+
+        self.assertEqual(
+            "_010_classical_authors",
+            root["properties"]["name"],
+        )
+
+        self.assertEqual(len(root["children"]), 2)
+
+        first_child = root["children"][0]
+
+        self.assertEqual(
+            "mps.cli.landefs.people.structure.Person",
+            first_child["concept"],
+        )
+
+        self.assertIn("name", first_child["properties"])

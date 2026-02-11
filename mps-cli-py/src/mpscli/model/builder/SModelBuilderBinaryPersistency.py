@@ -10,6 +10,7 @@ from mpscli.model.builder.binary.registry import load_registry
 from mpscli.model.builder.binary.imports import load_imports
 from mpscli.model.builder.binary.used_languages import load_used_languages
 from mpscli.model.builder.binary.module_refs import load_module_ref_list
+from mpscli.model.builder.binary.nodes import read_children
 
 
 class SModelBuilderBinaryPersistency(SModelBuilderBase):
@@ -24,6 +25,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
             "containments": {},
         }
         self.imported_models = {}
+        self.root_nodes = []
 
     def build(self, path_to_model: str):
         with open(path_to_model, "rb") as f:
@@ -41,7 +43,6 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         self.imported_models["0"] = model
 
-        # --- registry ---
         advance_until_after(reader, REGISTRY_START)
         load_registry(reader, self.registry)
         advance_until_after(reader, REGISTRY_END)
@@ -53,6 +54,14 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         load_module_ref_list(reader)
 
         load_imports(reader, self.imported_models)
+
+        advance_until_after(reader, MODEL_START)
+        self.root_nodes = read_children(
+            reader,
+            self.registry,
+            self.imported_models,
+            parent=None,
+        )
 
         return model
 
