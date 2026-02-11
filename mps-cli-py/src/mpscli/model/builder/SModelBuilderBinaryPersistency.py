@@ -1,16 +1,19 @@
-# SModelBuilderBinaryPersistency.py
+# mpscli/model/builder/SModelBuilderBinaryPersistency.py
 
 from mpscli.model.builder.binary.constants import *
-from mpscli.model.builder.binary.utils import *
+from mpscli.model.builder.binary.utils import (
+    read_uuid,
+    read_string,
+    advance_until_after,
+)
 from mpscli.model.builder.binary.reader import BinaryReader
 from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
-from mpscli.model.builder.binary.constants import REGISTRY_START, REGISTRY_END
-from mpscli.model.builder.binary.utils import advance_until_after
 from mpscli.model.builder.binary.registry import load_registry
 from mpscli.model.builder.binary.imports import load_imports
 from mpscli.model.builder.binary.used_languages import load_used_languages
 from mpscli.model.builder.binary.module_refs import load_module_ref_list
 from mpscli.model.builder.binary.nodes import read_children
+from mpscli.model.SModel import SModel
 
 
 class SModelBuilderBinaryPersistency(SModelBuilderBase):
@@ -18,14 +21,6 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
     def __init__(self):
         super().__init__()
         self.model_refs = []
-        self.registry = {
-            "concepts": {},
-            "properties": {},
-            "references": {},
-            "containments": {},
-        }
-        self.imported_models = {}
-        self.root_nodes = []
 
     def build(self, path_to_model: str):
         with open(path_to_model, "rb") as f:
@@ -41,10 +36,10 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         model = self.read_model_header(reader)
 
-        self.imported_models["0"] = model
+        self.index_2_imported_model_uuid["0"] = model.uuid
 
         advance_until_after(reader, REGISTRY_START)
-        load_registry(reader, self.registry)
+        load_registry(reader, self)
         advance_until_after(reader, REGISTRY_END)
 
         load_used_languages(reader)
@@ -53,15 +48,10 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         load_module_ref_list(reader)
 
-        load_imports(reader, self.imported_models)
+        load_imports(reader, self)
 
         advance_until_after(reader, MODEL_START)
-        self.root_nodes = read_children(
-            reader,
-            self.registry,
-            self.imported_models,
-            parent=None,
-        )
+        read_children(reader, self, model, None)
 
         return model
 
@@ -87,7 +77,8 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         advance_until_after(reader, HEADER_END)
 
-        model = {"uuid": model_id, "name": model_name}
+        model = SModel(model_name, model_id, False)
 
         self.model_refs.append(model)
+
         return model
