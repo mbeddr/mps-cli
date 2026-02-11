@@ -4,6 +4,7 @@ from .constants import *
 from .utils import read_string
 from mpscli.model.SNode import SNode
 from mpscli.model.SNodeRef import SNodeRef
+from mpscli.model.builder.binary.node_id_utils import NodeIdEncodingUtils
 
 
 def read_children(reader, builder, model, parent=None):
@@ -29,6 +30,7 @@ def read_node(reader, builder, model, parent=None):
     concept = builder.index_2_concept[str(concept_index)]
 
     node_id = read_node_id(reader)
+    node_id = NodeIdEncodingUtils.encode(node_id)
 
     aggregation_index = reader.read_u16()
 
@@ -87,24 +89,33 @@ def read_reference(reader, builder, model):
     reference_index = reader.read_u16()
 
     kind = reader.read_u8()
+
+    # Rust supports 1, 2, 3 but only fully implements 1
+    if kind not in (1, 2, 3):
+        raise ValueError(f"Unknown reference kind: {kind}")
+
     if kind != 1:
-        raise ValueError("Only direct references supported")
+        raise ValueError("Reference kinds 2 and 3 not supported yet")
 
     target_node_id = read_node_id(reader)
+    target_node_id = NodeIdEncodingUtils.encode(target_node_id)
 
     target_model_kind = reader.read_u8()
 
     if target_model_kind == REF_THIS_MODEL:
         model_uuid = model.uuid
+
     elif target_model_kind == REF_OTHER_MODEL:
         modelref_kind = reader.read_u8()
         if modelref_kind != MODELREF_INDEX:
             raise ValueError("Expected MODELREF_INDEX")
+
         model_index = reader.read_u32()
         model_uuid = builder.index_2_imported_model_uuid[str(model_index)]
+
     else:
         raise ValueError("Unknown target model kind")
 
-    read_string(reader)
+    resolve_info = read_string(reader)
 
     return SNodeRef(model_uuid, target_node_id)
