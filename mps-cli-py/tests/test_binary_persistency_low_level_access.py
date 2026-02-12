@@ -169,3 +169,33 @@ class TestBinaryPersistencyLowLevelAccess(TestBase):
         end = time.time()
 
         self.assertLess(end - start, 2)
+
+    def test_known_but_not_supported_reference_kind_raises(self):
+        data = bytearray()
+        data.extend((0).to_bytes(2, "big"))
+        data.append(NODEID_LONG)
+        data.extend((1).to_bytes(8, "big"))
+        data.extend((0).to_bytes(2, "big"))
+        data.append(ord("{"))
+        data.extend((0).to_bytes(2, "big"))
+        data.extend((0).to_bytes(2, "big"))
+        data.extend((1).to_bytes(2, "big"))
+        data.extend((0).to_bytes(2, "big"))
+        data.append(2)
+
+        reader = BinaryReader(bytes(data))
+        builder = SModelBuilderBinaryPersistency()
+        model = builder.build(self.MPB_PATH)
+
+        builder.index_2_reference_role["0"] = "person"
+
+        with self.assertRaises(NotImplementedError):
+            read_node(reader, builder, model)
+
+    def test_reference_has_resolve_info_field(self):
+        builder = SModelBuilderBinaryPersistency()
+        model = builder.build(self.MPB_PATH)
+
+        for node in model.get_nodes():
+            for ref in node.references.values():
+                self.assertTrue(hasattr(ref, "resolve_info"))

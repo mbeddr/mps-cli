@@ -1,5 +1,3 @@
-# mpscli/model/builder/binary/nodes.py
-
 from .constants import *
 from .utils import read_string
 from mpscli.model.SNode import SNode
@@ -47,7 +45,6 @@ def read_node(reader, builder, model, parent=None):
     node = SNode(node_id, concept, role_in_parent, parent)
 
     properties_count = reader.read_u16()
-
     for _ in range(properties_count):
         prop_index = reader.read_u16()
         prop_name = builder.index_2_property[str(prop_index)]
@@ -61,8 +58,8 @@ def read_node(reader, builder, model, parent=None):
     references_count = reader.read_u16()
 
     for _ in range(references_count):
-        reference = read_reference(reader, builder, model)
-        node.references[reference.node_uuid] = reference
+        ref_name, reference = read_reference(reader, builder, model)
+        node.references[ref_name] = reference
 
     read_children(reader, builder, model, node)
 
@@ -88,14 +85,18 @@ def read_node_id(reader):
 def read_reference(reader, builder, model):
     reference_index = reader.read_u16()
 
+    reference_name = builder.index_2_reference_role.get(str(reference_index))
+
+    if reference_name is None:
+        raise ValueError(f"Reference role not found for index {reference_index}")
+
     kind = reader.read_u8()
 
-    # Rust supports 1, 2, 3 but only fully implements 1
     if kind not in (1, 2, 3):
-        raise ValueError(f"Unknown reference kind: {kind}")
+        raise ValueError(f"unknown reference kind: {kind}")
 
     if kind != 1:
-        raise ValueError("Reference kinds 2 and 3 not supported yet")
+        raise NotImplementedError(f"Reference kind {kind} not supported yet")
 
     target_node_id = read_node_id(reader)
     target_node_id = NodeIdEncodingUtils.encode(target_node_id)
@@ -107,6 +108,7 @@ def read_reference(reader, builder, model):
 
     elif target_model_kind == REF_OTHER_MODEL:
         modelref_kind = reader.read_u8()
+
         if modelref_kind != MODELREF_INDEX:
             raise ValueError("Expected MODELREF_INDEX")
 
@@ -114,8 +116,12 @@ def read_reference(reader, builder, model):
         model_uuid = builder.index_2_imported_model_uuid[str(model_index)]
 
     else:
-        raise ValueError("Unknown target model kind")
+        raise ValueError(f"Unknown target model kind: {target_model_kind}")
 
     resolve_info = read_string(reader)
 
-    return SNodeRef(model_uuid, target_node_id)
+    return reference_name, SNodeRef(
+        model_uuid,
+        target_node_id,
+        resolve_info,
+    )
