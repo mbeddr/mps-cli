@@ -8,38 +8,33 @@ class TestBinaryRepositoryCompleteness(TestBase):
 
     REPO_PATH = "../mps_test_projects/" "mps_cli_binary_persistency_generated/"
 
-    def test_build_repository(self):
+    def _build_repo(self):
         builder = SSolutionsRepositoryBuilder()
-        repo = builder.build(self.REPO_PATH)
+        return builder.build(self.REPO_PATH)
+
+    def test_repository_builds(self):
+        repo = self._build_repo()
 
         self.assertIsNotNone(repo)
         self.assertGreater(len(repo.solutions), 0)
 
-    def test_solution_and_model_structure(self):
-        builder = SSolutionsRepositoryBuilder()
-        repo = builder.build(self.REPO_PATH)
+    def test_library_top_model_completeness(self):
+        repo = self._build_repo()
 
-        library_solution = repo.find_solution_by_name(
+        solution = repo.find_solution_by_name(
             "mps.cli.lanuse.library_top.binary_persistency"
         )
-
-        self.assertIsNotNone(library_solution)
-        self.assertEqual(len(library_solution.models), 2)
+        self.assertIsNotNone(solution)
+        self.assertEqual(len(solution.models), 2)
 
         model = repo.find_model_by_name(
             "mps.cli.lanuse.library_top.binary_persistency.library_top"
         )
-
         self.assertIsNotNone(model)
-        self.assertGreater(len(model.root_nodes), 0)
 
-    def test_root_node_properties_and_descendants(self):
-        builder = SSolutionsRepositoryBuilder()
-        repo = builder.build(self.REPO_PATH)
+        self.assertEqual(len(model.root_nodes), 2)
 
-        model = repo.find_model_by_name(
-            "mps.cli.lanuse.library_top.binary_persistency.library_top"
-        )
+        self.assertEqual(len(model.get_nodes()), 9)
 
         root = next(
             r for r in model.root_nodes if r.get_property("name") == "munich_library"
@@ -47,42 +42,41 @@ class TestBinaryRepositoryCompleteness(TestBase):
 
         self.assertIsNotNone(root)
 
-        descendants = model.get_nodes()
-        self.assertGreater(len(descendants), 0)
+        self.assertEqual(len(root.get_descendants()), 7)
 
         entities = root.get_children("entities")
         self.assertEqual(len(entities), 4)
 
-    def test_cross_model_reference_resolution(self):
-        builder = SSolutionsRepositoryBuilder()
-        repo = builder.build(self.REPO_PATH)
+        book = entities[0]
+        self.assertEqual(book.get_property("name"), "Tom Sawyer")
+        self.assertEqual(book.get_property("publicationDate"), "1876")
+        self.assertEqual(book.get_property("isbn"), "4323r2")
+        self.assertEqual(book.get_property("available"), "true")
 
-        model = repo.find_model_by_name(
-            "mps.cli.lanuse.library_top.binary_persistency.library_top"
+        self.assertEqual(
+            book.concept.name,
+            "mps.cli.landefs.library.structure.Book",
         )
 
-        root = next(
-            r for r in model.root_nodes if r.get_property("name") == "munich_library"
-        )
+        self.assertEqual(book.role_in_parent, "entities")
 
-        book = root.get_children("entities")[0]
         authors = book.get_children("authors")
+        self.assertGreater(len(authors), 0)
 
         reference = authors[0].get_reference("person")
 
         self.assertIsNotNone(reference)
+        self.assertEqual(reference.resolve_info, "Mark Twain")
         self.assertTrue(reference.model_uuid.startswith("r:"))
-        self.assertIsNotNone(reference.node_uuid)
+        self.assertEqual(reference.node_uuid, "4Yb5JA31NUv")
 
         resolved = reference.resolve(repo)
         self.assertIsNotNone(resolved)
 
     def test_language_registry_population(self):
-        builder = SSolutionsRepositoryBuilder()
-        repo = builder.build(self.REPO_PATH)
+        repo = self._build_repo()
 
         languages = repo.languages
-
         self.assertGreaterEqual(len(languages), 3)
 
         names = [l.name for l in languages]

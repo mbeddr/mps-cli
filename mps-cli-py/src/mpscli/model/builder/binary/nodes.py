@@ -4,6 +4,8 @@ from mpscli.model.SNode import SNode
 from mpscli.model.SNodeRef import SNodeRef
 from mpscli.model.builder.binary.node_id_utils import NodeIdEncodingUtils
 
+NODE_ID_ENCODER = NodeIdEncodingUtils()
+
 
 def read_children(reader, builder, model, parent=None):
     child_count = reader.read_u32()
@@ -28,7 +30,6 @@ def read_node(reader, builder, model, parent=None):
     concept = builder.index_2_concept[str(concept_index)]
 
     node_id = read_node_id(reader)
-    node_id = NodeIdEncodingUtils.encode(node_id)
 
     aggregation_index = reader.read_u16()
 
@@ -74,7 +75,8 @@ def read_node_id(reader):
     kind = reader.read_u8()
 
     if kind == NODEID_LONG:
-        return str(reader.read_u64())
+        raw_id = str(reader.read_u64())
+        return NODE_ID_ENCODER.encode(raw_id)
 
     if kind == NODEID_STRING:
         return read_string(reader)
@@ -99,7 +101,6 @@ def read_reference(reader, builder, model):
         raise NotImplementedError(f"Reference kind {kind} not supported yet")
 
     target_node_id = read_node_id(reader)
-    target_node_id = NodeIdEncodingUtils.encode(target_node_id)
 
     target_model_kind = reader.read_u8()
 
