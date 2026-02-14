@@ -14,6 +14,10 @@ class TestNodes(TestBase):
                 "mps.cli.lanuse.library_top.default_persistency.authors_top",
             ),
             ("mps_cli_lanuse_binary", "mps.cli.lanuse.library_top.authors_top"),
+            (
+                "mps_cli_binary_persistency_generated",
+                "mps.cli.lanuse.library_top.binary_persistency.authors_top",
+            ),
         ]
     )
     def test_build_root_nodes(
