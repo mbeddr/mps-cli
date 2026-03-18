@@ -1,33 +1,54 @@
 # mpscli/model/builder/binary/imports.py
+#
+# Standalone import-loading helper.
+# The canonical implementation lives in SModelBuilderBinaryPersistency._load_imports().
+# This module provides the same logic for external call sites.
 
-from mpscli.model.builder.binary.constants import *
-from mpscli.model.builder.binary.utils import (
-    read_uuid,
-    read_string,
-    read_module_reference,
-)
+from mpscli.model.builder.binary.model_input_stream import ModelInputStream
+
+_V2 = ModelInputStream.STREAM_ID_V2
+_V3 = ModelInputStream.STREAM_ID_V3
 
 
-def load_imports(reader, builder):
-    imports_count = reader.read_u32()
+def load_imports(reader: ModelInputStream, builder, version: int) -> None:
+    """
+    Reads the imports section:
 
-    for i in range(imports_count):
-        ref_kind = reader.read_u8()
+        u32  count
+        for each:
+            model_reference  (kind byte + optional uuid + name string)
+            [V2 only] i32    (import element version, compatibility field)
 
-        if ref_kind == MODELREF_INDEX:
-            raise ValueError("Unexpected MODELREF_INDEX in imports")
+    Populates builder.index_2_imported_model_uuid[str(i+1)].
+    """
+    count = reader.read_u32()
 
-        model_id_kind = reader.read_u8()
+    for i in range(count):
+        kind = reader.read_u8()
 
-        if model_id_kind == MODELID_REGULAR:
-            uuid = read_uuid(reader)
-            model_id = f"r:{uuid}"
-        elif model_id_kind == NULL:
-            model_id = ""
+        if kind == 0x70:  # NULL model ref
+            model_id = None
+        elif kind == 0x09:  # MODELREF_INDEX
+            reader.read_u32()
+            model_id = None
         else:
-            raise ValueError(f"Unsupported model id kind: 0x{model_id_kind:X}")
+            # Full model reference
+            model_id_kind = reader.read_u8()
 
-        model_name = read_string(reader)
-        read_module_reference(reader)
+            if model_id_kind == 0x48:  # uuid-based
+                uuid = reader.read_uuid()
+                model_id = f"r:{uuid[0]:016x}{uuid[1]:016x}"
+            elif model_id_kind == 0x70:  # NULL id
+                model_id = ""
+            else:
+                raise RuntimeError(
+                    f"Unsupported model_id_kind 0x{model_id_kind:02X} "
+                    f"at pos {reader.tell()}"
+                )
 
-        builder.index_2_imported_model_uuid[str(i + 1)] = model_id
+            reader.read_string()  # model name
+
+        if version == _V2:
+            reader.read_i32()  # V2 import version field
+
+        builder.index_2_imported_model_uuid[str(i + 1)] = model_id or ""

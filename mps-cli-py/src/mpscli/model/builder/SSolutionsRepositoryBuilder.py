@@ -9,6 +9,7 @@ from mpscli.model.SRepository import SRepository
 from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 from mpscli.model.builder.SSolutionBuilder import SSolutionBuilder
 
+
 class SSolutionsRepositoryBuilder:
 
     def __init__(self):
@@ -35,20 +36,23 @@ class SSolutionsRepositoryBuilder:
             self.collect_solutions_from_jars(path)
         self.repo.languages = list(SLanguageBuilder.languages.values())
         stop = timer()
-        duration = (stop - start)
-        print('duration for parsing modules: ' + str(duration) + ' seconds')
+        duration = stop - start
+        print("duration for parsing modules: " + str(duration) + " seconds")
         return self.repo
 
     def collect_solutions_from_sources(self, path):
-        for pth in Path(path).rglob('*.msd'):
+        for pth in Path(path).rglob("*.msd"):
             solutionBuilder = SSolutionBuilder()
             solution = solutionBuilder.build_solution(pth)
             if solution is not None:
-                self.repo.solutions.append(solution)
+                if not self.repo.find_solution_by_name(solution.name):
+                    self.repo.solutions.append(solution)
 
     def collect_solutions_from_jars(self, path):
-        for jar_path in Path(path).rglob('*.jar'):
-            directory_where_to_extract = jar_path.parent / jar_path.name.replace(".", "_")
+        for jar_path in Path(path).rglob("*.jar"):
+            directory_where_to_extract = jar_path.parent / jar_path.name.replace(
+                ".", "_"
+            )
             directory_where_to_extract.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(jar_path) as jar:
                 jar.extractall(directory_where_to_extract)
