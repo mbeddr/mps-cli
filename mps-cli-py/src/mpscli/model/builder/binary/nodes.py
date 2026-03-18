@@ -1,19 +1,30 @@
-from .constants import *
 from mpscli.model.SNode import SNode
 from mpscli.model.SNodeRef import SNodeRef
 from mpscli.model.builder.binary.node_id_utils import NodeIdEncodingUtils
 
 NODE_ID_ENCODER = NodeIdEncodingUtils()
 
+# ── Node-id kind bytes ───────────────────────────────────────────────────────
+NODEID_REGULAR = 0x18  # 8-byte integer id
+NODEID_STRING = 0x17  # string-encoded id (used for foreign/external node ids)
+NODEID_NULL = 0x70  # null
+
+# ── Model-reference kind bytes (in reference entries) ───────────────────────
+REF_THIS_MODEL = 0x11  # target is in the current model — no extra bytes
+REF_OTHER_MODEL = 0x12  # target is in an imported model — extra u8 + u32 follow
+
+# ────────────────────────────────────────────────────────────────────────────
+
 
 def read_children(reader, builder, model, parent=None):
-
+    """
+    Reads a child-list: u32 count followed by that many readNode() calls.
+    Root-level nodes are appended to model.root_nodes.
+    Child nodes are appended to parent.children.
+    """
     child_count = reader.read_u32()
 
-    nodes = []
-
     for _ in range(child_count):
-
         node = read_node(reader, builder, model, parent)
 
         if parent is None:
@@ -21,143 +32,135 @@ def read_children(reader, builder, model, parent=None):
         else:
             parent.children.append(node)
 
-        nodes.append(node)
-
-    return nodes
+    return model.root_nodes if parent is None else parent.children
 
 
 def read_node(reader, builder, model, parent=None):
-
+    """
+    Reads a single node.  See module docstring for the byte layout.
+    """
     pos = reader.tell()
 
-    node_id = read_node_id(reader)
-
-    concept_id = str(reader.read_u64())
-
-    concept = builder.concept_id_2_concept.get(concept_id)
-
+    # ── concept ──────────────────────────────────────────────────────────────
+    concept_index = reader.read_u16()
+    concept = builder.index_2_concept.get(concept_index)
     if concept is None:
-        raise RuntimeError(f"Unknown concept id {concept_id} at stream position {pos}")
+        raise RuntimeError(f"Unknown concept index {concept_index} at pos {pos}")
 
-    aggregation_index = reader.read_u16()
+    # ── node id ───────────────────────────────────────────────────────────────
+    node_id = _read_node_id(reader)
 
+    # ── role in parent ────────────────────────────────────────────────────────
+    agg_index = reader.read_u16()
     role_in_parent = None
+    if parent is not None and agg_index != 0xFFFF:
+        role_in_parent = builder.index_2_child_role_in_parent.get(agg_index)
 
-    if parent is not None:
-        role_in_parent = builder.index_2_child_role_in_parent.get(aggregation_index)
-
-    open_curly = reader.read_u8()
-
-    if chr(open_curly) != "{":
-        raise RuntimeError(f"Invalid node start at {reader.tell()}")
+    # ── opening brace ─────────────────────────────────────────────────────────
+    brace = reader.read_u8()
+    if brace != 0x7B:
+        raise RuntimeError(
+            f"Expected '{{' (0x7B) at pos {reader.tell() - 1}, got 0x{brace:02X}"
+        )
 
     node = SNode(node_id, concept, role_in_parent, parent)
 
-    # -------------------------
-    # PROPERTIES
-    # -------------------------
-
-    properties_count = reader.read_u16()
-
-    for _ in range(properties_count):
-
+    # ── properties ────────────────────────────────────────────────────────────
+    props_count = reader.read_u16()
+    for _ in range(props_count):
         prop_index = reader.read_u16()
+        value = reader.read_string()
+        prop_key = builder.index_2_property.get(prop_index)
+        if prop_key is not None:
+            node.properties[prop_key] = value
 
-        prop_name = builder.index_2_property.get(prop_index)
+    # ── user objects ──────────────────────────────────────────────────────────
+    user_obj_count = reader.read_u16()
+    for _ in range(user_obj_count):
+        reader.read_string()  # key
+        reader.read_string()  # value
 
-        prop_value = reader.read_string()
+    # ── references ────────────────────────────────────────────────────────────
+    refs_count = reader.read_u16()
+    for _ in range(refs_count):
+        ref_name, ref = _read_reference(reader, builder, model)
+        if ref_name is not None:
+            node.references[ref_name] = ref
 
-        if prop_name:
-            node.properties[prop_name] = prop_value
-
-    # -------------------------
-    # USER OBJECTS
-    # -------------------------
-
-    user_objects_count = reader.read_u16()
-
-    for _ in range(user_objects_count):
-        reader.read_string()
-
-    # -------------------------
-    # REFERENCES
-    # -------------------------
-
-    references_count = reader.read_u16()
-
-    for _ in range(references_count):
-
-        ref_name, reference = read_reference(reader, builder, model)
-
-        if ref_name:
-            node.references[ref_name] = reference
-
-    # -------------------------
-    # CHILDREN
-    # -------------------------
-
+    # ── children (recursive) ─────────────────────────────────────────────────
     read_children(reader, builder, model, node)
 
-    closed_curly = reader.read_u8()
-
-    if chr(closed_curly) != "}":
-        raise RuntimeError(f"Invalid node end at {reader.tell()}")
+    # ── closing brace ─────────────────────────────────────────────────────────
+    brace = reader.read_u8()
+    if brace != 0x7D:
+        raise RuntimeError(
+            f"Expected '}}' (0x7D) at pos {reader.tell() - 1}, got 0x{brace:02X}"
+        )
 
     return node
 
 
-def read_node_id(reader):
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
+
+def _read_node_id(reader):
+    """
+    Reads a node id:
+        0x18 → Regular long id  → encode with NodeIdEncodingUtils
+        0x17 → Foreign string   → return raw string
+        0x70 → NULL             → return None
+    """
     kind = reader.read_u8()
 
-    if kind == 0:
+    if kind == NODEID_NULL:
         return None
 
-    if kind == NODEID_LONG:
-
-        raw_id = str(reader.read_u64())
-
-        return NODE_ID_ENCODER.encode(raw_id)
+    if kind == NODEID_REGULAR:
+        raw = str(reader.read_u64())
+        return NODE_ID_ENCODER.encode(raw)
 
     if kind == NODEID_STRING:
-
         return reader.read_string()
 
-    raise RuntimeError(f"Unknown node id kind: {kind}")
+    raise RuntimeError(f"Unknown node id kind 0x{kind:02X} at pos {reader.tell() - 1}")
 
 
-def read_reference(reader, builder, model):
+def _read_reference(reader, builder, model):
+    """
+    Reads one reference entry:
 
-    reference_index = reader.read_u16()
+        ref_index   u16
+        skip        u8   (always 0x01)
+        node_id_kind + node_id   (same as _read_node_id)
+        model_kind  u8
+            0x11 REF_THIS_MODEL  → no extra bytes
+            0x12 REF_OTHER_MODEL → u8 extra + u32 model_index
+        resolve_info  string
 
-    reference_name = builder.index_2_reference_role.get(reference_index)
+    Returns (ref_name, SNodeRef) or (None, None) on unknown index.
+    """
+    ref_index = reader.read_u16()
+    ref_name = builder.index_2_reference_role.get(ref_index)
 
-    reader.read_u8()
+    reader.read_u8()  # skip byte (always 0x01)
 
-    target_node_id = read_node_id(reader)
+    target_node_id = _read_node_id(reader)
 
-    target_model_kind = reader.read_u8()
+    model_kind = reader.read_u8()
 
-    if target_model_kind == REF_THIS_MODEL:
-
+    if model_kind == REF_THIS_MODEL:
         model_uuid = model.uuid
 
-    elif target_model_kind == REF_OTHER_MODEL:
-
-        reader.read_u8()
-
+    elif model_kind == REF_OTHER_MODEL:
+        reader.read_u8()  # extra byte
         model_index = reader.read_u32()
-
-        model_uuid = builder.index_2_imported_model_uuid.get(model_index)
+        model_uuid = builder.index_2_imported_model_uuid.get(str(model_index))
 
     else:
-
-        model_uuid = None
+        # Unknown model kind — consume resolve_info and return placeholder
+        reader.read_string()
+        return ref_name, SNodeRef(None, target_node_id, None)
 
     resolve_info = reader.read_string()
 
-    return reference_name, SNodeRef(
-        model_uuid,
-        target_node_id,
-        resolve_info,
-    )
+    return ref_name, SNodeRef(model_uuid, target_node_id, resolve_info)

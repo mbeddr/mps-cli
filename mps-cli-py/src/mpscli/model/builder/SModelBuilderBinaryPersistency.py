@@ -265,30 +265,47 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         """
         Reads a SModelReference as written by ModelOutputStream.writeModelReference().
         Returns a best-effort model id string, or None.
+
+        V2 binary format (confirmed from diff.mpb hex + XML cross-reference):
+            outer kind byte:
+                0x70 → NULL (nothing more to read)
+                0x07 → non-null; read sub-kind next
+            sub-kind byte:
+                0x28 → Regular (uuid-based SModelId):
+                            uuid_high (u64) + uuid_low (u64)
+                            string  model_name
+                            string  stereotype/null (usually 0x70)
+                0x26 → Foreign (string-based SModelId, e.g. java stubs):
+                            string  model_id  (e.g. "java:java.lang")
+                            string  model_name (e.g. "java.lang@java_stub")
+                            module_ref  (declaring module)
+            i32  import version is read by the caller (_load_imports), not here.
         """
         kind = reader.read_u8()
 
-        if kind == 0x70:  # NULL
+        if kind == 0x70:  # NULL model reference
             return None
 
-        if kind == 0x09:  # MODELREF_INDEX
-            reader.read_u32()
-            return None
+        # Read the sub-kind byte that distinguishes Regular from Foreign
+        sub = reader.read_u8()
 
-        # Full model reference — kind byte already consumed.
-        model_id_kind = reader.read_u8()
-
-        if model_id_kind == 0x48:  # uuid-based SModelId
+        if sub == 0x28:  # Regular: uuid-based SModelId
             uuid = reader.read_uuid()
             model_id = f"r:{uuid[0]:016x}{uuid[1]:016x}"
-        elif model_id_kind == 0x70:  # NULL id
-            model_id = ""
+            reader.read_string()  # model long name
+            reader.read_string()  # stereotype (usually null / 0x70)
+
+        elif sub == 0x26:  # Foreign: string-based SModelId (java stubs)
+            reader.read_string()  # foreign id string e.g. "java:java.lang"
+            reader.read_string()  # model name e.g. "java.lang@java_stub"
+            reader.read_module_ref()  # declaring module reference
+            model_id = ""  # foreign ids not tracked
+
         else:
             raise RuntimeError(
-                f"Unsupported model_id_kind 0x{model_id_kind:02X} at pos {reader.tell()}"
+                f"Unsupported model ref sub-kind 0x{sub:02X} at pos {reader.tell()}"
             )
 
-        reader.read_string()  # model name
         return model_id
 
     # ── Diagnostics ──────────────────────────────────────────────────────────
