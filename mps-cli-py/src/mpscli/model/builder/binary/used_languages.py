@@ -12,19 +12,22 @@ _V3 = ModelInputStream.STREAM_ID_V3
 
 def load_used_languages(reader: ModelInputStream, version: int) -> None:
     """
-    V2 (loadUsedLanguagesV2):
+    V2 format:
         u16  count
-        for each: uuid (2×u64) + string name
-        NOTE: no version int per entry in V2.
+        for each: uuid + string name
+        there is no version int per entry in V2 format.
 
-    V3 (loadUsedLanguagesV3):
+    V3 format:
         u16  count
-        for each: uuid (2×u64) + string name + i32 import_version
+        for each: uuid + string name + i32 import_version
     """
     count = reader.read_u16()
 
     for _ in range(count):
-        reader.read_uuid()  # language uuid
-        reader.read_string()  # language name
+        # language uuid
+        reader.read_uuid()
+        # language name
+        reader.read_string()
         if version == _V3:
-            reader.read_i32()  # import version (V3 only)
+            # import version (which is present in V3 format only)
+            reader.read_i32()

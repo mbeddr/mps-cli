@@ -2,28 +2,13 @@ import struct
 
 
 class ModelInputStream:
-    """
-    Python equivalent of jetbrains.mps.util.io.ModelInputStream,
-    used by BinaryPersistence.
-
-    String encoding (EXACT match to Java):
-        read 1 byte c
-        c == 0x70  → NULL  (return None)
-        c == 0x01  → string table ref: read u32 index, return string_table[index]
-        else       → inline: read u16 length, read bytes, decode UTF-8,
-                     append to string_table, return string
-    """
-
-    # ── Stream version constants ────────────────────────────────────────────
     STREAM_ID_V1 = 0x00000300
     STREAM_ID_V2 = 0x00000400
     STREAM_ID_V3 = 0x00000500
 
-    # ── Registry stub constants (from BinaryPersistence.java) ───────────────
-    STUB_NONE = 0x12  # always written after flags; concept has no stub
-    STUB_ID = 0x13  # always written after flags; next u64 is stub concept id
+    STUB_NONE = 0x12
+    STUB_ID = 0x13
 
-    # ── Marker constants ────────────────────────────────────────────────────
     HEADER_START = 0x91ABABA9
     HEADER_END = 0xABABABAB
     REGISTRY_START = 0x5A5A5A5A
@@ -32,14 +17,10 @@ class ModelInputStream:
     HEADER_ATTRIBUTES = 0x7E
     DEPENDENCY_V1 = 0x01
 
-    # ────────────────────────────────────────────────────────────────────────
-
     def __init__(self, data: bytes):
         self.data = data
         self.pos = 0
         self.string_table: list = []
-
-    # ── Positioning ──────────────────────────────────────────────────────────
 
     def tell(self) -> int:
         return self.pos
@@ -47,14 +28,18 @@ class ModelInputStream:
     def seek(self, pos: int):
         self.pos = pos
 
-    # ── Primitives ───────────────────────────────────────────────────────────
-
     def read_u8(self) -> int:
         if self.pos >= len(self.data):
             raise RuntimeError(f"read_u8: EOF at pos {self.pos}")
         v = self.data[self.pos]
         self.pos += 1
         return v
+
+    def peek_u8(self) -> int:
+        # return the next byte without advancing the read position
+        if self.pos >= len(self.data):
+            raise RuntimeError(f"peek_u8: EOF at pos {self.pos}")
+        return self.data[self.pos]
 
     def read_bool(self) -> bool:
         return self.read_u8() != 0
@@ -67,7 +52,6 @@ class ModelInputStream:
         return v
 
     def read_i16(self) -> int:
-        """Signed short — same as Java readShort()."""
         if self.pos + 2 > len(self.data):
             raise RuntimeError(f"read_i16: EOF at pos {self.pos}")
         v = struct.unpack_from(">h", self.data, self.pos)[0]
@@ -82,7 +66,6 @@ class ModelInputStream:
         return v
 
     def read_i32(self) -> int:
-        """Signed int — same as Java readInt()."""
         if self.pos + 4 > len(self.data):
             raise RuntimeError(f"read_i32: EOF at pos {self.pos}")
         v = struct.unpack_from(">i", self.data, self.pos)[0]
@@ -106,36 +89,19 @@ class ModelInputStream:
         self.pos += length
         return v
 
-    # ── UUID (two big-endian longs, as Java writeUUID/readUUID) ─────────────
-
+    # UUID (two big-endian long which is same as Java writeUUID/readUUID)
     def read_uuid(self) -> tuple:
         high = self.read_u64()
         low = self.read_u64()
         return (high, low)
 
-    # ── String (CRITICAL — exact match to Java ModelInputStream) ────────────
-
     def read_string(self):
-        """
-        Exact translation of ModelInputStream.readString():
-
-            byte c = readByte();
-            if (c == NULL)       return null;              // 0x70
-            if (c == STRING_REF) return table[readInt()];  // 0x01
-            // else: inline new string
-            int len = readShort();   // unsigned 16-bit length
-            byte[] buf = new byte[len];
-            readFully(buf);
-            String s = new String(buf, UTF_8);
-            table.add(s);
-            return s;
-        """
         c = self.read_u8()
 
-        if c == 0x70:  # NULL
+        if c == 0x70:
             return None
 
-        if c == 0x01:  # string table reference
+        if c == 0x01:
             index = self.read_u32()
             if index >= len(self.string_table):
                 raise RuntimeError(
@@ -144,30 +110,13 @@ class ModelInputStream:
                 )
             return self.string_table[index]
 
-        # Inline string: c is the discriminator byte (its value beyond not
-        # being 0x70 or 0x01 does not matter). Read a fresh u16 for byte count.
         length = self.read_u16()
         raw = self.read_bytes(length)
-        s = raw.decode("utf-8")
+        s = raw.decode("utf-8", errors="replace")
         self.string_table.append(s)
         return s
 
-    # ── Module reference ─────────────────────────────────────────────────────
-
     def read_module_ref(self):
-        """
-        Reads a SModuleReference.
-
-        kind byte:
-            0x70  → NULL
-            0x18  → name-only  → read_string()
-            0x19  → indexed    → read_u32()
-            0x17  → full id:
-                        sub 0x70 → null id
-                        sub 0x48 → uuid (2×u64)
-                        sub 0x47 → string id
-                    then read_string() for name
-        """
         kind = self.read_u8()
 
         if kind == 0x70:
@@ -196,34 +145,29 @@ class ModelInputStream:
 
         raise RuntimeError(f"Unknown module ref kind 0x{kind:02X} at pos {self.pos}")
 
-    # ── Model reference ──────────────────────────────────────────────────────
-
     def read_model_ref(self):
-        """
-        Reads a SModelReference (used in imports).
-        Returns a best-effort string model_id, or None.
-        """
         kind = self.read_u8()
 
-        if kind == 0x70:  # NULL
+        if kind == 0x70:
             return None
 
-        if kind == 0x09:  # MODELREF_INDEX
+        if kind == 0x09:
             self.read_u32()
             return None
 
-        # Full model reference
+        # full model reference
         model_id_kind = self.read_u8()
 
-        if model_id_kind == 0x48:  # regular uuid
+        # regular uuid
+        if model_id_kind == 0x48:
             uuid = self.read_uuid()
             model_id = f"r:{uuid[0]:016x}{uuid[1]:016x}"
-        elif model_id_kind == 0x70:  # NULL id
+        elif model_id_kind == 0x70:
             model_id = ""
         else:
             raise RuntimeError(
                 f"Unsupported model_id_kind 0x{model_id_kind:02X} at pos {self.pos}"
             )
 
-        self.read_string()  # model name — consumed
+        self.read_string()
         return model_id

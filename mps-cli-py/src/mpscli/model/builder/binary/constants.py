@@ -20,26 +20,26 @@ STUB_ID = 0x13
 DEPENDENCY_V1 = 0x01
 
 
-# ---- Model references ----
+# ---- model references ----
 
 NULL = 0x70
 MODELREF_INDEX = 9
 MODELID_REGULAR = 0x28
 
 
-# ---- Strings ----
+# ------ strings ------
 
 STRING_INDEX = 1
 STRING_INLINE = 2
 
 
-# ---- Node IDs ----
+# ---- node IDs ----
 
 NODEID_STRING = 0x17
 NODEID_LONG = 0x18
 
 
-# ---- Module references ----
+# ---- module references ----
 
 MODULEREF_NAMEONLY = 0x18
 MODULEREF_INDEX = 0x19
@@ -49,7 +49,7 @@ MODULEID_REGULAR = 0x48
 MODULEID_FOREIGN = 0x47
 
 
-# ---- Reference markers ----
+# ---- reference markers ----
 
 REF_THIS_MODEL = 17
 REF_OTHER_MODEL = 18

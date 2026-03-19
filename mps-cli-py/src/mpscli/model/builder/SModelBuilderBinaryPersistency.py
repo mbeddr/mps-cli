@@ -4,32 +4,36 @@ from mpscli.model.builder.binary.nodes import read_children
 from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
 from mpscli.model.SModel import SModel
 
-# ── Stream version aliases ───────────────────────────────────────────────────
-_V2 = ModelInputStream.STREAM_ID_V2  # 0x00000400
-_V3 = ModelInputStream.STREAM_ID_V3  # 0x00000500
+_V2 = ModelInputStream.STREAM_ID_V2
+_V3 = ModelInputStream.STREAM_ID_V3
+
+
+class _UnknownSubKind(RuntimeError):
+    def __init__(self, sub_hex: str, pos: int):
+        super().__init__(f"Unsupported model ref sub-kind {sub_hex} at pos {pos}")
+        self.sub_hex = sub_hex
+        self.pos = pos
 
 
 class SModelBuilderBinaryPersistency(SModelBuilderBase):
     """
     Full binary parser for JetBrains MPS .mpb files.
 
-    Follows BinaryPersistence.java loadModel() / loadModelProperties() EXACTLY.
-
     High-level parse order:
-        1. Header  (HEADER_START … HEADER_END)
-        2. Registry (REGISTRY_START … REGISTRY_END)
+        1. Header  (HEADER_START to HEADER_END)
+        2. Registry (REGISTRY_START to REGISTRY_END)
         3. Model properties  — structure differs for V2 vs V3:
                V2:
-                   loadUsedLanguagesV2  (u16 count, each: uuid + string)
+                   loadUsedLanguagesV2  (u16 count, each is uuid + string)
                    loadModuleRefList    (engaged languages)
                    loadModuleRefList    (devkits)
-                   loadImports V2      (u32 count, each: model_ref + i32 version)
+                   loadImports V2       (u32 count, each is model_ref + i32 version)
                V3:
                    readByte DEPENDENCY_V1 (0x01)
-                   loadUsedLanguagesV3  (u16 count, each: readLanguage + i32 version)
-                   loadEngagedLanguages (u16 count, each: readLanguage)
-                   loadModuleRefList    (devkits)
-                   loadImports V3      (u32 count, each: model_ref, no extra int)
+                   loadUsedLanguagesV3    (u16 count, each is readLanguage + i32 version)
+                   loadEngagedLanguages   (u16 count, each is readLanguage)
+                   loadModuleRefList      (devkits)
+                   loadImports V3         (u32 count, each is model_ref)
         4. MODEL_START marker
         5. Node tree
     """
@@ -46,56 +50,49 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         self.stream_version = None
 
-    # ────────────────────────────────────────────────────────────────────────
-
     def build(self, path_to_model: str):
-        print(f"\n[build] Parsing MPB: {path_to_model}")
-
         with open(path_to_model, "rb") as f:
             data = f.read()
 
         reader = ModelInputStream(data)
-        self._dump_markers(reader)
 
-        # ── 1. Header ──────────────────────────────────────────────────────
-        version = self._load_header(reader)
+        # 1. header
+        version, model_uuid, model_name = self._load_header(reader)
         self.stream_version = version
-        print(f"[build] Header OK  version=0x{version:08X}  pos={reader.tell()}")
 
-        # Bootstrap model placeholder so import index 0 resolves
-        model = SModel("unknown.model", "r:unknown", False)
-        self.index_2_imported_model_uuid["0"] = model.uuid
+        # create the model with real uuid+name from header
+        uuid_str = model_uuid or "r:unknown"
+        name_str = model_name or "unknown.model"
+        model = SModel(name_str, uuid_str, False)
+        self.index_2_imported_model_uuid["0"] = uuid_str
 
-        # ── 2. Registry ────────────────────────────────────────────────────
+        # 2. registry
         load_registry(reader, self)
-        print(f"[build] Registry OK  pos={reader.tell()}")
 
-        # ── 3. Model properties ────────────────────────────────────────────
-        self._load_model_properties(reader, version)
-        print(f"[build] Model properties OK  pos={reader.tell()}")
+        # 3. model properties
+        try:
+            self._load_model_properties(reader, version)
+        except _UnknownSubKind as e:
+            import warnings
 
-        # ── 4. MODEL_START ─────────────────────────────────────────────────
+            warnings.warn(f"[build] {path_to_model}: {e} — skipped to MODEL_START")
+            self._skip_to_marker(reader, ModelInputStream.MODEL_START)
+            return model
+
+        # 4. model start
         token = reader.read_u32()
         if token != ModelInputStream.MODEL_START:
             raise RuntimeError(
                 f"Expected MODEL_START (0x{ModelInputStream.MODEL_START:08X}), "
                 f"got 0x{token:08X} at pos {reader.tell() - 4}"
             )
-        print(f"[build] MODEL_START confirmed  pos={reader.tell() - 4}")
 
-        # ── 5. Node tree ───────────────────────────────────────────────────
+        # 5. node tree
         read_children(reader, self, model, None)
 
         return model
 
-    # ── Header ──────────────────────────────────────────────────────────────
-
     def _load_header(self, reader: ModelInputStream) -> int:
-        """
-        Mirrors BinaryPersistence.loadHeader().
-        Reads all header bytes so the string table is populated before the registry.
-        Returns the stream version integer.
-        """
         if reader.read_u32() != ModelInputStream.HEADER_START:
             raise RuntimeError("Expected HEADER_START")
 
@@ -106,23 +103,28 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
             raise RuntimeError(f"Unknown stream version: 0x{version:08X}")
 
         if version == _V2:
-            # readModelReference()  (model id + name — both may call readString)
-            self._read_model_reference_v2(reader)
-            reader.read_i32()  # model version field (compatibility leftover)
-            # Check for optional HEADER_ATTRIBUTES block
+            # readModelReference()
+            _model_uuid, _model_name = self._read_model_reference_v2(reader)
+            # model version field
+            reader.read_i32()
+            # check for optional HEADER_ATTRIBUTES block
             sync = reader.read_u8()
             if sync == ModelInputStream.HEADER_ATTRIBUTES:
-                reader.read_bool()  # placeholder boolean (V2)
+                # placeholder boolean (V2)
+                reader.read_bool()
                 props_count = reader.read_i16()
             else:
-                # No attributes block — put the byte back logically by adjusting pos
+                # no attributes block so put the byte back logically by adjusting pos
                 reader.seek(reader.tell() - 1)
                 props_count = 0
         else:
-            # V3
-            reader.read_module_ref()  # module reference (may be null)
-            self._read_model_id(reader)  # model id
-            reader.read_string()  # model name
+            # v3
+            # module reference (may be null)
+            reader.read_module_ref()
+            # model id
+            _model_uuid = self._read_model_id(reader)
+            # model name
+            _model_name = reader.read_string()
             sync = reader.read_u8()
             if sync != ModelInputStream.HEADER_ATTRIBUTES:
                 raise RuntimeError(
@@ -131,10 +133,12 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
                 )
             props_count = reader.read_i16()
 
-        # Optional model properties (key/value pairs)
+        # optional model properties (key/value pairs)
         for _ in range(props_count):
-            reader.read_string()  # key   — adds to string table
-            reader.read_string()  # value — adds to string table
+            # key — adds to string table
+            reader.read_string()
+            # value - adds to string table
+            reader.read_string()
 
         if version == _V3:
             reader.read_u8()  # persistedCapabilities byte
@@ -143,63 +147,46 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         if reader.read_u32() != ModelInputStream.HEADER_END:
             raise RuntimeError("Expected HEADER_END")
 
-        return version
+        return version, _model_uuid, _model_name
 
     def _read_model_reference_v2(self, reader: ModelInputStream):
-        """
-        Consume a V2 SModelReference.
-
-        Byte layout (confirmed from diff.mpb hex):
-            kind  u8       — 0x07 for regular uuid-based model id
-            uuid  16 bytes — high u64 + low u64
-            extra u8       — sub-kind or version byte (0xA1 observed)
-            name  string   — long model name (e.g. "jetbrains.mps.vcs.diff")
-                             added to string table via read_string()
-            null  string   — stereotype or virtual package (0x70 = null)
-        """
         kind = reader.read_u8()
-        if kind == 0x70:  # NULL model reference
-            return
-        # Regular model id: uuid (2×u64)
-        reader.read_uuid()
-        reader.read_u8()  # extra byte after uuid (sub-kind/version)
-        reader.read_string()  # model long name — added to string table
-        reader.read_string()  # stereotype / virtual package (usually null)
+        # NULL model reference
+        if kind == 0x70:
+            return None, None
+        # regular model id is uuid (2×u64)
+        high, low = reader.read_uuid()
+        uuid_str = f"r:{high:016x}{low:016x}"
+        # extra byte after uuid (sub-kind/version)
+        reader.read_u8()
+        # model long name is added to string table
+        name = reader.read_string()
+        # declaring module ref
+        reader.read_module_ref()
+        return uuid_str, name
 
     def _read_model_id(self, reader: ModelInputStream):
-        """Consume a V3 SModelId (may be uuid-based or string-based)."""
         kind = reader.read_u8()
-        if kind == 0x70:  # NULL
-            return
-        if kind == 0x48:  # uuid-based
-            reader.read_uuid()
-        elif kind == 0x47:  # string-based
-            reader.read_string()
-        # else: silently skip unknown kinds (future-proofing)
-
-    # ── Model properties ─────────────────────────────────────────────────────
+        # NULL
+        if kind == 0x70:
+            return None
+        # uuid-based
+        if kind == 0x48:
+            high, low = reader.read_uuid()
+            return f"r:{high:016x}{low:016x}"
+        # string-based
+        elif kind == 0x47:
+            return reader.read_string()
+        # unknown kind
+        return None
 
     def _load_model_properties(self, reader: ModelInputStream, version: int):
-        """
-        Mirrors BinaryPersistence.loadModelProperties() for V2 and V3.
-
-        V2 (no dependency format byte):
-            loadUsedLanguagesV2  — u16 count, each: uuid + string
-            loadModuleRefList    — engaged languages
-            loadModuleRefList    — devkits
-            loadImports V2       — u32 count, each: model_ref + i32
-
-        V3 (has dependency format byte):
-            readByte DEPENDENCY_V1
-            loadUsedLanguagesV3  — u16 count, each: readLanguage + i32
-            loadEngagedLanguages — u16 count, each: readLanguage
-            loadModuleRefList    — devkits
-            loadImports V3       — u32 count, each: model_ref (no extra int)
-        """
         if version == _V2:
             self._load_used_languages_v2(reader)
-            self._load_module_ref_list(reader)  # engaged languages
-            self._load_module_ref_list(reader)  # devkits
+            # engaged languages
+            self._load_module_ref_list(reader)
+            # devkits
+            self._load_module_ref_list(reader)
             self._load_imports(reader, version)
         else:
             dep_fmt = reader.read_u8()
@@ -209,131 +196,82 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
                 )
             self._load_used_languages_v3(reader)
             self._load_engaged_languages(reader)
-            self._load_module_ref_list(reader)  # devkits
+            # devkits
+            self._load_module_ref_list(reader)
             self._load_imports(reader, version)
 
     def _load_used_languages_v2(self, reader: ModelInputStream):
-        """V2: u16 count, each entry: uuid (2×u64) + string name."""
         count = reader.read_u16()
-        print(f"[model_props] used_languages (V2) = {count}")
         for _ in range(count):
-            reader.read_uuid()  # language uuid
-            reader.read_string()  # language name
+            # language uuid
+            reader.read_uuid()
+            # language name
+            reader.read_string()
 
     def _load_used_languages_v3(self, reader: ModelInputStream):
         """
-        V3: u16 count, each entry: readLanguage() + i32 import version.
-        readLanguage() = uuid (2×u64) + string name  (same as V2 per-entry).
+        V3: u16 count and each entry is readLanguage() + i32 import version.
+        readLanguage() = uuid + string name (same as V2 per-entry).
         """
         count = reader.read_u16()
-        print(f"[model_props] used_languages (V3) = {count}")
         for _ in range(count):
-            reader.read_uuid()  # language uuid
-            reader.read_string()  # language name
-            reader.read_i32()  # import version
+            # language uuid
+            reader.read_uuid()
+            # language name
+            reader.read_string()
+            # import version
+            reader.read_i32()
 
     def _load_engaged_languages(self, reader: ModelInputStream):
-        """V3 only: u16 count, each: readLanguage() = uuid + string."""
         count = reader.read_u16()
-        print(f"[model_props] engaged_languages (V3) = {count}")
         for _ in range(count):
             reader.read_uuid()
             reader.read_string()
 
     def _load_module_ref_list(self, reader: ModelInputStream):
-        """u16 count, each: readModuleReference()."""
         count = reader.read_u16()
         for _ in range(count):
             reader.read_module_ref()
 
     def _load_imports(self, reader: ModelInputStream, version: int):
-        """
-        u32 count.
-        V2: each = readModelReference() + readInt() (version field).
-        V3: each = readModelReference() only.
-        """
         count = reader.read_u32()
-        print(f"[model_props] imports = {count}")
         for i in range(count):
             model_id = self._read_model_reference(reader)
             if version == _V2:
-                reader.read_i32()  # import element version (V2 only)
+                # import element version (V2 only)
+                reader.read_i32()
             self.index_2_imported_model_uuid[str(i + 1)] = model_id or ""
-            print(f"[model_props]   import[{i + 1}] id={model_id!r}")
 
     def _read_model_reference(self, reader: ModelInputStream):
-        """
-        Reads a SModelReference as written by ModelOutputStream.writeModelReference().
-        Returns a best-effort model id string, or None.
-
-        V2 binary format (confirmed from diff.mpb hex + XML cross-reference):
-            outer kind byte:
-                0x70 → NULL (nothing more to read)
-                0x07 → non-null; read sub-kind next
-            sub-kind byte:
-                0x28 → Regular (uuid-based SModelId):
-                            uuid_high (u64) + uuid_low (u64)
-                            string  model_name
-                            string  stereotype/null (usually 0x70)
-                0x26 → Foreign (string-based SModelId, e.g. java stubs):
-                            string  model_id  (e.g. "java:java.lang")
-                            string  model_name (e.g. "java.lang@java_stub")
-                            module_ref  (declaring module)
-            i32  import version is read by the caller (_load_imports), not here.
-        """
         kind = reader.read_u8()
-
-        if kind == 0x70:  # NULL model reference
+        # NULL model reference
+        if kind == 0x70:
             return None
 
-        # Read the sub-kind byte that distinguishes Regular from Foreign
         sub = reader.read_u8()
-
-        if sub == 0x28:  # Regular: uuid-based SModelId
+        # regular: uuid-based SModelId
+        if sub == 0x28:
             uuid = reader.read_uuid()
             model_id = f"r:{uuid[0]:016x}{uuid[1]:016x}"
-            reader.read_string()  # model long name
-            reader.read_string()  # stereotype (usually null / 0x70)
+            # model long name
+            reader.read_string()
+            reader.read_module_ref()
 
-        elif sub == 0x26:  # Foreign: string-based SModelId (java stubs)
-            reader.read_string()  # foreign id string e.g. "java:java.lang"
-            reader.read_string()  # model name e.g. "java.lang@java_stub"
-            reader.read_module_ref()  # declaring module reference
-            model_id = ""  # foreign ids not tracked
+        # foreign: string-based SModelId (java stubs)
+        elif sub == 0x26:
+            # example - "java:java.lang"
+            model_id = reader.read_string()
+            # model name example "java.lang@java_stub"
+            reader.read_string()
+            # declaring module reference
+            reader.read_module_ref()
 
         else:
-            raise RuntimeError(
-                f"Unsupported model ref sub-kind 0x{sub:02X} at pos {reader.tell()}"
-            )
+            raise _UnknownSubKind(f"0x{sub:02X}", reader.tell())
 
         return model_id
 
-    # ── Diagnostics ──────────────────────────────────────────────────────────
-
-    def _dump_markers(self, reader: ModelInputStream):
-        """Print offsets of all structural markers in the file."""
-        markers = {
-            ModelInputStream.HEADER_START: "HEADER_START",
-            ModelInputStream.HEADER_END: "HEADER_END",
-            ModelInputStream.REGISTRY_START: "REGISTRY_START",
-            ModelInputStream.REGISTRY_END: "REGISTRY_END",
-            ModelInputStream.MODEL_START: "MODEL_START",
-        }
-        import struct as _struct
-
-        data = reader.data
-        print("\n=== Binary marker offsets ===")
-        for i in range(len(data) - 3):
-            val = _struct.unpack_from(">I", data, i)[0]
-            if val in markers:
-                print(f"  {markers[val]:20s} @ offset {i}")
-        print("=============================\n")
-
     def _skip_to_marker(self, reader: ModelInputStream, marker: int):
-        """
-        Sliding-window scan until `marker` (4-byte big-endian) is found and consumed.
-        Does NOT call read_string() — only use for sections where string table is irrelevant.
-        """
         target = marker.to_bytes(4, "big")
         start = reader.pos
         while reader.pos + 4 <= len(reader.data):
