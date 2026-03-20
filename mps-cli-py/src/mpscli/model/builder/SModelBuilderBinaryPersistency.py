@@ -50,6 +50,14 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         self.stream_version = None
 
+    def _uuid_str(self, high: int, low: int) -> str:
+        # format two u64 values as a Java-style uuid string with dashes.
+        return (
+            f"r:{high >> 32:08x}-{(high >> 16) & 0xffff:04x}-"
+            f"{high & 0xffff:04x}-{(low >> 48) & 0xffff:04x}-"
+            f"{low & 0xffffffffffff:012x}"
+        )
+
     def build(self, path_to_model: str):
         with open(path_to_model, "rb") as f:
             data = f.read()
@@ -157,7 +165,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         reader.read_u8()
         # regular model id is uuid (2×u64)
         high, low = reader.read_uuid()
-        uuid_str = f"r:{high:016x}{low:016x}"
+        uuid_str = self._uuid_str(high, low)
         # model long name is added to string table
         name = reader.read_string()
         # declaring module ref
@@ -172,7 +180,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         # uuid-based
         if kind == 0x48:
             high, low = reader.read_uuid()
-            return f"r:{high:016x}{low:016x}"
+            return self._uuid_str(high, low)
         # string-based
         elif kind == 0x47:
             return reader.read_string()
@@ -251,7 +259,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         # regular: uuid-based SModelId
         if sub == 0x28:
             uuid = reader.read_uuid()
-            model_id = f"r:{uuid[0]:016x}{uuid[1]:016x}"
+            model_id = self._uuid_str(uuid[0], uuid[1])
             # model long name
             reader.read_string()
             reader.read_module_ref()

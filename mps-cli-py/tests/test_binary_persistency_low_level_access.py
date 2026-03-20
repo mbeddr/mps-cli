@@ -3,7 +3,7 @@ from mpscli.model.builder.SModelBuilderBinaryPersistency import (
 )
 from tests.test_base import TestBase
 from mpscli.model.SRepository import SRepository
-from mpscli.model.builder.binary.reader import BinaryReader
+from mpscli.model.builder.binary.model_input_stream import ModelInputStream
 from mpscli.model.builder.binary.constants import NODEID_LONG
 from mpscli.model.builder.binary.nodes import read_node
 
@@ -139,25 +139,50 @@ class TestBinaryPersistencyLowLevelAccess(TestBase):
         for node in model.get_nodes():
             self.assertIsInstance(node.uuid, str)
 
-    def test_invalid_reference_kind_raises(self):
+    def test_invalid_reference_model_kind_handled_gracefully(self):
+        # model_kind = 9 is unknown
+        # _read_reference handles unknown model_kind by reading the resolve_info string and
+        # returning a (ref_name, placeholder) so no exception raised.
         data = bytearray()
+        # props_count = 0
         data.extend((0).to_bytes(2, "big"))
+        # node_id_kind for this node
         data.append(NODEID_LONG)
+        # node_id = 1
         data.extend((1).to_bytes(8, "big"))
+        # concept_index
         data.extend((0).to_bytes(2, "big"))
+        # opening brace
         data.append(ord("{"))
+        # inner props count = 0
         data.extend((0).to_bytes(2, "big"))
+        # consumed as u16 by read_node
         data.extend((0).to_bytes(2, "big"))
+        # ref_count = 1
         data.extend((1).to_bytes(2, "big"))
+        # ref_index = 0
         data.extend((0).to_bytes(2, "big"))
+        # skip byte (always 0x01)
+        data.append(0x01)
+        # node_id_kind for reference target
+        data.append(NODEID_LONG)
+        # node_id for reference target = 1
+        data.extend((1).to_bytes(8, "big"))
+        # model_kind = 9 (unknown)
         data.append(9)
+        # resolve_info = null string
+        data.append(0x70)
+        # read_children reads child_count as u32, then read_node reads closing brace
+        data.extend((0).to_bytes(4, "big"))
+        # closing brace
+        data.append(ord("}"))
 
-        reader = BinaryReader(bytes(data))
+        reader = ModelInputStream(bytes(data))
         builder = SModelBuilderBinaryPersistency()
         model = builder.build(self.MPB_PATH)
 
-        with self.assertRaises(ValueError):
-            read_node(reader, builder, model)
+        node = read_node(reader, builder, model)
+        self.assertIsNotNone(node)
 
     def test_binary_parsing_performance(self):
         import time
@@ -170,27 +195,51 @@ class TestBinaryPersistencyLowLevelAccess(TestBase):
 
         self.assertLess(end - start, 2)
 
-    def test_known_but_not_supported_reference_kind_raises(self):
+    def test_unknown_reference_model_kind_returns_placeholder(self):
+        # model_kind = 2 is also unknown so same graceful handling has been implemented where it
+        # returns placeholder and no exception is raised
         data = bytearray()
+        # props_count = 0
         data.extend((0).to_bytes(2, "big"))
+        # node_id_kind for this node
         data.append(NODEID_LONG)
+        # node_id = 1
         data.extend((1).to_bytes(8, "big"))
+        # concept_index
         data.extend((0).to_bytes(2, "big"))
+        # opening brace
         data.append(ord("{"))
+        # inner props count = 0
         data.extend((0).to_bytes(2, "big"))
+        # consumed as u16 by read_node
         data.extend((0).to_bytes(2, "big"))
+        # ref_count = 1
         data.extend((1).to_bytes(2, "big"))
+        # ref_index = 0
         data.extend((0).to_bytes(2, "big"))
+        # skip byte (always 0x01)
+        data.append(0x01)
+        # node_id_kind for reference target
+        data.append(NODEID_LONG)
+        # node_id for reference target = 1
+        data.extend((1).to_bytes(8, "big"))
+        # model_kind = 2 (unknown)
         data.append(2)
+        # resolve_info = null string
+        data.append(0x70)
+        # read_children reads child_count as u32, then read_node reads closing brace
+        data.extend((0).to_bytes(4, "big"))
+        # closing brace
+        data.append(ord("}"))
 
-        reader = BinaryReader(bytes(data))
+        reader = ModelInputStream(bytes(data))
         builder = SModelBuilderBinaryPersistency()
         model = builder.build(self.MPB_PATH)
 
         builder.index_2_reference_role["0"] = "person"
 
-        with self.assertRaises(NotImplementedError):
-            read_node(reader, builder, model)
+        node = read_node(reader, builder, model)
+        self.assertIsNotNone(node)
 
     def test_reference_has_resolve_info_field(self):
         builder = SModelBuilderBinaryPersistency()

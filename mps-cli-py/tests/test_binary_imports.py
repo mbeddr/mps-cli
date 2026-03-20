@@ -9,7 +9,7 @@ MPB = (
     "mps_cli_binary_persistency_generated_low_level_access_test_data/"
     "mps.cli.lanuse.library_top.binary_persistency.authors_top.mpb"
 )
-MODEL_UUID = "r:cf91f3728bfd44b88e34024eb23e64a8"
+MODEL_UUID = "r:cf91f372-8bfd-44b8-8e34-024eb23e64a8"
 
 
 class TestImports(unittest.TestCase):
@@ -22,7 +22,8 @@ class TestImports(unittest.TestCase):
 
     def test_non_empty_imports_start_with_r_colon(self):
         for key, uid in self.builder.index_2_imported_model_uuid.items():
-            if uid:  # empty string is valid for foreign/stub imports
+            # empty string is valid for foreign/stub imports
+            if uid:
                 self.assertTrue(
                     uid.startswith("r:"),
                     f"Import[{key}]={uid!r} does not start with 'r:'",
