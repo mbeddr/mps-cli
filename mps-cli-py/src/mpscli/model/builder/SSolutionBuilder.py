@@ -28,9 +28,11 @@ class SSolutionBuilder:
     USE_CACHE: bool = False
     CACHE_LOAD_FN = None
     CACHE_SAVE_FN = None
+    # set true to print a one-line status for each .mpb file as it completes
+    SHOW_PROGRESS: bool = False
 
     def build_solution(self, path_to_msd_file: Path) -> Optional[SSolution]:
-        # Build a single solution (opens its own worker pool for .mpb files)
+        # build a single solution (opens its own worker pool for .mpb files)
         solutions = self.build_all([path_to_msd_file])
         return solutions[0] if solutions else None
 
@@ -58,12 +60,13 @@ class SSolutionBuilder:
 
         if all_mpb_paths:
             workers = self.MPB_WORKERS or min(os.cpu_count() or 4, 16)
+            total = len(all_mpb_paths)
 
             # Only use a process pool when the batch is large enough to justify the spawn overhead
             use_pool = workers > 1 and len(all_mpb_paths) > self.MPB_PARALLEL_THRESHOLD
 
             if not use_pool:
-                for ps in all_mpb_paths:
+                for done, ps in enumerate(all_mpb_paths, 1):
                     try:
                         cached = (
                             self.CACHE_LOAD_FN(Path(ps))
@@ -81,11 +84,15 @@ class SSolutionBuilder:
                                 and model is not None
                             ):
                                 self.CACHE_SAVE_FN(Path(ps), model)
+                        if self.SHOW_PROGRESS:
+                            print(f"[{done}/{total}] OK  {os.path.basename(ps)}")
                     except Exception as exc:
                         import warnings
 
                         warnings.warn(f"Failed to parse {ps}: {exc}")
                         mpb_results[ps] = None
+                        if self.SHOW_PROGRESS:
+                            print(f"[{done}/{total}] ERR {os.path.basename(ps)}")
             else:
                 # for large batches firsst check cache first, only after that submit uncached to pool
                 uncached_paths = []
@@ -105,12 +112,16 @@ class SSolutionBuilder:
 
                     # maybe much safer
                     multiprocessing.freeze_support()
+                    done = len(all_mpb_paths) - len(
+                        uncached_paths
+                    )  # cached files already counted
                     with ProcessPoolExecutor(max_workers=workers) as pool:
                         future_to_path = {
                             pool.submit(_parse_mpb, ps): ps for ps in uncached_paths
                         }
                         for future in as_completed(future_to_path):
                             ps = future_to_path[future]
+                            done += 1
                             try:
                                 model = future.result()
                                 mpb_results[ps] = model
@@ -120,11 +131,19 @@ class SSolutionBuilder:
                                     and model is not None
                                 ):
                                     self.CACHE_SAVE_FN(Path(ps), model)
+                                if self.SHOW_PROGRESS:
+                                    print(
+                                        f"[{done}/{total}] OK  {os.path.basename(ps)}"
+                                    )
                             except Exception as exc:
                                 import warnings
 
                                 warnings.warn(f"Failed to parse {ps}: {exc}")
                                 mpb_results[ps] = None
+                                if self.SHOW_PROGRESS:
+                                    print(
+                                        f"[{done}/{total}] ERR {os.path.basename(ps)}"
+                                    )
 
         # phase 3: assemble solutions
         solutions = []

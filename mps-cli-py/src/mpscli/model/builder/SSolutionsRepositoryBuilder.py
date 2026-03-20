@@ -127,6 +127,7 @@ class SSolutionsRepositoryBuilder:
         builder = SSolutionBuilder()
         if self.USE_CACHE:
             builder.USE_CACHE = True
+            builder.SHOW_PROGRESS = True
             builder.CACHE_LOAD_FN = _load_cached
             builder.CACHE_SAVE_FN = _save_cached
 
