@@ -6,10 +6,12 @@ from mpscli.model.builder.SSolutionsRepositoryBuilder import (
 
 class TestBinaryRepositoryCompleteness(TestBase):
 
-    REPO_PATH = "../mps_test_projects/" "mps_cli_binary_persistency_generated/"
+    REPO_PATH = "../mps_test_projects/mps_cli_binary_persistency_generated/"
 
     def _build_repo(self):
         builder = SSolutionsRepositoryBuilder()
+        # tests should never use the disk cache and they need fresh parses every time
+        builder.USE_CACHE = False
         return builder.build(self.REPO_PATH)
 
     def test_repository_builds(self):

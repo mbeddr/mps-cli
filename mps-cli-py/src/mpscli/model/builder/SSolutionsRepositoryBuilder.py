@@ -158,12 +158,9 @@ class SSolutionsRepositoryBuilder:
             if not _jar_has_msd(jar_path):
                 return
 
-            extract_dir = Path(
-                tempfile.mkdtemp(
-                    prefix="mps_jar_",
-                    dir=jar_path.parent,
-                )
-            )
+            extract_dir = jar_path.parent / jar_path.name.replace(".", "_")
+            extract_dir.mkdir(parents=True, exist_ok=True)
+
             try:
                 with zipfile.ZipFile(jar_path) as jar:
                     jar.extractall(extract_dir)

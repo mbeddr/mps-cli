@@ -154,11 +154,10 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         # NULL model reference
         if kind == 0x70:
             return None, None
+        reader.read_u8()
         # regular model id is uuid (2×u64)
         high, low = reader.read_uuid()
         uuid_str = f"r:{high:016x}{low:016x}"
-        # extra byte after uuid (sub-kind/version)
-        reader.read_u8()
         # model long name is added to string table
         name = reader.read_string()
         # declaring module ref
