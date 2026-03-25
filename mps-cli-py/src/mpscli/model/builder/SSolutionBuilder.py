@@ -28,8 +28,6 @@ class SSolutionBuilder:
     USE_CACHE: bool = False
     CACHE_LOAD_FN = None
     CACHE_SAVE_FN = None
-    # set true to print a one-line status for each .mpb file as it completes
-    SHOW_PROGRESS: bool = False
 
     def build_solution(self, path_to_msd_file: Path) -> Optional[SSolution]:
         # build a single solution (opens its own worker pool for .mpb files)
@@ -84,15 +82,11 @@ class SSolutionBuilder:
                                 and model is not None
                             ):
                                 self.CACHE_SAVE_FN(Path(ps), model)
-                        if self.SHOW_PROGRESS:
-                            print(f"[{done}/{total}] OK  {os.path.basename(ps)}")
                     except Exception as exc:
                         import warnings
 
                         warnings.warn(f"Failed to parse {ps}: {exc}")
                         mpb_results[ps] = None
-                        if self.SHOW_PROGRESS:
-                            print(f"[{done}/{total}] ERR {os.path.basename(ps)}")
             else:
                 # for large batches firsst check cache first, only after that submit uncached to pool
                 uncached_paths = []
@@ -131,19 +125,11 @@ class SSolutionBuilder:
                                     and model is not None
                                 ):
                                     self.CACHE_SAVE_FN(Path(ps), model)
-                                if self.SHOW_PROGRESS:
-                                    print(
-                                        f"[{done}/{total}] OK  {os.path.basename(ps)}"
-                                    )
                             except Exception as exc:
                                 import warnings
 
                                 warnings.warn(f"Failed to parse {ps}: {exc}")
                                 mpb_results[ps] = None
-                                if self.SHOW_PROGRESS:
-                                    print(
-                                        f"[{done}/{total}] ERR {os.path.basename(ps)}"
-                                    )
 
         # phase 3: assemble solutions
         solutions = []

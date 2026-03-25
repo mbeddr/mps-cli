@@ -49,6 +49,7 @@ def _cache_key(path: Path) -> str:
 
 
 def _load_cached(path: Path):
+    # return cached SModel if file is unchanged, else return None
     try:
         key = _cache_key(path)
         cache_file = _get_cache_dir() / key
@@ -61,6 +62,7 @@ def _load_cached(path: Path):
 
 
 def _save_cached(path: Path, model) -> None:
+    # persist a parsed SModel to the cache
     try:
         key = _cache_key(path)
         cache_file = _get_cache_dir() / key
@@ -115,6 +117,7 @@ class SSolutionsRepositoryBuilder:
             self.collect_solutions_from_jars(path)
 
         self.repo.languages = list(SLanguageBuilder.languages.values())
+
         stop = timer()
         print(f"duration for parsing modules: {stop - start:.2f} seconds")
         return self.repo
@@ -127,7 +130,6 @@ class SSolutionsRepositoryBuilder:
         builder = SSolutionBuilder()
         if self.USE_CACHE:
             builder.USE_CACHE = True
-            builder.SHOW_PROGRESS = True
             builder.CACHE_LOAD_FN = _load_cached
             builder.CACHE_SAVE_FN = _save_cached
 
@@ -156,20 +158,24 @@ class SSolutionsRepositoryBuilder:
         workers = self.JAR_THREADS or min(os.cpu_count() or 4, 16)
 
         def _process_jar(jar_path: Path):
+            # cheap peek: skip jarss with no .msd
             if not _jar_has_msd(jar_path):
                 return
 
+            # extract to an isolated temp directory
             extract_dir = jar_path.parent / jar_path.name.replace(".", "_")
             extract_dir.mkdir(parents=True, exist_ok=True)
-
             try:
                 with zipfile.ZipFile(jar_path) as jar:
                     jar.extractall(extract_dir)
-                print("path = ", extract_dir)
+                # print just the jar name
+                print(f"extracting: {jar_path.name}")
 
+                # scan and parse
                 self.collect_solutions_from_sources(extract_dir)
 
             finally:
+                # always clean up
                 try:
                     shutil.rmtree(extract_dir)
                 except OSError as e:
