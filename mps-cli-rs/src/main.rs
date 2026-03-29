@@ -4,7 +4,7 @@ mod builder;
 use crate::builder::smodules_repository_builder::build_repo_from_directory;
 
 fn main() {
-    let repository = build_repo_from_directory(String::from("C:\\work\\E3_2.0_Solution\\solutions"));
+    let repository = build_repo_from_directory(String::from("C:\\work\\Solution\\build\\dependencies1"));
     println!("number of solutions: {}", repository.solutions.len());
 }
 

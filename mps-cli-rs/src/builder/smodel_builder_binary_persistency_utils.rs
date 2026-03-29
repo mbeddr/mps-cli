@@ -2,7 +2,13 @@ use std::io::{Cursor, Read};
 use byteorder::{BigEndian, ReadBytesExt};
 use uuid::Uuid;
 use crate::builder::smodel_builder_binary_persistency_constants::*;
- 
+
+  #[macro_export]
+  macro_rules! log_debug {
+    ($($arg:tt)*) => {
+      //println!("[DEBUG] {}", format!($($arg)*));
+    };
+  }
 
 pub(crate) fn read_uuid(cursor: &mut Cursor<&Vec<u8>>) -> String {
     let head_bits = cursor.read_u64::<BigEndian>().expect("failed to read u64 head_bits");
@@ -20,7 +26,7 @@ pub(crate) fn read_string(cursor: &mut Cursor<&Vec<u8>>, my_strings: &mut Vec<St
     }
 
     let string_size = cursor.read_u16::<BigEndian>().expect("failed to read u32") as usize;
-    println!(".........reading string of size: {}", string_size);
+    log_debug!(".........reading string of size: {}", string_size);
 
     let mut sb = String::new();
     let mut buf = vec![0u8; string_size];
@@ -28,7 +34,7 @@ pub(crate) fn read_string(cursor: &mut Cursor<&Vec<u8>>, my_strings: &mut Vec<St
     sb.push_str(&String::from_utf8_lossy(&buf));
     my_strings.push(sb.clone());
 
-    println!(".........reading string: {}", sb);
+    log_debug!(".........reading string: {}", sb);
     return sb;
   }
 

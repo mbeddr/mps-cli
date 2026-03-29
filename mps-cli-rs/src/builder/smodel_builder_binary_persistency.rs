@@ -1,5 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, io::Read, path::PathBuf, rc::Rc};
 
+use crate::log_debug;
 use crate::model::sconcept::{SConcept, SContainmentLink, SProperty, SReferenceLink};
 use crate::model::{slanguage::SLanguage, smodel::SModel};
 use crate::model::snode::SNode;
@@ -20,7 +21,7 @@ pub(crate) fn build_model<'a>(mpb_file: PathBuf,
         panic!("expected file with extension .mpb but found '{}'", mpb_file.to_str().unwrap());        
     }
 
-    println!(".........reading file: {}", mpb_file.to_str().unwrap());
+    log_debug!(".........reading file: {}", mpb_file.to_str().unwrap());
 
     let file = std::fs::File::open(mpb_file.clone());  
     if file.is_err() {
@@ -48,7 +49,7 @@ pub(crate) fn build_model<'a>(mpb_file: PathBuf,
 
 pub(crate) fn read_children(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>>, model_builder_cache : &mut SModelBuilderCache, my_strings: &mut Vec<String>, model : Rc<RefCell<SModel>>) {
     let child_count : u32 = cursor.read_u32::<BigEndian>().expect("failed to read u32 child count");
-    println!("...child count: {}", child_count);
+    log_debug!("...child count: {}", child_count);
     for _ in 0..child_count {
         let rootNode: Rc<SNode> = read_node(cursor, parent.clone(), model_builder_cache, my_strings, model.clone());
         if parent.is_none() {
@@ -68,7 +69,7 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>
 
     nodeid = node_id_utils.encode(nodeid);
     let mut node= SNode::new(nodeid.clone(), concept.clone(), None);
-    println!("...node: {} - {}", nodeid, concept.name);
+    log_debug!("...node: {} - {}", nodeid, concept.name);
 
     let aggregation_index : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 aggregation index");
 
@@ -78,12 +79,12 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>
     }
 
     let properties_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 properties count");
-    println!("...properties count: {}", properties_count);
+    log_debug!("...properties count: {}", properties_count);
     for _ in 0..properties_count {
         let property_index: u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16");
         let property: &Rc<SProperty> = model_builder_cache.index_2_property.get(&property_index.to_string()).expect("property not found by index");
         let property_value = read_string(cursor, my_strings);
-        println!("......property: {} - {}", property.name, property_value);
+        log_debug!("......property: {} - {}", property.name, property_value);
         node.add_property(property, property_value);
     }
     
@@ -93,7 +94,7 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>
     }
 
     let references_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 references count");
-    println!("...references count: {}", references_count);
+    log_debug!("...references count: {}", references_count);
     for _ in 0..references_count {
         let reference_index: u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16");
         let reference: &Rc<SReferenceLink> = model_builder_cache.index_2_reference_link.get(&reference_index.to_string()).expect("reference not found by index");
@@ -104,7 +105,10 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>
         }
         if kind == 1 {
           let mut reference_nodeid = read_node_id(cursor, my_strings);
-          reference_nodeid = node_id_utils.encode(reference_nodeid);
+          println!("......reference node id: {}", reference_nodeid);
+          if !reference_nodeid.starts_with("~") {
+              reference_nodeid = node_id_utils.encode(reference_nodeid);
+          }
           println!("......reference node id: {}", reference_nodeid);
           let mut target_model_kind: u8 = cursor.read_u8().expect("failed to read u8");
           if (target_model_kind != REF_OTHER_MODEL && target_model_kind != REF_THIS_MODEL) {
@@ -119,7 +123,7 @@ pub(crate) fn read_node(cursor: &mut Cursor<&Vec<u8>>, parent : Option<Rc<SNode>
 
           let resolve_info = read_string(cursor, my_strings);
           node.add_reference(reference, model_ref_id.clone(), reference_nodeid.clone(), Some(resolve_info.clone()));
-          println!("......reference: {} - {}@{} - resolveInfo: {}", reference.name, model_ref_id, reference_nodeid, resolve_info);
+          log_debug!("......reference: {} - {}@{} - resolveInfo: {}", reference.name, model_ref_id, reference_nodeid, resolve_info);
         } else {
           panic!("reference kinds 2 and 3 are not supported yet");
         }
@@ -165,7 +169,7 @@ pub(crate) fn read_module_reference(cursor: &mut Cursor<&Vec<u8>>, my_strings: &
         read_string(cursor, my_strings);
       }
     } else {
-      panic!("unknown model reference format 0x{:X}", c);
+      panic!("unknown module reference format 0x{:X}", c);
     }
 }
 
@@ -173,10 +177,11 @@ pub(crate) fn read_model_reference(cursor: &mut Cursor<&Vec<u8>>, model_builder_
     let c = cursor.read_u8().expect("failed to read u8");
     if c == MODELREF_INDEX {
       let model_index: u32 = cursor.read_u32::<BigEndian>().expect("failed to read u32");
-      println!("......model reference by index: {}", model_index);
+      log_debug!("......model reference by index: {}", model_index);
       return model_builder_cache.index_2_imported_model_uuid.get(&model_index.to_string()).expect("model id not found by index").to_string();
     } else {
-      panic!("unexpected model reference format 0x{:X}", c);
+      return "UNKNOWN_MODEL_REFERENCE".to_string();
+      //panic!("unexpected model reference format 0x{:X}", c);
     }
 }
 
@@ -184,14 +189,16 @@ pub(crate) fn read_and_add_model_reference(cursor: &mut Cursor<&Vec<u8>>, model_
   let c = cursor.read_u8().expect("failed to read u8");
   if c == MODELREF_INDEX {
     panic!("unexpected MODELREF_INDEX when reading and adding model reference");
-  }  
+  } else if c == NULL {
+    panic!("unexpected NULL when reading and adding model reference");
+  }
   
   let mut model_id = read_model_id(cursor);
   let _model_name = read_string(cursor, my_strings);
   read_module_reference(cursor, my_strings);
   model_builder_cache.index_2_imported_model_uuid.insert(index.clone(), model_id.clone());
-  println!("......imported model: {} - {}", model_id, _model_name);
-  println!("......imported model reference added at index: {}", index);
+  log_debug!("......imported model: {} - {}", model_id, _model_name);
+  log_debug!("......imported model reference added at index: {}", index);
   return (model_id, _model_name);
 }
 
@@ -221,11 +228,11 @@ pub(crate) fn load_model_properties(cursor: &mut Cursor<&Vec<u8>>,
 
     //BinaryPersistence::loadUsedLanguages
     let used_languages_count = cursor.read_u16::<BigEndian>().expect("failed to read u16 used languages count");
-    println!("...languages count: {}", used_languages_count);
+    log_debug!("...languages count: {}", used_languages_count);
     for _ in 0..used_languages_count {
         let lang_id = read_uuid(cursor);
         let lang_name = read_string(cursor, my_strings);
-        println!("...used language: {} - {}", lang_id, lang_name);
+        log_debug!("...used language: {} - {}", lang_id, lang_name);
         // we do nothing with this information
     }
 
@@ -236,10 +243,13 @@ pub(crate) fn load_model_properties(cursor: &mut Cursor<&Vec<u8>>,
 
     //BinaryPersistence::loadImports
     let imports_count : u32 = cursor.read_u32::<BigEndian>().expect("failed to read u32 imports count");
-    println!("...imports count: {}", imports_count);
+    log_debug!("...imports count: {}", imports_count);
     for import_index in 0..imports_count {
         //TODO: FIXME we use "import_index + 1" since the first element is the current model
         read_and_add_model_reference(cursor, model_builder_cache, my_strings, (import_index + 1).to_string());
+        
+        // each import has "usedVersion"
+        cursor.read_i32::<BigEndian>();
     }
 
 }
@@ -247,7 +257,7 @@ pub(crate) fn load_model_properties(cursor: &mut Cursor<&Vec<u8>>,
 //BinaryPersistence::loadModuleRefList
 pub(crate) fn load_module_ref_list(cursor: &mut Cursor<&Vec<u8>>, my_strings: &mut Vec<String>) {
     let modules_ref_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 modules ref count");
-    println!("...modules ref count: {}", modules_ref_count);
+    log_debug!("...modules ref count: {}", modules_ref_count);
     for _ in 0..modules_ref_count {
         read_module_reference(cursor, my_strings)
     }
@@ -259,7 +269,7 @@ pub(crate) fn load_registry(cursor: &mut Cursor<&Vec<u8>>,
                              language_builder : &mut SLanguageBuilder,
                              language_id_to_slanguage: &mut HashMap<String, SLanguage>) {
     let lan_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 language count");
-    println!("...language count: {}", lan_count);
+    log_debug!("...language count: {}", lan_count);
     let mut concept_index: u32 = 0;
     let mut property_index: u32 = 0;
     let mut reference_link_index: u32 = 0;
@@ -269,10 +279,10 @@ pub(crate) fn load_registry(cursor: &mut Cursor<&Vec<u8>>,
         let lan_name = read_string(cursor, my_strings);
 
         let lang = get_or_build_language(&lan_id.to_string(), &lan_name.to_string(), language_id_to_slanguage);
-        println!("...language: {} - {}", lan_id, lan_name);
+        log_debug!("...language: {} - {}", lan_id, lan_name);
 
         let concept_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 concept count");
-        println!("...concept count: {}", concept_count);
+        log_debug!("...concept count: {}", concept_count);
         for _ in 0..concept_count {
             let concept_id = cursor.read_u64::<BigEndian>().expect("failed to read u64 concept id");
             let concept_name = read_string(cursor, my_strings);
@@ -280,39 +290,39 @@ pub(crate) fn load_registry(cursor: &mut Cursor<&Vec<u8>>,
             // not used
             let flags = cursor.read_u8().expect("failed to read u8 flags");
             let stub_token = cursor.read_u8().expect("failed to read u8 stubToken");
-            print!("...concept flags: 0x{:X}, stubToken: 0x{:X}", flags, stub_token);
+            log_debug!("...concept flags: 0x{:X}, stubToken: 0x{:X}", flags, stub_token);
 
             let full_concept_name = format!("{}.structure.{}", lan_name, concept_name);
             let conc = language_builder.get_or_create_concept(lang, concept_id.to_string().as_str(), full_concept_name.as_str());
             model_builder_cache.index_2_concept.insert(concept_index.to_string(), Rc::clone(&conc));
             concept_index += 1;
-            println!("......concept: {} - {}", conc.name, concept_name);
+            log_debug!("......concept: {} - {}", conc.name, concept_name);
 
             let property_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 property count");
-            println!("...property count: {}", property_count);
+            log_debug!("...property count: {}", property_count);
             for _ in 0..property_count {
                 let prop_id = cursor.read_u64::<BigEndian>().expect("failed to read u64 property id");
                 let prop_name = read_string(cursor, my_strings);
                 let _prop = language_builder.get_or_create_property(Rc::clone(&conc), prop_id.to_string(), prop_name);
                 model_builder_cache.index_2_property.insert(property_index.to_string(), Rc::clone(&_prop));
                 property_index += 1;
-                println!("......property: {} - {}", prop_id, _prop.name);
+                log_debug!("......property: {} - {}", prop_id, _prop.name);
             }
 
             let association_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 association count");
-            println!("...association count: {}", association_count);
+            log_debug!("...association count: {}", association_count);
             for _ in 0..association_count {
                 let link_id = cursor.read_u64::<BigEndian>().expect("failed to read u64 link id");
                 let link_name = read_string(cursor, my_strings);
                 let _link = language_builder.get_or_create_reference(Rc::clone(&conc), link_id.to_string(), link_name);
                 model_builder_cache.index_2_reference_link.insert(reference_link_index.to_string(), Rc::clone(&_link));
                 reference_link_index += 1;
-                println!("......property: {} - {}", link_id, _link.name);
+                log_debug!("......property: {} - {}", link_id, _link.name);
 
             }
 
             let aggregation_count : u16 = cursor.read_u16::<BigEndian>().expect("failed to read u16 aggregation count");
-            println!("...aggregation count: {}", aggregation_count);
+            log_debug!("...aggregation count: {}", aggregation_count);
             for _ in 0..aggregation_count {
                 let link_id = cursor.read_u64::<BigEndian>().expect("failed to read u64 link id");
                 let link_name = read_string(cursor, my_strings);
@@ -320,7 +330,7 @@ pub(crate) fn load_registry(cursor: &mut Cursor<&Vec<u8>>,
                 let _link = language_builder.get_or_create_child(Rc::clone(&conc), link_id.to_string(), link_name);
                 model_builder_cache.index_2_containment_link.insert(aggregation_link_index.to_string(), Rc::clone(&_link));
                 aggregation_link_index += 1;
-                println!("......aggregation link: {} - {}", link_id, _link.name);
+                log_debug!("......aggregation link: {} - {}", link_id, _link.name);
             }
         }
     }
@@ -354,6 +364,29 @@ pub(crate) fn read_model_header(cursor: &mut Cursor<&Vec<u8>>,
       crt_model = model_builder_cache.get_model(model_name.clone(), model_id.clone());    
       println!("...model: {} - {}", model_id, model_name);
       model_builder_cache.index_2_imported_model_uuid.insert("0".to_string(), model_id.clone());
+      
+      // nothing is expected here - but the mps implementation calls readModuleReference
+      read_module_reference(cursor, my_strings);
+
+
+      cursor.read_u32::<BigEndian>().expect("failed to read u32"); // comment from mps sources "//left for compatibility: old version was here"
+      let position = cursor.position();
+
+      let have_attributes = cursor.read_u8().expect("failed to read u8 haveAttributes");
+      log_debug!("...have attributes: 0x{:X}", have_attributes);
+      if have_attributes == HEADER_ATTRIBUTES {
+        cursor.read_u8().expect("failed to read u8"); // comment from mps sources "// just skip placeholder boolean value,"
+        let props_count = cursor.read_i16::<BigEndian>().expect("failed to read u16 properties count");
+        log_debug!("...model properties count: {}", props_count);
+        for _ in 0..props_count {
+            let key = read_string(cursor, my_strings);
+            let value = read_string(cursor, my_strings);
+            log_debug!("...property: {} - {}", key, value);
+        }
+      } else {
+        cursor.set_position(position);
+      }
+
 
       advance_cursor_until_after(cursor, HEADER_END);
 

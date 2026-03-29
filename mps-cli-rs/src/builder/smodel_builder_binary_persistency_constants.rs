@@ -3,6 +3,7 @@
 // https://github.com/JetBrains/MPS/blob/f9075b2832077358fd85a15a52bba76a9dad07a3/core/persistence/source/jetbrains/mps/persistence/binary/BinaryPersistence.java
 pub const HEADER_START : u32 = 0x91ABABA9;
 pub const HEADER_END : u32   = 0xabababab;
+pub const HEADER_ATTRIBUTES : u8 = 0x7e;
 pub const STREAM_ID_V2 : u32 = 0x00000400;
 pub const STREAM_ID : u32   = STREAM_ID_V2;
 
