@@ -107,7 +107,7 @@ class SSolutionsRepositoryBuilder:
         start = timer()
         for path in paths:
             if not os.path.exists(path):
-                print("ERROR: path", path, "does not exist!")
+                warnings.warn(f"Path not found: {path}")
                 continue
             if not os.path.isdir(path):
                 print("ERROR: path", path, "is not a directory!")

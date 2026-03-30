@@ -1,11 +1,11 @@
 """
-demo.py — Quick local test for the binary parser.
+demo.py — A quick local test for the binary parser.
 
 Points at a local MPS project directory and prints a summary of what was parsed.
 Edit PLUGINS_PATH below to point at either MPS plugins folder or a test project.
 
 Two modes:
-    MODE = "plugins": parse a full MPS plugins directory (e.g. C:\\Temp\\plugins)
+    MODE = "plugins": parse a full MPS plugins directory (e.g. C:\Temp\plugins)
     MODE = "test_project": parse a single mps_test_projects directory (original behaviour)
 """
 
@@ -66,7 +66,7 @@ def print_node(node, depth: int = 0, max_depth: int = 3) -> None:
 
     # node headline: bullet + concept + role slot + name in quotes + id in brackets
     role_tag = f" [{role}]" if role else ""
-    name_tag = f"  “{name}”" if name else ""
+    name_tag = f"  '{name}'" if name else ""
     print(f"{pad}\u2022 {cname}{role_tag}{name_tag}  [{uid}]")
 
     # other properties (name alreadyy shown inline above)
@@ -80,11 +80,11 @@ def print_node(node, depth: int = 0, max_depth: int = 3) -> None:
         model_u = str(getattr(ref, "model_uuid", "") or "")
         if model_u.startswith("java:"):
             # java stuub reference — show class name from resolve_info
-            print(f"{pad}    {k} → {resolve} (Java)")
+            print(f"{pad}    {k} -> {resolve} (Java)")
         else:
             # mps model reference — show uuid + resolve hint
             hint = f" ({resolve})" if resolve else ""
-            print(f"{pad}    {k} → {model_u[:36]}{hint}")
+            print(f"{pad}    {k} -> {model_u[:36]}{hint}")
 
     for child in node.children or []:
         print_node(child, depth + 1, max_depth)
@@ -184,7 +184,7 @@ def main() -> None:
     )
 
     summary = (
-        f"\n=== Repository Summary ===\n"
+        f"\n***Repository Summary***\n"
         f"  Solutions : {len(repo.solutions)}\n"
         f"  Languages : {len(repo.languages)}\n"
         f"  Models    : {total_models}\n"
@@ -234,7 +234,7 @@ if __name__ == "__main__":
 
     multiprocessing.freeze_support()
 
-    # redirect stdout to a log file; timing/summary also echoed to stderr (console)
+    # redirect stdout to a log file
     log_file = f"mps_debug_{datetime.now().strftime('%H%M%S')}.log"
     sys.stdout = open(log_file, "w", encoding="utf-8", buffering=1)
     print(f"Logging to: {log_file}")
