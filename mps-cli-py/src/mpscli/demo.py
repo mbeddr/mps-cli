@@ -5,7 +5,7 @@ Points at a local MPS project directory and prints a summary of what was parsed.
 Edit PLUGINS_PATH below to point at either MPS plugins folder or a test project.
 
 Two modes:
-    MODE = "plugins": parse a full MPS plugins directory (e.g. C:\Temp\plugins)
+    MODE = "plugins": parse a full MPS plugins directory (e.g. C:\\Temp\\plugins)
     MODE = "test_project": parse a single mps_test_projects directory (original behaviour)
 """
 
