@@ -27,16 +27,18 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
                    loadUsedLanguagesV2  (u16 count, each is uuid + string)
                    loadModuleRefList    (engaged languages)
                    loadModuleRefList    (devkits)
-                   loadImports V2       (u32 count, each is model_ref + i32 version)
+                   loadImports V2  (u32 count, each is model_ref + i32 version)
                V3:
                    readByte DEPENDENCY_V1 (0x01)
-                   loadUsedLanguagesV3    (u16 count, each is readLanguage + i32 version)
+                   loadUsedLanguagesV3 (u16 count, each is readLanguage + i32 version)
                    loadEngagedLanguages   (u16 count, each is readLanguage)
                    loadModuleRefList      (devkits)
-                   loadImports V3         (u32 count, each is model_ref)
+                   loadImports V3  (u32 count, each is model_ref)
         4. MODEL_START marker
         5. Node tree
     """
+
+    # TODO - check if V2 format support is really needed or already obsolete
 
     def __init__(self):
         super().__init__()
