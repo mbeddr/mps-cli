@@ -228,6 +228,14 @@ def main() -> None:
         for model in sol.models:
             print_model(model, max_roots=3, max_depth=3)
 
+    print("\n=== Languages ===")
+    for lan in repo.languages:
+        if not lan.concepts:
+            continue
+        print(f"Language : {lan.name}")
+        print(f"{'='*60}")
+        for c in lan.concepts:
+            c.print_concept_details()
 
 if __name__ == "__main__":
     import multiprocessing
