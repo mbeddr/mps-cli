@@ -1,5 +1,5 @@
 """
-demo.py — A quick local test for the binary parser.
+demo.py - A quick local test for the binary parser.
 
 Points at a local MPS project directory and prints a summary of what was parsed.
 Edit PLUGINS_PATH below to point at either MPS plugins folder or a test project.
@@ -69,7 +69,7 @@ def print_node(node, depth: int = 0, max_depth: int = 3) -> None:
     name_tag = f"  '{name}'" if name else ""
     print(f"{pad}\u2022 {cname}{role_tag}{name_tag}  [{uid}]")
 
-    # other properties (name alreadyy shown inline above)
+    # other properties (name already shown inline above)
     for k, v in sorted((node.properties or {}).items()):
         if k != "name":
             print(f"{pad}    {k} = {v!r}")
@@ -79,10 +79,10 @@ def print_node(node, depth: int = 0, max_depth: int = 3) -> None:
         resolve = getattr(ref, "resolve_info", None) or ""
         model_u = str(getattr(ref, "model_uuid", "") or "")
         if model_u.startswith("java:"):
-            # java stuub reference — show class name from resolve_info
+            # java stub reference - show class name from resolve_info
             print(f"{pad}    {k} -> {resolve} (Java)")
         else:
-            # mps model reference — show uuid + resolve hint
+            # mps model reference - show uuid + resolve hint
             hint = f" ({resolve})" if resolve else ""
             print(f"{pad}    {k} -> {model_u[:36]}{hint}")
 
@@ -156,6 +156,49 @@ def verify_model(model) -> dict:
     return checks
 
 
+def print_languages(repo) -> None:
+    # split languagess into two groups so basically those with aspect models loaded (mpl was actuallyy found) and
+    # those without (maybe only seen via registry during .mpb parsing)
+    with_models = [l for l in repo.languages if l.models]
+    without_models = [l for l in repo.languages if not l.models]
+
+    print(f"\n*** Languages ({len(repo.languages)} total) ***")
+    print(f"  with aspect models loaded - {len(with_models)}")
+    print(f"  Registry-only (no .mpl found) : {len(without_models)}")
+
+    if with_models:
+        print("\n  ---Languages with aspect models ----")
+        for lang in sorted(with_models, key=lambda l: l.name):
+            aspect_names = ", ".join(
+                m.name.split(".")[-1] for m in lang.models if m.name
+            )
+            print(f"  \u2022 {lang.name}")
+            print(f"  version : {lang.language_version}")
+            print(f"  uuid    : {lang.uuid}")
+            print(f"  aspects : {aspect_names}")
+            print(f"  concepts (registry): {len(lang.concepts)}")
+
+            # show rooot node countt per aspect to verify .mpb parsing actually worked
+            for m in lang.models:
+                aspect = m.name.split(".")[-1] if m.name else "?"
+                root_count = len(m.root_nodes)
+                print(f"[{aspect}] {root_count} roots")
+
+                if "structure" in (m.name or "") and root_count > 0:
+                    concept_names = [
+                        r.properties.get("name", "")
+                        for r in m.root_nodes[:5]
+                        if r.properties.get("name")
+                    ]
+                    if concept_names:
+                        print(f"sample concepts: {', '.join(concept_names)}")
+
+    if without_models:
+        print("\n  ---- Registry-only languages (no aspect models) ---")
+        for lang in sorted(without_models, key=lambda l: l.name):
+            print(f"  \u2022 {lang.name}  ({len(lang.concepts)} concepts)")
+
+
 def main() -> None:
     path = PLUGINS_PATH if MODE == "plugins" else TEST_PROJECT
 
@@ -215,10 +258,13 @@ def main() -> None:
     sys.stderr.write(f"\n{verdict}\n")
     sys.stderr.flush()
 
+    # language extension verification - shows whether .mpl reading worked
+    print_languages(repo)
+
     print("\n=== Solutions ===")
     for sol in repo.solutions:
         if not sol.models:
-            # skip language-only JARs with no models to show
+            # skip language-only jars with no models to show
             continue
         sol_nodes = sum(sum(count_nodes(r) for r in m.root_nodes) for m in sol.models)
         print(f"\n{'='*60}")

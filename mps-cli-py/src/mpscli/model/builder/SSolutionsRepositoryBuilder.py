@@ -85,6 +85,17 @@ def _jar_has_msd(jar_path: Path) -> bool:
         return False
 
 
+def _jar_is_relevant(jar_path: Path) -> bool:
+    # a jar is worth extracting if it contains either a solution descriptorr which is .msd file or a
+    # language descriptor which is .mpl file
+    try:
+        with zipfile.ZipFile(jar_path) as zf:
+            names = zf.namelist()
+            return any(name.endswith(".msd") or name.endswith(".mpl") for name in names)
+    except Exception:
+        return False
+
+
 class SSolutionsRepositoryBuilder:
 
     # number of threads for parallel jar processing.  None = auto (up to 16).
@@ -149,7 +160,7 @@ class SSolutionsRepositoryBuilder:
           2. Extract to a private temp directory.
           3. collect_solutions_from_sources() on the temp dir
           4. Delete the temp dir unconditionally.
-        now all jars are processed concurrently via a ThreadPoolExecutor.
+            now all jars are processed concurrently via a ThreadPoolExecutor
         """
         jar_paths = list(Path(path).rglob("*.jar"))
         if not jar_paths:
@@ -158,8 +169,8 @@ class SSolutionsRepositoryBuilder:
         workers = self.JAR_THREADS or min(os.cpu_count() or 4, 16)
 
         def _process_jar(jar_path: Path):
-            # cheap peek: skip jarss with no .msd
-            if not _jar_has_msd(jar_path):
+            # cheap peek - skip jars with neither a .msd nor .mpl file
+            if not _jar_is_relevant(jar_path):
                 return
 
             # extract to an isolated temp directory
@@ -171,8 +182,12 @@ class SSolutionsRepositoryBuilder:
                 # print just the jar name
                 print(f"extracting: {jar_path.name}")
 
-                # scan and parse
+                # scan and also parse solutions (.msd and modelss)
                 self.collect_solutions_from_sources(extract_dir)
+
+                # read any .mpl files to populate SLanguage objects with version and aspect models
+                for mpl_file in extract_dir.rglob("*.mpl"):
+                    SLanguageBuilder.load_from_mpl(mpl_file)
 
             finally:
                 # always clean up

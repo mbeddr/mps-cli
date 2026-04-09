@@ -142,7 +142,7 @@ class TestBinaryPersistencyLowLevelAccess(TestBase):
     def test_invalid_reference_model_kind_handled_gracefully(self):
         # model_kind = 9 is unknown
         # _read_reference handles unknown model_kind by reading the resolve_info string and
-        # returning a (ref_name, placeholder) so no exception raised.
+        # returning a (ref_name, placeholder) so no exception is raised.
         data = bytearray()
         # props_count = 0
         data.extend((0).to_bytes(2, "big"))
