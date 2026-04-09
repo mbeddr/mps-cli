@@ -16,11 +16,6 @@ def _build_repo():
 
 
 class TestCrossModelReferenceResolution(unittest.TestCase):
-    """
-    The person reference in library_top (Tom Sawyer → Mark Twain) must
-    resolve to the correct Person node in the authors_top model.
-    """
-
     def setUp(self):
         self.repo = _build_repo()
         lib = self.repo.find_model_by_name(LIB_MODEL_NAME)
@@ -28,7 +23,8 @@ class TestCrossModelReferenceResolution(unittest.TestCase):
         munich = next(
             r for r in lib.root_nodes if r.get_property("name") == "munich_library"
         )
-        book = munich.get_children("entities")[0]  # Tom Sawyer
+        # Tom Sawyer
+        book = munich.get_children("entities")[0]
         authors = book.get_children("authors")
         self.assertGreater(len(authors), 0)
         self.ref = authors[0].get_reference("person")
