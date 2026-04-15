@@ -1,16 +1,22 @@
 import unittest
 
-from mpscli.model.builder.NodeIdEncodingUtils import NodeIdEncodingUtils
+from mpscli.model.builder.utils.NodeIdEncodingUtils import NodeIdEncodingUtils
 
 
-class TestStringUtils(unittest.TestCase):
+class TestNodeIdEncodingUtils(unittest.TestCase):
 
-    def test_string_utils(self):
-        """
-        Test the StringUtils
-        """
-        su = NodeIdEncodingUtils()
-        self.assertEqual(5731700211660045982, su.decode_string('4Yb5JA31NUu'))
+    def setUp(self):
+        self.utils = NodeIdEncodingUtils()
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_decode(self):
+        self.assertEqual("5731700211660045983", self.utils.decode("4Yb5JA31NUv"))
+
+    def test_encode(self):
+        self.assertEqual("4Yb5JA31NUv", self.utils.encode("5731700211660045983"))
+
+    def test_round_trip(self):
+        original = "5731700211660045983"
+        encoded = self.utils.encode(original)
+        decoded = self.utils.decode(encoded)
+
+        self.assertEqual(original, decoded)

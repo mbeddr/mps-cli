@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MPSProject">
+    <projectModules>
+      <modulePath path="$PROJECT_DIR$/solutions/mps.cli.lanuse.library_second.binary_persistency/mps.cli.lanuse.library_second.binary_persistency.msd" folder="" />
+      <modulePath path="$PROJECT_DIR$/solutions/mps.cli.lanuse.library_top.binary_persistency/mps.cli.lanuse.library_top.binary_persistency.msd" folder="" />
+      <modulePath path="$PROJECT_DIR$/solutions/mps_cli_lanuse_binary_persistency.build/mps_cli_lanuse_binary_persistency.build.msd" folder="" />
+      <modulePath path="$PROJECT_DIR$/../mps_cli_landefs/languages/mps.cli.landefs.library/mps.cli.landefs.library.mpl" folder="" />
+      <modulePath path="$PROJECT_DIR$/../mps_cli_landefs/languages/mps.cli.landefs.people/mps.cli.landefs.people.mpl" folder="" />
+    </projectModules>
+  </component>
+</project>

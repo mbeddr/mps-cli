@@ -1,4 +1,3 @@
-
 class SConcept:
 
     def __init__(self, name, uuid):

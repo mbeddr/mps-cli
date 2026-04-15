@@ -1,3 +1,8 @@
+# --- VS Code Shared Settings ---
+**/.vscode/*
+!mps-cli-py/.vscode/settings.json
+!mps-cli-py/.vscode/extensions.json
+
 **/.idea/
 **/.gradle/
 **/build/
