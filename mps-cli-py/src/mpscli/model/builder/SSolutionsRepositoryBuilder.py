@@ -20,20 +20,6 @@ from mpscli.model.builder.utils.ModelCache import ModelCache
 from mpscli.model.builder.utils.JarUtils import jar_is_relevant
 
 
-def _jar_is_relevant(jar_path: Path) -> bool:
-    # peek inside a zip/jar to check for .msd or .mpl files without extracting where only the ZIP
-    # central directory is read
-    # A jar is worth extracting if it contains:
-    # .msd - solution descriptor
-    # .mpl - language descriptor
-    try:
-        with zipfile.ZipFile(jar_path) as zf:
-            names = zf.namelist()
-            return any(name.endswith(".msd") or name.endswith(".mpl") for name in names)
-    except Exception:
-        return False
-
-
 class SSolutionsRepositoryBuilder:
 
     # number of threads for parallel jar processing
