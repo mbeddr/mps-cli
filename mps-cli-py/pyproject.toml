@@ -4,10 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mps-cli"
-version = "0.5.0"
+version = "0.6.0"
 authors = [
   { name="Daniel Ratiu", email="ratiud@googlemail.com" },
   { name="Prithvi Venkat", email="prithvi.rvce@gmail.com" },
+  { name="Michael Langhammer", email="mich.langhammer@googlemail.com" },
 ]
 description = "MPS Command Line Interface (MPS-CLI) is a library to parse MPS files and build the model as Python objects."
 readme = "README.md"
