@@ -43,6 +43,16 @@ class TestLanguageFromMpl(unittest.TestCase):
         uuid = self.tips_lang.uuid
         self.assertIsNotNone(uuid)
         self.assertNotEqual(uuid, "")
+        self.assertRegex(
+            uuid,
+            r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            f"Language uuidd should be a plain uuid but got: {uuid!r}",
+        )
+        self.assertEqual(
+            "feee615f-9f2b-486f-804f-8987b652fcea",
+            uuid,
+            "build.tips language UUID does not match the expected value for MPS 2024.1",
+        )
 
     def test_language_version_is_integer(self):
         self.assertIsInstance(self.tips_lang.language_version, int)
@@ -72,7 +82,3 @@ class TestLanguageFromMpl(unittest.TestCase):
             concept_names,
             "MPSTipsAndTricks concept should appear in structure aspect roots",
         )
-
-
-if __name__ == "__main__":
-    unittest.main()

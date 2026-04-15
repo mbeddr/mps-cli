@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "ms-python.python",            // main Python support
+        "ms-python.black-formatter",    // the formatter you just configured
+    ]
+}

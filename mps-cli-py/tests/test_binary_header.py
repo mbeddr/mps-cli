@@ -34,7 +34,3 @@ class TestHeader(unittest.TestCase):
     def test_self_import_at_index_0(self):
         # import[0] always holds the model's own uuid
         self.assertEqual(MODEL_UUID, self.builder.index_2_imported_model_uuid["0"])
-
-
-if __name__ == "__main__":
-    unittest.main()

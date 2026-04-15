@@ -93,7 +93,7 @@ class TestNodeTree(unittest.TestCase):
         for node in _all_nodes(self.model):
             self.assertFalse(
                 node.uuid.isdigit(),
-                f"uuid {node.uuid!r} looks like a raw integer — encoding not applied",
+                f"uuid {node.uuid!r} looks like a raw integer - encoding not applied",
             )
 
     def test_all_nodes_have_dict_properties(self):
@@ -124,7 +124,3 @@ class TestNodeTree(unittest.TestCase):
         # SModel.get_node_by_uuid() uses dict[key] and raises KeyError for missing keys
         with self.assertRaises(KeyError):
             self.model.get_node_by_uuid("dummy_uuid")
-
-
-if __name__ == "__main__":
-    unittest.main()

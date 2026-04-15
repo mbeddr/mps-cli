@@ -1,14 +1,46 @@
 from mpscli.model.builder.binary.model_input_stream import ModelInputStream
+from mpscli.model.builder.binary.constants import (
+    REGISTRY_START,
+    REGISTRY_END,
+    STUB_NONE,
+    STUB_ID,
+)
 from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 
 
 def load_registry(reader: ModelInputStream, builder) -> None:
-    REGISTRY_START = ModelInputStream.REGISTRY_START
-    REGISTRY_END = ModelInputStream.REGISTRY_END
-    # 0x12
-    STUB_NONE = ModelInputStream.STUB_NONE
-    # 0x13
-    STUB_ID = ModelInputStream.STUB_ID
+    # mirrors BinaryPersistence.loadRegistry() in:
+    # https://github.com/JetBrains/MPS/blob/6236c4073eac3cde78506add6b0fa90601d76009/core/persistence/source/jetbrains/mps/persistence/binary/BinaryPersistence.java
+    #
+    # Purpose: Reads the REGISTRY_START to REGISTRY_END section and builds four index maps from sequential
+    # write-position integers to concept/property/reference/child objects and thesee indices are used throughout the
+    # node tree so that each node only needs to write a small u16 index rather than repeating full concept and property
+    # names on every node.
+    #
+    # Java uses four parallel int counters (conceptIndex, propertyIndex, associationIndex, aggregationIndex) that
+    # increment as each entry is written and on read the same counterss are used to reconstruct the index and
+    # Python mirrors this exactly with four local counters..
+    #
+    # Java builds live SConcept/SProperty/SReferenceLink/SContainmentLink objects via MetaAdapterFactory and
+    # stores them in TIntObjectHashMap<T> (Trove, O(1) int keyed).
+    # Python builds lightweight name/id wrapper objects via SLanguageBuilder and stores them in plain dicts which
+    # is semantically identical and sufficient for CLI extraction.
+    #
+    # Per-language binary layout explained below (same in V2 and V3) -
+    #   u16  lang_count
+    #   per language:
+    #    2xu64 SLanguageId UUID - (Java: os.writeUUID(ul.getLanguageId().getIdValue()))
+    #    string language name
+    #    u16 concept_count
+    #    per concept:
+    #       u64 concept id - (Java: os.writeLong(ci.getConceptId().getIdValue()))
+    #       string short name - (Java: os.writeString(ci.getBriefName()))
+    #       u8 flags byte - (ConceptKind<<4 | StaticScope | 0x80 if interface)
+    #       u8 stub token - STUB_NONE(0x12) or STUB_ID(0x13)
+    #       [u64 stub concept id] - only if stub token == STUB_ID
+    #       u16 property_count - per prop:  u64 id + string name
+    #       u16 association_count - per assoc: u64 id + string name
+    #       u16 aggregation_count - per agg: u64 id + string name + bool unordered
 
     token = reader.read_u32()
     if token != REGISTRY_START:
@@ -23,7 +55,7 @@ def load_registry(reader: ModelInputStream, builder) -> None:
 
     lang_count = reader.read_u16()
     for lang_i in range(lang_count):
-        # SLanguageId.getIdValue() = UUID
+        # SLanguageId.getIdValue() = UUID written as 2xu64
         language_uuid = reader.read_uuid()
         language_name = reader.read_string()
         language = SLanguageBuilder.get_language(language_name, language_uuid)
@@ -31,21 +63,21 @@ def load_registry(reader: ModelInputStream, builder) -> None:
         concept_count = reader.read_u16()
 
         for _ in range(concept_count):
-            # concept id is written as writeLong(ci.getConceptId().getIdValue())
+            # concept id written as writeLong(ci.getConceptId().getIdValue())
             concept_id_raw = reader.read_u64()
             concept_id = str(concept_id_raw)
 
             short_name = reader.read_string()
+            # Java reconstructs the fqn via NameUtil.conceptFQNameFromNamespaceAndShortName(langName, shortName)
+            # which produces "langName.structure.shortName" amd we replicate that here..
             full_name = f"{language_name}.structure.{short_name}"
 
             flags = reader.read_u8()
 
             stub_token = reader.read_u8()
             if stub_token == STUB_NONE:
-                # no stub
                 pass
             elif stub_token == STUB_ID:
-                # discard stub concept id
                 reader.read_u64()
             else:
                 raise RuntimeError(
@@ -61,7 +93,7 @@ def load_registry(reader: ModelInputStream, builder) -> None:
             # properties
             prop_count = reader.read_u16()
             for _ in range(prop_count):
-                reader.read_u64()  # property id
+                reader.read_u64()  # property id (discarded - we use name only)
                 name = reader.read_string()
                 prop = SLanguageBuilder.get_property(concept, name)
                 builder.index_2_property[property_index] = prop
@@ -70,20 +102,17 @@ def load_registry(reader: ModelInputStream, builder) -> None:
             # associations (reference links)
             assoc_count = reader.read_u16()
             for _ in range(assoc_count):
-                # association id
-                reader.read_u64()
+                reader.read_u64()  # association id (discarded - we use name only)
                 name = reader.read_string()
                 ref = SLanguageBuilder.get_reference(concept, name)
                 builder.index_2_reference_role[reference_index] = ref
                 reference_index += 1
 
-            # aggregations (containment links/children)
+            # aggregations (containment links/child roles)
             agg_count = reader.read_u16()
             for _ in range(agg_count):
-                # aggregation id
                 reader.read_u64()
                 name = reader.read_string()
-                # unordered flag
                 reader.read_bool()
                 child = SLanguageBuilder.get_child(concept, name)
                 builder.index_2_child_role_in_parent[child_index] = child

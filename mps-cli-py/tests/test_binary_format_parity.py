@@ -69,7 +69,3 @@ class TestBinaryParityWithOtherFormats(TestBase):
             "mps.cli.lanuse.library_top.default_persistency.authors_top",
         )
         self.assertEqual(AUTHORS_ROOT_UUID, dp.uuid)
-
-
-if __name__ == "__main__":
-    unittest.main()

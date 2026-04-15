@@ -20,12 +20,6 @@ class TestBinaryRepository(unittest.TestCase):
     def setUp(self):
         self.repo = _build_repo()
 
-    def test_repo_not_none(self):
-        self.assertIsNotNone(self.repo)
-
-    def test_has_solutions(self):
-        self.assertGreater(len(self.repo.solutions), 0)
-
     def test_library_top_solution_exists(self):
         self.assertIsNotNone(self.repo.find_solution_by_name(SOLUTION_NAME))
 
@@ -42,8 +36,11 @@ class TestBinaryRepository(unittest.TestCase):
     def test_no_placeholder_uuids(self):
         for sol in self.repo.solutions:
             for model in sol.models:
-                self.assertNotEqual("r:unknown", model.uuid)
-                self.assertTrue(model.uuid.startswith("r:"))
+                self.assertRegex(
+                    model.uuid,
+                    r"^r:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    f"Model UUID {model.uuid!r} is a placeholdder or not in 'r:uuid' format",
+                )
 
     def test_library_language_present(self):
         self.assertIsNotNone(self.repo.find_language_by_name("mps.cli.landefs.library"))
@@ -53,7 +50,3 @@ class TestBinaryRepository(unittest.TestCase):
 
     def test_lang_core_present(self):
         self.assertIsNotNone(self.repo.find_language_by_name("jetbrains.mps.lang.core"))
-
-
-if __name__ == "__main__":
-    unittest.main()

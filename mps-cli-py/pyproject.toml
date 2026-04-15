@@ -23,3 +23,7 @@ classifiers = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mpscli"]
+
+[tool.black]
+line-length = 88
+target-version = ['py37']

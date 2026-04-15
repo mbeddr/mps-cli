@@ -6,12 +6,20 @@ from tests.test_base import TestBase
 
 class TestModelAttributes(TestBase):
 
-    @parameterized.expand([('mps_cli_lanuse_model_attributes',
-                            'mps_cli_lanuse_model_attributes',
-                            'mps_cli_lanuse_model_attributes.default_generation',
-                            'mps_cli_lanuse_model_attributes.disable_generation',
-                            'mps_cli_lanuse_model_attributes.enable_generation')])
-    def test_model_attributes(self, test_data_location, solution_name, first_model, second_model, third_model):
+    @parameterized.expand(
+        [
+            (
+                "mps_cli_lanuse_model_attributes",
+                "mps_cli_lanuse_model_attributes",
+                "mps_cli_lanuse_model_attributes.default_generation",
+                "mps_cli_lanuse_model_attributes.disable_generation",
+                "mps_cli_lanuse_model_attributes.enable_generation",
+            )
+        ]
+    )
+    def test_model_attributes(
+        self, test_data_location, solution_name, first_model, second_model, third_model
+    ):
         """
         Test the building of modules and models
         """
@@ -32,6 +40,3 @@ class TestModelAttributes(TestBase):
         model = self.repo.find_model_by_name(third_model)
         self.assertNotEqual(None, model)
         self.assertFalse(model.is_do_not_generate)
-
-if __name__ == '__main__':
-    unittest.main()

@@ -28,7 +28,3 @@ class TestImports(unittest.TestCase):
                     uid.startswith("r:"),
                     f"Import[{key}]={uid!r} does not start with 'r:'",
                 )
-
-
-if __name__ == "__main__":
-    unittest.main()

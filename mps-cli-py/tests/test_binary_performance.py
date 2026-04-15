@@ -18,7 +18,3 @@ class TestParserPerformance(unittest.TestCase):
         SModelBuilderBinaryPersistency().build(MPB)
         elapsed = time.perf_counter() - t0
         self.assertLess(elapsed, 2.0, f"Parsing took {elapsed:.2f}s, limit is 2s")
-
-
-if __name__ == "__main__":
-    unittest.main()

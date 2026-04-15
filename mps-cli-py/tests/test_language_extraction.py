@@ -8,17 +8,16 @@ class TestLanguageExtraction(TestBase):
 
     @parameterized.expand(
         [
-            "mps_cli_lanuse_file_per_root",
-            "mps_cli_lanuse_default_persistency",
-            "mps_cli_lanuse_binary",
+            ("mps_cli_lanuse_file_per_root", 3),
+            ("mps_cli_lanuse_default_persistency", 3),
+            ("mps_cli_lanuse_binary", 3),
+            ("mps_cli_binary_persistency_generated", 4),
         ]
     )
-    def test_languages_and_concepts(self, test_data_location):
-        """
-        Test the building of languages and concepts
-        """
+    def test_languages_and_concepts(self, test_data_location, expected_language_count):
         self.doSetUp(test_data_location)
-        self.assertEqual(3, len(self.repo.languages))
+        self.assertEqual(expected_language_count, len(self.repo.languages))
+
         mps_lang_core = self.repo.find_language_by_name("jetbrains.mps.lang.core")
         self.assertIsNotNone(mps_lang_core)
         landefs_library = self.repo.find_language_by_name("mps.cli.landefs.library")
@@ -42,7 +41,3 @@ class TestLanguageExtraction(TestBase):
         )
         self.assertEqual(["publicationDate"], book_concept.properties)
         self.assertEqual(["authors"], book_concept.children)
-
-
-if __name__ == "__main__":
-    unittest.main()

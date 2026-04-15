@@ -83,7 +83,3 @@ class TestLibraryTopModel(unittest.TestCase):
                 self.assertIs(root, child.parent)
                 for grandchild in child.children:
                     self.assertIs(child, grandchild.parent)
-
-
-if __name__ == "__main__":
-    unittest.main()

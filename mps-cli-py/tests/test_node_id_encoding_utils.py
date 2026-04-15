@@ -1,6 +1,6 @@
 import unittest
 
-from mpscli.model.builder.binary.node_id_utils import NodeIdEncodingUtils
+from mpscli.model.builder.utils.NodeIdEncodingUtils import NodeIdEncodingUtils
 
 
 class TestNodeIdEncodingUtils(unittest.TestCase):
