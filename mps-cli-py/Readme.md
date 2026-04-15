@@ -4,7 +4,7 @@ This project provides a Python library which parses MPS files and builds the obj
 
 ### Features
 The following features are available:
-- load MPS files (*.mpsr, *.mps, *.jar) and expose their content as Python object model 
+- load MPS files (*.mpsr, *.mps, *.mpb, *.jar) and expose their content as Python object model 
   - solutions, models, root nodes, nodes, children, references, properties
 - extract the meta-information and expose it as Python object model
   - list of languages, their concepts with information about properties, references, children
@@ -18,6 +18,7 @@ The core of the Python object model is given by the following classes:
 ### Limitations
 The library has currently the following limitations:
 - the recovered language information reflects only the used language in the loaded solutions
+  - if "mps/plugins" directory is considered the language information is loaded as an object model
 
 ### Run tests
 

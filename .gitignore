@@ -25,3 +25,4 @@ gradle.properties
 **/workspace.xml
 **/misc.xml
 **/__pycache__/
+**/.DS_Store
