@@ -17,6 +17,7 @@ from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 from mpscli.model.builder.SSolutionBuilder import SSolutionBuilder
 from mpscli.model.builder.utils.MpbBatchParser import MpbBatchParser
 from mpscli.model.builder.utils.ModelCache import ModelCache
+from mpscli.model.builder.utils.JarUtils import jar_is_relevant
 
 
 def _jar_is_relevant(jar_path: Path) -> bool:
@@ -115,7 +116,7 @@ class SSolutionsRepositoryBuilder:
 
     def _process_jar(self, jar_path: Path) -> None:
         # cheap peek - skip jars with neither a .msd nor .mpl file
-        if not _jar_is_relevant(jar_path):
+        if not jar_is_relevant(jar_path):
             return
         # extract to an isolated temp directory
         extract_dir = jar_path.parent / jar_path.name.replace(".", "_")
