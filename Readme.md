@@ -13,7 +13,7 @@ This repository contains tooling for reading MPS models from command line - with
 - `mps-cli-gradle-plugin` - the gradle plugin to read MPS models
 - `mps-cli-py` - a Python library to read MPS models
 - `mps-cli-ts` - a Typescript library to read MPS models 
-- `mps-cli-ts` - a Rust library to read MPS models
+- `mps-cli-rs` - a Rust library to read MPS models
 - `demos` - examples for the use of the MPS-CLI tooling 
   - `gradle-plugin-use` - example of the use of the `mps-cli-gradle-plugin` 
   - `jupyter-notebook` - example of the use of the `mps-cli-py` library in a Jupyter Notebook
