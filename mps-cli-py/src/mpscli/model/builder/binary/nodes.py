@@ -201,8 +201,9 @@ def _read_other_model_ref(reader, builder):
             model_id = uuid_str(uuid[0], uuid[1])
             # model long name
             reader.read_string()
-            # stereotype (null in practice)
-            reader.read_string()
+            # declaring module ref - Java's https://github.com/JetBrains/MPS/blob/6236c4073eac3cde78506add6b0fa90601d76009/core/kernel/source/jetbrains/mps/util/io/ModelInputStream.java
+            # calls readModuleReference() heree and not a second string
+            _read_module_ref(reader)
 
         elif sub == MODELID_FOREIGN:
             # foreign model id, ex: "java:java.lang"
