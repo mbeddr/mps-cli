@@ -1,8 +1,6 @@
 import sys
 import unittest
 
-sys.path.insert(1, "../..")
-
 from mpscli.model.builder.SModelBuilderBinaryPersistency import (
     SModelBuilderBinaryPersistency,
 )
@@ -49,7 +47,3 @@ class TestCrossModuleModelRef(unittest.TestCase):
             0,
             "migration model should have at least one root node",
         )
-
-
-if __name__ == "__main__":
-    unittest.main()
