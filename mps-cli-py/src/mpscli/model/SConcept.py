@@ -1,3 +1,8 @@
+import logging
+
+_log = logging.getLogger(__name__)
+
+
 class SConcept:
 
     def __init__(self, name, uuid):
@@ -8,14 +13,14 @@ class SConcept:
         self.references = []
 
     def print_concept_details(self):
-        print("concept: " + self.name)
-        print("\tproperties: ")
+        _log.debug("concept: %s", self.name)
+        _log.debug("\tproperties: ")
         for property in self.properties:
-            print("\t\t" + property)
-        print("\tchildren: ")
+            _log.debug("\t\t%s", property)
+        _log.debug("\tchildren: ")
         for child in self.children:
-            print("\t\t" + child)
-        print("\treferences: ")
+            _log.debug("\t\t%s", child)
+        _log.debug("\treferences: ")
         for reference in self.references:
-            print("\t\t" + reference)
-        print("<<<")
+            _log.debug("\t\t%s", reference)
+        _log.debug("<<<")

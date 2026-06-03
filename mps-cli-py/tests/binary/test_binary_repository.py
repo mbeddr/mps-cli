@@ -11,8 +11,9 @@ AUTH_MODEL_NAME = "mps.cli.lanuse.library_top.binary_persistency.authors_top"
 
 
 def _build_repo():
+    # set as class variable before construction so __init__ sees it and skips ParseCache
+    SSolutionsRepositoryBuilder.USE_CACHE = False
     builder = SSolutionsRepositoryBuilder()
-    builder.USE_CACHE = False
     return builder.build(REPO_PATH)
 
 

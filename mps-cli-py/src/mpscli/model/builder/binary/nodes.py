@@ -51,11 +51,11 @@ def read_children(reader, builder, model, parent=None):
         node = read_node(reader, builder, model, parent)
 
         if parent is None:
-            model.root_nodes.append(node)
-        else:
-            parent.children.append(node)
+            # register as root.. parent-child links are derived from parent_idxs during finalize
+            model._root_idxs.append(node._idx)
 
-    return model.root_nodes if parent is None else parent.children
+    # no return value so callers do not use the result.
+    # parent-child links are derived from _parent_buf during model._finalize() call..
 
 
 def read_node(reader, builder, model, parent=None):
@@ -88,7 +88,10 @@ def read_node(reader, builder, model, parent=None):
             f"Expected '{{' (0x{NODE_OPEN_BRACE:02X}) at pos {reader.tell() - 1}, got 0x{brace:02X}"
         )
 
-    node = SNode(node_id, concept, role_in_parent, parent)
+    # allocate node in models flat arrays so basically no SNode object constructed here
+    parent_idx = None if parent is None else parent._idx
+    idx = model._add_node(node_id, concept, role_in_parent, parent_idx)
+    node = SNode(model, idx)
 
     props_count = reader.read_u16()
     for _ in range(props_count):
@@ -96,7 +99,7 @@ def read_node(reader, builder, model, parent=None):
         value = reader.read_string()
         prop_key = builder.index_2_property.get(prop_index)
         if prop_key is not None:
-            node.properties[prop_key] = value
+            model._set_property(idx, prop_key, value)
 
     user_obj_count = reader.read_u16()
     for _ in range(user_obj_count):
@@ -106,9 +109,9 @@ def read_node(reader, builder, model, parent=None):
     for _ in range(refs_count):
         ref_name, ref = _read_reference(reader, builder, model)
         if ref_name is not None:
-            node.references[ref_name] = ref
+            model._set_reference(idx, ref_name, ref)
 
-    # read children recursively
+    # read children recursively - parent-child links built from parent_idxs during finalize
     read_children(reader, builder, model, node)
 
     brace = reader.read_u8()

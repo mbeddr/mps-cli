@@ -18,6 +18,12 @@ classifiers = [
     "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "numpy>=1.20",
+]
+
+[project.optional-dependencies]
+fast = ["lxml>=4.0"]
 
 [project.urls]
 "Homepage" = "https://github.com/mbeddr/mps-cli"

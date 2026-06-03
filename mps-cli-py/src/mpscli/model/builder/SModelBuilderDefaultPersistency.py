@@ -1,4 +1,3 @@
-
 import xml.etree.ElementTree as ET
 from mpscli.model.builder.SModelBuilderBase import SModelBuilderBase
 
@@ -14,6 +13,7 @@ class SModelBuilderDefaultPersistency(SModelBuilderBase):
 
         for node_xml_node in model_xml_node.findall("node"):
             root_node = self.extract_node(model, node_xml_node, None)
-            model.root_nodes.append(root_node)
+            model._root_idxs.append(root_node._idx)
 
+        model._finalize()
         return model

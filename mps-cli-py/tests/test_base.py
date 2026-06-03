@@ -20,9 +20,9 @@ class TestBase(unittest.TestCase):
         Builds the object model based on MPS models
         """
         SLanguageBuilder.languages = {}
-        builder = SSolutionsRepositoryBuilder()
         # tests should never use the disk cache and they need fresh parses every time
-        builder.USE_CACHE = False
+        SSolutionsRepositoryBuilder.USE_CACHE = False
+        builder = SSolutionsRepositoryBuilder()
         test_data_location = "../mps_test_projects/" + test_data_location
         print("test data location ", test_data_location)
         path = os.path.abspath(test_data_location)

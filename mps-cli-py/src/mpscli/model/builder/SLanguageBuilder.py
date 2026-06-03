@@ -1,5 +1,7 @@
+import warnings
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from threading import Lock
 
 from mpscli.model.SLanguage import SLanguage
 from mpscli.model.SConcept import SConcept
@@ -7,21 +9,36 @@ from mpscli.model.SConcept import SConcept
 
 class SLanguageBuilder:
     languages = {}
+    # protects languages dict and per-language _concepts_by_name dicts..
+    # needed because get_concept is called from multiple threads during warm cache loads so..
+    _lock = Lock()
 
     @classmethod
     def get_language(cls, name, uuid):
-        lan = cls.languages.get(name, None)
-        if lan is None:
-            lan = SLanguage(name, uuid)
-            cls.languages[name] = lan
+        # dict reads are GIL atomic I think so no lock needed on the fast path
+        lan = cls.languages.get(name)
+        if lan is not None:
+            return lan
+        with cls._lock:
+            lan = cls.languages.get(name)
+            if lan is None:
+                lan = SLanguage(name, uuid)
+                cls.languages[name] = lan
         return lan
 
     @classmethod
     def get_concept(cls, language, concept_name, concept_uuid):
-        concept = next((c for c in language.concepts if c.name == concept_name), None)
-        if concept is None:
-            concept = SConcept(concept_name, concept_uuid)
-            language.concepts.append(concept)
+        if not hasattr(language, "_concepts_by_name"):
+            language._concepts_by_name = {c.name: c for c in language.concepts}
+        concept = language._concepts_by_name.get(concept_name)
+        if concept is not None:
+            return concept
+        with cls._lock:
+            concept = language._concepts_by_name.get(concept_name)
+            if concept is None:
+                concept = SConcept(concept_name, concept_uuid)
+                language.concepts.append(concept)
+                language._concepts_by_name[concept_name] = concept
         return concept
 
     @classmethod
@@ -54,39 +71,34 @@ class SLanguageBuilder:
 
     @classmethod
     def load_from_mpl(cls, mpl_path: Path) -> SLanguage:
-        # read a .mpl file and populayte the matching SLanguage with version and aspect models
-        # if the language was already registered via registry (from .mpb parsing), we
-        # update that same object so basically no duplicates are created..
+        # reads a .mpl file and improves the matching SLanguage with its version number and aspect models..
+        # If the language was already registered via a registry section in a .mpb file, get_language() returns
+        # the same object so no duplicate entries are created I guess..
         try:
             return cls._read_and_enrich(mpl_path)
         except Exception as exc:
-            import warnings
-
             warnings.warn(f"Failed to read language from {mpl_path.name}: {exc}")
             return None
 
     @classmethod
     def _read_and_enrich(cls, mpl_path: Path) -> SLanguage:
         root = ET.parse(mpl_path).getroot()
-
         namespace = root.get("namespace", "")
         uuid = root.get("uuid", "")
         version = int(root.get("languageVersion", "0"))
-
-        # get_language does get or create so this safely merges with any already registered entry
         lang = cls.get_language(namespace, uuid)
         lang.language_version = version
         lang.models = cls._load_aspect_models(mpl_path.parent / "models")
-
         return lang
 
     @classmethod
     def _load_aspect_models(cls, models_dir: Path) -> list:
-        # parse every .mpb in the models directory next to the .mpl file
-        # these are the language aspects which is structure,, behavior, editor, constraints, typesystem, etc..
+        # parses every .mpb in the models directory next to the .mpl file.
+        # these are the language aspect models such as the structure, behavior, editor, constraints, typesystem etc.
+        # import is kept local to avoid pulling SModelBuilderBinaryPersistency and all its binary parsing
+        # dependencies into the module at load time..
         if not models_dir.exists():
             return []
-
         from mpscli.model.builder.SModelBuilderBinaryPersistency import (
             SModelBuilderBinaryPersistency,
         )
@@ -98,8 +110,5 @@ class SLanguageBuilder:
                 if model is not None:
                     loaded.append(model)
             except Exception as exc:
-                import warnings
-
                 warnings.warn(f"Failed to parse aspect model {mpb_file.name}: {exc}")
-
         return loaded

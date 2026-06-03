@@ -13,20 +13,24 @@ class SModelBuilderBase:
         self.index_2_reference_role = {}
         self.index_2_imported_model_uuid = {}
 
-    def extract_node(self, my_model, node_xml, parent):
-        root_node_id = node_xml.get("id")
-        root_node_concept = self.index_2_concept[node_xml.get("concept")]
+    def extract_node(self, my_model, node_xml, parent_node):
+        # allocate node in model's flat arrays - no SNode object constructed here.
+        # returns an SNode view (2-slot wrapperr around model+idx)
+        node_id = node_xml.get("id")
+        concept = self.index_2_concept[node_xml.get("concept")]
         child_role_index = node_xml.get("role")
-        if child_role_index is None:
-            child_role = None
-        else:
-            child_role = self.index_2_child_role_in_parent[child_role_index]
-        s_node = SNode(root_node_id, root_node_concept, child_role, parent)
+        role = (
+            None
+            if child_role_index is None
+            else self.index_2_child_role_in_parent[child_role_index]
+        )
+        parent_idx = None if parent_node is None else parent_node._idx
+        idx = my_model._add_node(node_id, concept, role, parent_idx)
+
         for property_xml_node in node_xml.findall("property"):
-            property_role = property_xml_node.get("role")
-            property_value = property_xml_node.get("value")
-            property_name = self.index_2_property[property_role]
-            s_node.properties[property_name] = property_value
+            prop_name = self.index_2_property[property_xml_node.get("role")]
+            my_model._set_property(idx, prop_name, property_xml_node.get("value"))
+
         for ref_xml_node in node_xml.findall("ref"):
             ref_role = ref_xml_node.get("role")
             ref_to = ref_xml_node.get("to")
@@ -34,20 +38,30 @@ class SModelBuilderBase:
                 ref_node_uuid = ref_xml_node.get("node")
                 s_node_ref = SNodeRef(my_model.uuid, ref_node_uuid)
             else:
-                ref_model_index = ref_to[0 : ref_to.find(":")]
-                ref_node_uuid = ref_to[ref_to.find(":") + 1 : len(ref_to)]
-                s_node_ref = SNodeRef(self.index_2_imported_model_uuid[ref_model_index], ref_node_uuid)
-            ref_name = self.index_2_reference_role[ref_role]
-            s_node.references[ref_name] = s_node_ref
-        for child_node_xml in node_xml.findall("node"):
-            child_node = self.extract_node(my_model, child_node_xml, s_node)
-            s_node.children.append(child_node)
+                sep = ref_to.find(":")
+                ref_model_index = ref_to[:sep]
+                ref_node_uuid = ref_to[sep + 1 :]
+                s_node_ref = SNodeRef(
+                    self.index_2_imported_model_uuid[ref_model_index], ref_node_uuid
+                )
+            my_model._set_reference(
+                idx, self.index_2_reference_role[ref_role], s_node_ref
+            )
 
-        return s_node
+        node = SNode(my_model, idx)
+        for child_node_xml in node_xml.findall("node"):
+            # recursive call - child registers its parent_idx via _add_node
+            # no explicit parent.children.append needed I think cuz parent-child links are derived from parent_idxs
+            # during model._finalize()..
+            self.extract_node(my_model, child_node_xml, node)
+
+        return node
+
     @staticmethod
     def is_model_generatable(model_xml_node):
         return any(
-            attribute.get("name") == "doNotGenerate" and attribute.get("value") == "true"
+            attribute.get("name") == "doNotGenerate"
+            and attribute.get("value") == "true"
             for attribute in model_xml_node.findall("attribute")
         )
 
@@ -64,7 +78,7 @@ class SModelBuilderBase:
         for import_xml_node in imports_xml_node.findall("import"):
             import_index = import_xml_node.get("index")
             imported_model_ref = import_xml_node.get("ref")
-            imported_model_uuid = imported_model_ref[0: imported_model_ref.find("(")]
+            imported_model_uuid = imported_model_ref[0 : imported_model_ref.find("(")]
             self.index_2_imported_model_uuid[import_index] = imported_model_uuid
         registry_xml_node = model_xml_node.find("registry")
         for language_xml_node in registry_xml_node.findall("language"):
@@ -74,13 +88,17 @@ class SModelBuilderBase:
             for concept_xml_node in language_xml_node.findall("concept"):
                 concept_id = concept_xml_node.get("id")
                 concept_name = concept_xml_node.get("name")
-                concept = SLanguageBuilder.get_concept(language, concept_name, concept_id)
+                concept = SLanguageBuilder.get_concept(
+                    language, concept_name, concept_id
+                )
                 concept_index = concept_xml_node.get("index")
                 self.index_2_concept[concept_index] = concept
                 for property_xml_node in concept_xml_node.findall("property"):
                     property_name = property_xml_node.get("name")
                     property_index = property_xml_node.get("index")
-                    node_property = SLanguageBuilder.get_property(concept, property_name)
+                    node_property = SLanguageBuilder.get_property(
+                        concept, property_name
+                    )
                     self.index_2_property[property_index] = node_property
                 for child_xml_node in concept_xml_node.findall("child"):
                     child_name = child_xml_node.get("name")

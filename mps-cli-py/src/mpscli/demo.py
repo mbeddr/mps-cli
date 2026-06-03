@@ -9,6 +9,7 @@ Two modes:
     MODE = "test_project": parse a single mps_test_projects directory (original behaviour)
 """
 
+import logging
 import sys
 import time
 from datetime import datetime
@@ -283,6 +284,7 @@ def main() -> None:
         for c in lan.concepts:
             c.print_concept_details()
 
+
 if __name__ == "__main__":
     import multiprocessing
 
@@ -292,5 +294,14 @@ if __name__ == "__main__":
     log_file = f"mps_debug_{datetime.now().strftime('%H%M%S')}.log"
     sys.stdout = open(log_file, "w", encoding="utf-8", buffering=1)
     print(f"Logging to: {log_file}")
+
+    # route library log output (each parse phasee timings and cache progress) to stderr so they appear on
+    # console alongside the summary lines...
+    # format leaves out timestamps and level names to keep the output clean
+    logging.basicConfig(
+        stream=sys.stderr,
+        level=logging.INFO,
+        format="%(message)s",
+    )
 
     main()

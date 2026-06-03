@@ -114,6 +114,7 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
             # and abort entirely but our Python implementation does lenient partial extraction where the node tree
             # is usually intact even when an unusual import reference sub-kind is encountered
             advance_until_after(reader, MODEL_START)
+            model._finalize()
             return model
 
         # 4. MODEL_START
@@ -127,6 +128,40 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
         # 5. Node tree - recursive read_children populates model.root_nodes
         read_children(reader, self, model, None)
 
+        model._finalize()
+        return model
+
+    def build_from_bytes(self, data: bytes, path_hint: str = "<bytes>"):
+        # same as build() but accepts pre-read bytes instead of a file path.. and is used by MpbBatchParser workers
+        # which read bytes from ZipFile before passing to subprocess which in turn avoids
+        # opening the JAR again in the worker.
+        reader = ModelInputStream(data)
+        version, model_uuid, model_name = self._load_header(reader)
+        self.stream_version = version
+        uuid_str = model_uuid or "r:unknown"
+        name_str = model_name or "unknown.model"
+        model = SModel(name_str, uuid_str, False)
+        self.index_2_imported_model_uuid["0"] = uuid_str
+        load_registry(reader, self)
+        try:
+            self._load_model_properties(reader, version)
+        except _UnknownSubKind as e:
+            import warnings
+
+            warnings.warn(
+                f"[build_from_bytes] {path_hint}: {e} - skipped to MODEL_START"
+            )
+            advance_until_after(reader, MODEL_START)
+            model._finalize()
+            return model
+        token = reader.read_u32()
+        if token != MODEL_START:
+            raise RuntimeError(
+                f"Expected MODEL_START (0x{MODEL_START:08X}), "
+                f"got 0x{token:08X} at pos {reader.tell() - 4}"
+            )
+        read_children(reader, self, model, None)
+        model._finalize()
         return model
 
     def _load_header(self, reader: ModelInputStream):

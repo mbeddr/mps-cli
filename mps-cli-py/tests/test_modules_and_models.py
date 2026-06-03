@@ -27,12 +27,16 @@ class TestModulesAndModels(TestBase):
                 "r:ca00da79-915e-4bdb-9c30-11a341daf779",
             ),
             (
+                # binary models live inside jars and are now read directly from ZIP bytes without extracting to disk. the original approach extracted JARs to a
+                # Previously we extracted jar to temp folder which gave each model a real on disk path but
+                # the new approach reads bytes in memory so path_to_model_file is not set
+                # and so None signals that the path check should be skipped for  this case..
                 "mps_cli_lanuse_binary",
                 "mps.cli.lanuse.library_top",
-                "mps_test_projects/mps_cli_lanuse_binary/mps_cli_lanuse_file_per_root_jar/mps.cli.lanuse.library_top",
+                "mps_cli_lanuse_file_per_root",
                 "mps.cli.lanuse.library_second",
                 "mps.cli.lanuse.library_top.authors_top",
-                "mps_test_projects/mps_cli_lanuse_binary/mps_cli_lanuse_file_per_root_jar/mps.cli.lanuse.library_top/models/mps.cli.lanuse.library_top.authors_top/.model",
+                None,
                 "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed",
             ),
         ]
@@ -70,7 +74,9 @@ class TestModulesAndModels(TestBase):
             library_top_authors_top_model_uuid, library_top_authors_top.uuid
         )
 
-        self.assertTrue(
-            library_top_authors_top_path
-            in library_top_authors_top.path_to_model_file.as_posix()
-        )
+        # None means the model came from a jar and has no on disk path to check...
+        if library_top_authors_top_path is not None:
+            self.assertTrue(
+                library_top_authors_top_path
+                in library_top_authors_top.path_to_model_file.as_posix()
+            )

@@ -5,13 +5,14 @@ write them as a markdown file that is transferrable to HTML
 """
 
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(1, "..")
 
 MODE = "plugins"
-PLUGINS_PATH = r"C:\Temp\plugins"
+PLUGINS_PATH = r"C:\Users\emb-venkpri\vemb\arch"
 TEST_PROJECT = r"..\..\mps_test_projects\mps_cli_binary_persistency_language"
 OUTPUT_FILE = Path(f"language_concepts_{datetime.now().strftime('%H%M%S')}.md")
 
@@ -224,16 +225,27 @@ def build_markdown(languages_with_structure: list) -> str:
 def main():
     path = PLUGINS_PATH if MODE == "plugins" else TEST_PROJECT
 
-    print(f"Parsing ({MODE}): {path}", flush=True)
+    msg = f"Parsing ({MODE}): {path}"
+    print(msg, flush=True)
+    sys.stderr.write(msg + "\n")
+    sys.stderr.flush()
+
+    t0 = time.perf_counter()
     builder = SSolutionsRepositoryBuilder()
-    builder.USE_CACHE = False
     builder.build(path)
+    elapsed = time.perf_counter() - t0
+
+    timing_msg = f"Parsing complete in {elapsed:.1f}s"
+    print(f"\n{timing_msg}")
+    sys.stderr.write(timing_msg + "\n")
+    sys.stderr.flush()
 
     languages_with_structure = collect_languages_with_structure()
 
-    print(
-        f"Languages with structure aspect: {len(languages_with_structure)}", flush=True
-    )
+    lang_msg = f"Languages with structure aspect: {len(languages_with_structure)}"
+    print(lang_msg, flush=True)
+    sys.stderr.write(lang_msg + "\n")
+    sys.stderr.flush()
 
     for lang, structure in languages_with_structure:
         print(f"\n{'=' * 60}")
@@ -258,8 +270,22 @@ def main():
 
     md = build_markdown(languages_with_structure)
     OUTPUT_FILE.write_text(md, encoding="utf-8")
-    print(f"\nmarkdown file written: {OUTPUT_FILE}", flush=True)
+    done_msg = f"markdown file written: {OUTPUT_FILE}"
+    print(f"\n{done_msg}", flush=True)
+    sys.stderr.write(done_msg + "\n")
+    sys.stderr.flush()
 
 
 if __name__ == "__main__":
+    import multiprocessing
+
+    multiprocessing.freeze_support()
+
+    # redirect stdout to a log file so all output goess to disk..
+    log_file = f"lang_extraction_{datetime.now().strftime('%H%M%S')}.log"
+    sys.stdout = open(log_file, "w", encoding="utf-8", buffering=1)
+    print(f"Logging to: {log_file}")
+    sys.stderr.write(f"Logging to: {log_file}\n")
+    sys.stderr.flush()
+
     main()

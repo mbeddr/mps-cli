@@ -2,12 +2,18 @@
 
 This project provides a Python library which parses MPS files and builds the object model.
 
+### Requirements
+
+- numpy >= 1.20
+
 ### Features
 The following features are available:
 - load MPS files (*.mpsr, *.mps, *.mpb, *.jar) and expose their content as Python object model 
   - solutions, models, root nodes, nodes, children, references, properties
 - extract the meta-information and expose it as Python object model
   - list of languages, their concepts with information about properties, references, children
+- JAR files are read directly without extracting to disk
+- Parsed models are cached in '~/.mps_cli_cache' directory and invalidated automatically when JARs change on disk
 
 The core of the Python object model is given by the following classes:
 - `SNode` - represents a node

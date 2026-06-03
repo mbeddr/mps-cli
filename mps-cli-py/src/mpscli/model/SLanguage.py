@@ -5,6 +5,9 @@ class SLanguage:
         self.uuid = uuid
         self.concepts = []
 
+        # internal dict for concept lookup by name
+        self._concepts_by_name = {}
+
         # version number from the languageVersion attribute in the .mpl file..
         # stays 0 if this language was only seen via registry (never had its .mpl read)
         self.language_version = 0
@@ -15,10 +18,8 @@ class SLanguage:
         self.models = []
 
     def find_concept_by_name(self, name):
-        for c in self.concepts:
-            if c.name == name:
-                return c
-        return None
+        # lookupp via internal dict
+        return self._concepts_by_name.get(name)
 
     def find_model_by_name(self, suffix):
         # find a specific aspect model by the last segment of its name.
