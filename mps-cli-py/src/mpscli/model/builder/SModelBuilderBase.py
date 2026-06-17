@@ -30,13 +30,14 @@ class SModelBuilderBase:
         for ref_xml_node in node_xml.findall("ref"):
             ref_role = ref_xml_node.get("role")
             ref_to = ref_xml_node.get("to")
+            resolve_info = ref_xml_node.get("resolve")
             if ref_to is None:
                 ref_node_uuid = ref_xml_node.get("node")
-                s_node_ref = SNodeRef(my_model.uuid, ref_node_uuid)
+                s_node_ref = SNodeRef(my_model.uuid, ref_node_uuid, resolve_info)
             else:
                 ref_model_index = ref_to[0 : ref_to.find(":")]
                 ref_node_uuid = ref_to[ref_to.find(":") + 1 : len(ref_to)]
-                s_node_ref = SNodeRef(self.index_2_imported_model_uuid[ref_model_index], ref_node_uuid)
+                s_node_ref = SNodeRef(self.index_2_imported_model_uuid[ref_model_index], ref_node_uuid, resolve_info)
             ref_name = self.index_2_reference_role[ref_role]
             s_node.references[ref_name] = s_node_ref
         for child_node_xml in node_xml.findall("node"):
