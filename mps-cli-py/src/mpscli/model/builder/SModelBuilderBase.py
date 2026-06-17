@@ -52,7 +52,7 @@ class SModelBuilderBase:
         )
 
     @staticmethod
-    def extract_imported_models(model_xml_node):
+    def extract_imported_models(self, model_xml_node):
         imported_models = {}
         imports_xml_node = model_xml_node.find("imports")
         if imports_xml_node is None:
@@ -63,6 +63,7 @@ class SModelBuilderBase:
             imported_model_ref = import_xml_node.get("ref")
             imported_model_uuid = imported_model_ref[0 : imported_model_ref.find("(")]
             imported_models[import_index] = imported_model_uuid
+            self.index_2_imported_model_uuid[import_index] = imported_model_uuid        
 
         return imported_models
 
@@ -71,13 +72,11 @@ class SModelBuilderBase:
         model_name = model_ref[model_ref.find("(") + 1 : len(model_ref) - 1]
         model_uuid = model_ref[0 : model_ref.find("(")]
         model_is_do_not_generate = self.is_model_generatable(model_xml_node)
-        model_imported_models = self.extract_imported_models(model_xml_node)
+        model_imported_models = self.extract_imported_models(self, model_xml_node)
         model = SModel(model_name, model_uuid, model_is_do_not_generate, model_imported_models)
         return model
 
-    def extract_imports_and_registry(self, model_xml_node):
-        for import_index, imported_model_uuid in self.extract_imported_models(model_xml_node).items():
-            self.index_2_imported_model_uuid[import_index] = imported_model_uuid
+    def extract_registry(self, model_xml_node):
         registry_xml_node = model_xml_node.find("registry")
         for language_xml_node in registry_xml_node.findall("language"):
             language_id = language_xml_node.get("id")
