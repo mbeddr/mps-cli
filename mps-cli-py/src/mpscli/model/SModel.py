@@ -2,9 +2,10 @@
 
 class SModel:
 
-    def __init__(self, name, uuid, is_do_not_generate):
+    def __init__(self, name, uuid, is_do_not_generate, imported_models=None):
         self.name = name
         self.uuid = uuid
+        self.imported_models = {} if imported_models is None else imported_models
         self.root_nodes = []
         self.path_to_model_file = ""
         self.is_do_not_generate = is_do_not_generate
