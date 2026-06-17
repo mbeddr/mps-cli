@@ -93,12 +93,12 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         uuid_str = model_uuid or "r:unknown"
         name_str = model_name or "unknown.model"
-        model = SModel(name_str, uuid_str, False)
 
         # Import index 0 is always the current model's own uuid..
         # Java: SModel.importedModels() lists imports starting from index 1 and index 0 is implicitly
         # the model itself used when resolving REF_THIS_MODEL
         self.index_2_imported_model_uuid["0"] = uuid_str
+        model = SModel(name_str, uuid_str, False)
 
         # 2. registry - builds concept/property/reference/child index maps
         load_registry(reader, self)
@@ -115,6 +115,12 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
             # is usually intact even when an unusual import reference sub-kind is encountered
             advance_until_after(reader, MODEL_START)
             return model
+
+        model.imported_models = {
+            index: imported_model_uuid
+            for index, imported_model_uuid in self.index_2_imported_model_uuid.items()
+            if index != "0"
+        }
 
         # 4. MODEL_START
         token = reader.read_u32()

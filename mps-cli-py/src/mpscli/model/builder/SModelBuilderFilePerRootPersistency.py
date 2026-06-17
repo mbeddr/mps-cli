@@ -22,7 +22,7 @@ class SModelBuilderFilePerRootPersistency(SModelBuilderBase):
     def extract_root_node(self, model, mpsr_file):
         tree = ET.parse(mpsr_file)
         model_xml_node = tree.getroot()
-        self.extract_imports_and_registry(model_xml_node)
+        self.extract_registry(model_xml_node)
         root_node = model_xml_node.find("node")
         return self.extract_node(model, root_node, None)
 
