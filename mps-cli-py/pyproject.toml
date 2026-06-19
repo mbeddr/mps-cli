@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mps-cli"
-version = "0.6.0"
+version = "0.5.1"
 authors = [
   { name="Daniel Ratiu", email="ratiud@googlemail.com" },
   { name="Prithvi Venkat", email="prithvi.rvce@gmail.com" },
