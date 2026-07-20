@@ -37,7 +37,11 @@ class SModelBuilderBase:
             else:
                 ref_model_index = ref_to[0 : ref_to.find(":")]
                 ref_node_uuid = ref_to[ref_to.find(":") + 1 : len(ref_to)]
-                s_node_ref = SNodeRef(self.index_2_imported_model_uuid[ref_model_index], ref_node_uuid, resolve_info)
+                s_node_ref = SNodeRef(
+                    self.index_2_imported_model_uuid[ref_model_index],
+                    ref_node_uuid,
+                    resolve_info,
+                )
             ref_name = self.index_2_reference_role[ref_role]
             s_node.references[ref_name] = s_node_ref
         for child_node_xml in node_xml.findall("node"):
@@ -45,10 +49,12 @@ class SModelBuilderBase:
             s_node.children.append(child_node)
 
         return s_node
+
     @staticmethod
     def is_model_generatable(model_xml_node):
         return any(
-            attribute.get("name") == "doNotGenerate" and attribute.get("value") == "true"
+            attribute.get("name") == "doNotGenerate"
+            and attribute.get("value") == "true"
             for attribute in model_xml_node.findall("attribute")
         )
 
@@ -64,7 +70,7 @@ class SModelBuilderBase:
             imported_model_ref = import_xml_node.get("ref")
             imported_model_uuid = imported_model_ref[0 : imported_model_ref.find("(")]
             imported_models[import_index] = imported_model_uuid
-            self.index_2_imported_model_uuid[import_index] = imported_model_uuid        
+            self.index_2_imported_model_uuid[import_index] = imported_model_uuid
 
         return imported_models
 
@@ -74,7 +80,9 @@ class SModelBuilderBase:
         model_uuid = model_ref[0 : model_ref.find("(")]
         model_is_do_not_generate = self.is_model_generatable(model_xml_node)
         model_imported_models = self.extract_imported_models(self, model_xml_node)
-        model = SModel(model_name, model_uuid, model_is_do_not_generate, model_imported_models)
+        model = SModel(
+            model_name, model_uuid, model_is_do_not_generate, model_imported_models
+        )
         return model
 
     def extract_registry(self, model_xml_node):
@@ -86,13 +94,17 @@ class SModelBuilderBase:
             for concept_xml_node in language_xml_node.findall("concept"):
                 concept_id = concept_xml_node.get("id")
                 concept_name = concept_xml_node.get("name")
-                concept = SLanguageBuilder.get_concept(language, concept_name, concept_id)
+                concept = SLanguageBuilder.get_concept(
+                    language, concept_name, concept_id
+                )
                 concept_index = concept_xml_node.get("index")
                 self.index_2_concept[concept_index] = concept
                 for property_xml_node in concept_xml_node.findall("property"):
                     property_name = property_xml_node.get("name")
                     property_index = property_xml_node.get("index")
-                    node_property = SLanguageBuilder.get_property(concept, property_name)
+                    node_property = SLanguageBuilder.get_property(
+                        concept, property_name
+                    )
                     self.index_2_property[property_index] = node_property
                 for child_xml_node in concept_xml_node.findall("child"):
                     child_name = child_xml_node.get("name")

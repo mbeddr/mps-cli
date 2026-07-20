@@ -4,6 +4,10 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    
+    // Restrict formatting strictly to modified lines across the workspace
+    "editor.formatOnSaveMode": "modifications",
+
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true

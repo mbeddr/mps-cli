@@ -3,6 +3,7 @@ import unittest
 from mpscli.model.builder.SSolutionsRepositoryBuilder import (
     SSolutionsRepositoryBuilder,
 )
+from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 
 REPO_PATH = "../mps_test_projects/mps_cli_binary_persistency_generated/"
 SOLUTION_NAME = "mps.cli.lanuse.library_top.binary_persistency"
@@ -11,9 +12,9 @@ AUTH_MODEL_NAME = "mps.cli.lanuse.library_top.binary_persistency.authors_top"
 
 
 def _build_repo():
-    builder = SSolutionsRepositoryBuilder()
-    builder.USE_CACHE = False
-    return builder.build(REPO_PATH)
+    SLanguageBuilder.languages = {}
+    SSolutionsRepositoryBuilder.USE_CACHE = False
+    return SSolutionsRepositoryBuilder().build(REPO_PATH)
 
 
 class TestBinaryRepository(unittest.TestCase):

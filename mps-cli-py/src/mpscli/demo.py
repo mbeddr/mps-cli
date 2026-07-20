@@ -13,6 +13,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+import logging
 
 sys.path.insert(1, "..")
 
@@ -283,6 +284,7 @@ def main() -> None:
         for c in lan.concepts:
             c.print_concept_details()
 
+
 if __name__ == "__main__":
     import multiprocessing
 
@@ -291,6 +293,7 @@ if __name__ == "__main__":
     # redirect stdout to a log file
     log_file = f"mps_debug_{datetime.now().strftime('%H%M%S')}.log"
     sys.stdout = open(log_file, "w", encoding="utf-8", buffering=1)
+    logging.basicConfig(level=logging.INFO, stream=sys.stderr, format="%(message)s")
     print(f"Logging to: {log_file}")
 
     main()

@@ -9,8 +9,9 @@ AUTHORS_ROOT_UUID = "4Yb5JA31NUu"
 
 
 def _repo(location):
+    # set as class variable before construction so __init__ sees it and skips ParseCache
+    SSolutionsRepositoryBuilder.USE_CACHE = False
     builder = SSolutionsRepositoryBuilder()
-    builder.USE_CACHE = False
     return builder.build(f"../mps_test_projects/{location}")
 
 
