@@ -1,6 +1,6 @@
 # tests/test_mpb_batch_parser.py
 #
-# Tests for MpbBatchParser - the phase2 binary model parser. Covers parse_from_jars serial/parallel threshold, 
+# Tests for MpbBatchParser - the phase2 binary model parser. Covers parse_from_jars serial/parallel threshold,
 # lang_pairs registration and concept registration in the main process for small batches and result completeness..
 
 import os
@@ -21,6 +21,14 @@ _BINARY_PROJECT = os.path.abspath(
     "../mps_test_projects/mps_cli_binary_persistency_generated"
 )
 _BINARY_JAR_DIR = Path(_BINARY_PROJECT)
+
+# known values from the binary test project
+_EXPECTED_MPB_COUNT = 13
+_EXPECTED_LANGUAGES = {
+    "mps.cli.landefs.library",
+    "mps.cli.landefs.people",
+    "jetbrains.mps.lang.core",
+}
 
 
 def _find_jars(path: Path):
@@ -58,7 +66,8 @@ class TestMpbBatchParserParseFromJars(unittest.TestCase):
     def test_parse_from_jars_returns_all_members(self):
         parser = MpbBatchParser()
         results = parser.parse_from_jars(self._scan.all_mpb_members)
-        self.assertEqual(len(results), len(self._scan.all_mpb_members))
+        # binary project has exactly 13 mpb members
+        self.assertEqual(len(results), _EXPECTED_MPB_COUNT)
 
     def test_parse_from_jars_no_none_models(self):
         parser = MpbBatchParser()
@@ -72,7 +81,9 @@ class TestMpbBatchParserParseFromJars(unittest.TestCase):
         SLanguageBuilder.languages = {}
         parser = MpbBatchParser()
         parser.parse_from_jars(self._scan.all_mpb_members)
-        self.assertTrue(len(SLanguageBuilder.languages) > 0)
+        registered = set(SLanguageBuilder.languages.keys())
+        for lang in _EXPECTED_LANGUAGES:
+            self.assertIn(lang, registered)
 
     def test_parse_from_jars_empty_returns_empty_dict(self):
         parser = MpbBatchParser()
@@ -83,13 +94,13 @@ class TestMpbBatchParserParseFromJars(unittest.TestCase):
         parser = MpbBatchParser()
         results = parser.parse_from_jars(self._scan.all_mpb_members)
         for key, model in results.items():
-            self.assertTrue(len(model.uuid) > 0, f"model uuid empty for {key}")
+            self.assertNotEqual(model.uuid, "", f"model uuid empty for {key}")
 
     def test_parse_from_jars_models_have_name(self):
         parser = MpbBatchParser()
         results = parser.parse_from_jars(self._scan.all_mpb_members)
         for key, model in results.items():
-            self.assertTrue(len(model.name) > 0, f"model name empty for {key}")
+            self.assertNotEqual(model.name, "", f"model name empty for {key}")
 
     def test_parallel_threshold_default_is_5(self):
         self.assertEqual(MpbBatchParser.PARALLEL_THRESHOLD, 5)

@@ -17,6 +17,11 @@ _BINARY_PROJECT = os.path.abspath(
 )
 _BINARY_JAR_DIR = Path(_BINARY_PROJECT)
 
+# known solution in the binary test project
+_EXPECTED_SOLUTION = "mps.cli.lanuse.library_top.binary_persistency"
+# known language in the binary test project
+_EXPECTED_LANGUAGE = "mps.cli.landefs.library"
+
 
 def _find_jars(path: Path):
     return list(path.rglob("*.jar"))
@@ -32,17 +37,22 @@ class TestScanJar(unittest.TestCase):
         # at least one har in the binary test project should be relevant
         results = [scan_jar(jp) for jp in self._jars]
         non_none = [r for r in results if r is not None]
-        self.assertTrue(len(non_none) > 0)
+        # binary project has 4 jars and all are relevant
+        self.assertEqual(len(non_none), 4)
 
     def test_scan_jar_result_has_solution_infos(self):
         results = [r for r in (scan_jar(jp) for jp in self._jars) if r is not None]
         all_solutions = [si for r in results for si in r.solution_infos]
-        self.assertTrue(len(all_solutions) > 0)
+        # binary project has 2 solution_infos across all JARs
+        self.assertEqual(len(all_solutions), 2)
+        solution_names = {si.solution.name for si in all_solutions}
+        self.assertIn(_EXPECTED_SOLUTION, solution_names)
 
     def test_scan_jar_result_has_mpb_members(self):
         results = [r for r in (scan_jar(jp) for jp in self._jars) if r is not None]
         all_mpb = [m for r in results for m in r.all_mpb_members]
-        self.assertTrue(len(all_mpb) > 0)
+        # binary project has exactly 13 mpb members across all JARs
+        self.assertEqual(len(all_mpb), 13)
 
     def test_scan_jar_solution_has_name_and_uuid(self):
         results = [r for r in (scan_jar(jp) for jp in self._jars) if r is not None]
@@ -98,7 +108,15 @@ class TestScanAllJars(unittest.TestCase):
     def test_scan_all_jars_returns_combined_result(self):
         result = scan_all_jars(self._jars, workers=4)
         self.assertIsInstance(result, JarScanResult)
-        self.assertTrue(len(result.solution_infos) > 0)
+        # binary project has 2 solution_infos across 4 JARs
+        self.assertEqual(len(result.solution_infos), 2)
+        solution_names = {si.solution.name for si in result.solution_infos}
+        self.assertIn(_EXPECTED_SOLUTION, solution_names)
+
+    def test_scan_all_jars_expected_mpb_count(self):
+        result = scan_all_jars(self._jars, workers=4)
+        # binary project has 13 mpb members across 4 JARs
+        self.assertEqual(len(result.all_mpb_members), 13)
 
     def test_scan_all_jars_no_duplicate_mpb_members(self):
         result = scan_all_jars(self._jars, workers=4)
@@ -109,7 +127,8 @@ class TestScanAllJars(unittest.TestCase):
 
     def test_scan_all_jars_collects_jar_stats(self):
         result = scan_all_jars(self._jars, workers=4)
-        self.assertTrue(len(result.jar_stats) > 0)
+        # should have stats for all 4 JARs
+        self.assertEqual(len(result.jar_stats), 4)
 
     def test_scan_all_jars_empty_list_returns_empty_result(self):
         result = scan_all_jars([], workers=4)

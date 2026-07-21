@@ -1,6 +1,6 @@
 # tests/test_disk_model_loader.py
 #
-# Tests for DiskModelLoader - the phase3 disk FPR/MPS parser. Verifies load_disk_solutions correctness, 
+# Tests for DiskModelLoader - the phase3 disk FPR/MPS parser. Verifies load_disk_solutions correctness,
 # preread_disk_bytes, warm cache path, lang_pairs accumulation and model count consistency withh test projects.
 
 import os
@@ -27,6 +27,22 @@ _BINARY_PROJECT = os.path.abspath(
     "../mps_test_projects/mps_cli_binary_persistency_generated"
 )
 
+# known values from mps_cli_lanuse_file_per_root
+_FPR_EXPECTED_SOLUTIONS = {
+    "mps.cli.lanuse.library_top",
+    "mps.cli.lanuse.library_second",
+}
+_FPR_EXPECTED_MODEL = "mps.cli.lanuse.library_top.authors_top"
+_FPR_EXPECTED_MODEL_UUID = "r:ec5f093b-9d83-43a1-9b41-b5952da8b1ed"
+
+# known values from mps_cli_lanuse_default_persistency
+_MPS_EXPECTED_SOLUTIONS = {
+    "mps.cli.lanuse.library_top.default_persistency",
+    "mps.cli.lanuse.library_second.default_persistency",
+}
+_MPS_EXPECTED_MODEL = "mps.cli.lanuse.library_top.default_persistency.authors_top"
+_MPS_EXPECTED_MODEL_UUID = "r:ca00da79-915e-4bdb-9c30-11a341daf779"
+
 
 def _msd_paths(project_dir):
     return sorted(Path(project_dir).rglob("*.msd"))
@@ -41,7 +57,9 @@ class TestLoadDiskSolutionsFpr(unittest.TestCase):
 
     def test_returns_solutions(self):
         solutions = load_disk_solutions(self._msd_paths)
-        self.assertTrue(len(solutions) > 0)
+        # fpr project has exactly 2 solutions
+        self.assertEqual(len(solutions), 2)
+        self.assertEqual({s.name for s in solutions}, _FPR_EXPECTED_SOLUTIONS)
 
     def test_solutions_have_names(self):
         solutions = load_disk_solutions(self._msd_paths)
@@ -51,14 +69,21 @@ class TestLoadDiskSolutionsFpr(unittest.TestCase):
     def test_solutions_have_models(self):
         solutions = load_disk_solutions(self._msd_paths)
         total_models = sum(len(s.models) for s in solutions)
-        self.assertGreater(total_models, 0)
+        # library_top has 2 models, library_second has 1 model
+        self.assertEqual(total_models, 3)
+
+    def test_expected_model_present_with_correct_uuid(self):
+        solutions = load_disk_solutions(self._msd_paths)
+        all_models = {m.name: m for s in solutions for m in s.models}
+        self.assertIn(_FPR_EXPECTED_MODEL, all_models)
+        self.assertEqual(all_models[_FPR_EXPECTED_MODEL].uuid, _FPR_EXPECTED_MODEL_UUID)
 
     def test_models_have_root_nodes(self):
         solutions = load_disk_solutions(self._msd_paths)
         all_models = [m for s in solutions for m in s.models]
-        # at least some models should have root nodes
+        # at least the authors_top model should have root nodes
         models_with_nodes = [m for m in all_models if len(m.root_nodes) > 0]
-        self.assertTrue(len(models_with_nodes) > 0)
+        self.assertGreaterEqual(len(models_with_nodes), 1)
 
     def test_models_have_uuid(self):
         solutions = load_disk_solutions(self._msd_paths)
@@ -69,7 +94,8 @@ class TestLoadDiskSolutionsFpr(unittest.TestCase):
     def test_registers_languages(self):
         SLanguageBuilder.languages = {}
         load_disk_solutions(self._msd_paths)
-        self.assertTrue(len(SLanguageBuilder.languages) > 0)
+        self.assertIn("mps.cli.landefs.library", SLanguageBuilder.languages)
+        self.assertIn("jetbrains.mps.lang.core", SLanguageBuilder.languages)
 
 
 class TestLoadDiskSolutionsMps(unittest.TestCase):
@@ -81,12 +107,21 @@ class TestLoadDiskSolutionsMps(unittest.TestCase):
 
     def test_returns_solutions_for_mps_project(self):
         solutions = load_disk_solutions(self._msd_paths)
-        self.assertTrue(len(solutions) > 0)
+        # mps project has exactly 2 solutions
+        self.assertEqual(len(solutions), 2)
+        self.assertEqual({s.name for s in solutions}, _MPS_EXPECTED_SOLUTIONS)
 
     def test_mps_solutions_have_models(self):
         solutions = load_disk_solutions(self._msd_paths)
         total_models = sum(len(s.models) for s in solutions)
-        self.assertGreater(total_models, 0)
+        # library_top.default_persistency has 2 models, library_second has one
+        self.assertEqual(total_models, 3)
+
+    def test_expected_mps_model_present_with_correct_uuid(self):
+        solutions = load_disk_solutions(self._msd_paths)
+        all_models = {m.name: m for s in solutions for m in s.models}
+        self.assertIn(_MPS_EXPECTED_MODEL, all_models)
+        self.assertEqual(all_models[_MPS_EXPECTED_MODEL].uuid, _MPS_EXPECTED_MODEL_UUID)
 
 
 class TestLoadDiskSolutionsEdgeCases(unittest.TestCase):

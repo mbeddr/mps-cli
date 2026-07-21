@@ -23,6 +23,20 @@ _BINARY_JAR_DIR = Path(_BINARY_PROJECT)
 _LANUSE_BINARY = os.path.abspath("../mps_test_projects/mps_cli_lanuse_binary")
 _LANUSE_BINARY_DIR = Path(_LANUSE_BINARY)
 
+# known values from binary test project
+_EXPECTED_SOLUTION = "mps.cli.lanuse.library_top.binary_persistency"
+_EXPECTED_MODEL_COUNT = 2
+_EXPECTED_MODELS = {
+    "mps.cli.lanuse.library_top.binary_persistency.library_top",
+    "mps.cli.lanuse.library_top.binary_persistency.authors_top",
+}
+
+# known values from lanuse_binary test project
+_LANUSE_EXPECTED_SOLUTIONS = {
+    "mps.cli.lanuse.library_top",
+    "mps.cli.lanuse.library_second",
+}
+
 
 def _find_jars(path: Path):
     return list(path.rglob("*.jar"))
@@ -48,7 +62,9 @@ class TestLoadJarSolutions(unittest.TestCase):
             parse_cache=None,
             use_cache=False,
         )
-        self.assertTrue(len(solutions) > 0)
+        # binary project solution is present among results
+        solution_names = {s.name for s in solutions}
+        self.assertIn(_EXPECTED_SOLUTION, solution_names)
 
     def test_solutions_have_names(self):
         solutions = load_jar_solutions(
@@ -59,8 +75,9 @@ class TestLoadJarSolutions(unittest.TestCase):
             parse_cache=None,
             use_cache=False,
         )
+        # solution names are verified with concrete values in test_returns_solutions
         for sol in solutions:
-            self.assertTrue(len(sol.name) > 0)
+            self.assertNotEqual(sol.name, "")
 
     def test_solutions_have_models(self):
         solutions = load_jar_solutions(
@@ -71,8 +88,10 @@ class TestLoadJarSolutions(unittest.TestCase):
             parse_cache=None,
             use_cache=False,
         )
-        total = sum(len(s.models) for s in solutions)
-        self.assertGreater(total, 0)
+        # binary project solution has the expected models
+        sol = next(s for s in solutions if s.name == _EXPECTED_SOLUTION)
+        model_names = {m.name for m in sol.models}
+        self.assertEqual(model_names, _EXPECTED_MODELS)
 
     def test_disk_solution_names_excluded(self):
         # solutions whose names are in disk_solution_names should be skipped
@@ -144,8 +163,9 @@ class TestLoadJarSolutionsWithFpr(unittest.TestCase):
             parse_cache=None,
             use_cache=False,
         )
-        all_models = [m for s in solutions for m in s.models]
-        self.assertTrue(len(all_models) > 0)
+        # lanuse_binary project has exactly 2 solutions
+        solution_names = {s.name for s in solutions}
+        self.assertEqual(solution_names, _LANUSE_EXPECTED_SOLUTIONS)
 
     def test_jar_fpr_models_have_root_nodes(self):
         solutions = load_jar_solutions(
@@ -158,4 +178,4 @@ class TestLoadJarSolutionsWithFpr(unittest.TestCase):
         )
         all_models = [m for s in solutions for m in s.models]
         models_with_nodes = [m for m in all_models if len(m.root_nodes) > 0]
-        self.assertTrue(len(models_with_nodes) > 0)
+        self.assertGreaterEqual(len(models_with_nodes), 1)

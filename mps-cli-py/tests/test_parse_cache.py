@@ -1,7 +1,7 @@
 # tests/test_parse_cache.py
 #
-# Tests for ParseCache specifically the persistent SModel cache used by phase3 (disk_solutions) and phase4 (jar_xml). 
-# Verifies save/load round-trips and mtime+size staleness evictionn, lang_pairs storagee and re-registration and 
+# Tests for ParseCache specifically the persistent SModel cache used by phase3 (disk_solutions) and phase4 (jar_xml).
+# Verifies save/load round-trips and mtime+size staleness evictionn, lang_pairs storagee and re-registration and
 # atomic write behaviour..
 
 import pickle
@@ -240,3 +240,52 @@ class TestParseCachePublicApi(unittest.TestCase):
         # should complete without error when directories do not exist yet
         cache.load_sync({"fake/jar.jar": (1.0, 100)})
         cache.load_disk_sync({"fake/sol.msd": (1.0, 100)})
+
+
+class TestSSolutionsRepositoryBuilderWithCache(unittest.TestCase):
+    # verifies that USE_CACHE=True (the default) works correctly end-to-end.. This exercises the ParseCache
+    # jar_xml and disk_solutions paths with a real test project.
+    def setUp(self):
+        SLanguageBuilder.languages = {}
+        # ignore_cleanup_errors so background cache-flush threads that are still writing do not cause
+        # tearDown to fail on Windows where open files cannot be deleted
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_builder_with_cache_enabled_produces_correct_results(self):
+        import os
+        from mpscli.model.builder.SSolutionsRepositoryBuilder import (
+            SSolutionsRepositoryBuilder,
+        )
+        from mpscli.model.builder.utils.ParseCache import ParseCache, _FileCache
+
+        # patch ParseCache to use temp dir so we do not touch ~/.mps_cli_cache
+        cache_root = Path(self._tmp.name)
+        original_init = ParseCache.__init__
+
+        def patched_init(self_pc, workers=None):
+            w = workers or 4
+            self_pc._xml = _FileCache(cache_root / "jar_xml", w)
+            self_pc._disk = _FileCache(cache_root / "disk_solutions", w)
+
+        ParseCache.__init__ = patched_init
+        try:
+            SSolutionsRepositoryBuilder.USE_CACHE = True
+            builder = SSolutionsRepositoryBuilder()
+            project = os.path.abspath(
+                "../mps_test_projects/mps_cli_lanuse_file_per_root"
+            )
+            repo = builder.build(project)
+            # should produce correct results with cache enabled
+            self.assertEqual(len(repo.solutions), 2)
+            self.assertIsNotNone(
+                repo.find_solution_by_name("mps.cli.lanuse.library_top")
+            )
+            self.assertIsNotNone(
+                repo.find_solution_by_name("mps.cli.lanuse.library_second")
+            )
+        finally:
+            ParseCache.__init__ = original_init
+            SSolutionsRepositoryBuilder.USE_CACHE = False
