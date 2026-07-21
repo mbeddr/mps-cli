@@ -4,13 +4,14 @@ SSolutionsRepositoryBuilder - builds an SRepository from a directory tree.
 
 import logging
 import os
+import re
 import sys
 import threading
 import warnings
 from timeit import default_timer as timer
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional
 
 from mpscli.model.SRepository import SRepository
 from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
@@ -57,7 +58,17 @@ class SSolutionsRepositoryBuilder:
             cache_save_fn=self._disk_cache.save if self._disk_cache else None,
         )
 
-    def build(self, paths):
+    def build(self, paths, jar_filter: Optional[str] = None):
+        # paths cann be:
+        # : a single string or a directory path or an individual .jar file path
+        # : a list of stringsor any mix of directory paths and individual .jar file paths
+        # Also, jar_filter is an optional regex pattern applied to jar filenames when scanning directories
+        # and individual .jar paths passed directly are always included regardless
+        # jar_filter examples:
+        # - builder.build("/path/to/plugins/")
+        # - builder.build("/path/to/specific.jar")
+        # - builder.build(["/path/to/dir", "/path/to/other.jar"])
+        # - builder.build("/path/to/plugins/", jar_filter=r"org\.something123\..*")
         if isinstance(paths, str):
             paths = [paths]
         elif not isinstance(paths, list):
@@ -65,15 +76,41 @@ class SSolutionsRepositoryBuilder:
             sys.exit(1)
 
         start = timer()
-        valid_paths = [p for p in paths if self._is_valid_path(p)]
-        if valid_paths:
-            self.collect_solutions_from_jars(valid_paths)
+        dir_paths, jar_paths = self._resolve_paths(paths, jar_filter)
+        if dir_paths or jar_paths:
+            self.collect_solutions_from_jars(
+                dir_paths, extra_jars=jar_paths, jar_filter=jar_filter
+            )
         self.repo.languages = list(SLanguageBuilder.languages.values())
         stop = timer()
         _log.info("duration for parsing modules: %.2f seconds", stop - start)
         if self._parse_cache:
             self._parse_cache.flush()
         return self.repo
+
+    def _resolve_paths(self, paths: List[str], jar_filter: Optional[str]):
+        # split input paths into directories and individual jar files so that directories are validated
+        # and returned for recursive scanning.
+        dir_paths = []
+        jar_paths = []
+        compiled = re.compile(jar_filter) if jar_filter else None
+
+        for path in paths:
+            p = Path(path)
+            if not p.exists():
+                warnings.warn(f"Path not found: {path}")
+                continue
+            if p.is_file():
+                if p.suffix == ".jar":
+                    jar_paths.append(p)
+                else:
+                    _log.error("path %s is not a directory or a .jar file", path)
+            elif p.is_dir():
+                dir_paths.append(path)
+            else:
+                _log.error("path %s is not a directory or a .jar file", path)
+
+        return dir_paths, jar_paths
 
     def collect_solutions_from_sources(
         self, paths, msd_paths=None, preread_bytes=None, workers=1, msd_stats=None
@@ -116,12 +153,27 @@ class SSolutionsRepositoryBuilder:
             "[diag] phase3 disk: %.1fs -- %d msd files", timer() - t0, len(msd_paths)
         )
 
-    def collect_solutions_from_jars(self, paths):
+    def collect_solutions_from_jars(
+        self,
+        paths: List[str],
+        extra_jars: Optional[List[Path]] = None,
+        jar_filter: Optional[str] = None,
+    ):
         workers = self.JAR_THREADS or min(os.cpu_count() or 4, 16)
+        compiled_filter = re.compile(jar_filter) if jar_filter else None
 
         # phase1: scan ZIP central directories.
         t0 = timer()
-        jar_paths = [jp for path in paths for jp in Path(path).rglob("*.jar")]
+        # collect jars from directories applying jar_filter to filenames if provided
+        jar_paths = []
+        for path in paths:
+            for jp in Path(path).rglob("*.jar"):
+                if compiled_filter is None or compiled_filter.search(jp.name):
+                    jar_paths.append(jp)
+        # add individually specified jar files directly so that they bypass jar_filter
+        if extra_jars:
+            jar_paths.extend(extra_jars)
+
         scan = scan_all_jars(jar_paths, workers)
         t1 = timer()
         _log.info(
