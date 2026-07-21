@@ -135,6 +135,56 @@ class SModelBuilderBinaryPersistency(SModelBuilderBase):
 
         return model
 
+    def build_from_bytes(self, data: bytes, path_hint: str = ""):
+        reader = ModelInputStream(data)
+
+        # 1. header: extracts stream version andd model UUID and model name
+        version, model_uuid, model_name = self._load_header(reader)
+        self.stream_version = version
+
+        uuid_str = model_uuid or "r:unknown"
+        name_str = model_name or "unknown.model"
+
+        # Import index 0 is always the current models own uuid..
+        # Java's SModel.importedModels() lists imports starting from index 1 and index 0 is implicitly
+        # the model itself used when resolving REF_THIS_MODEL
+        self.index_2_imported_model_uuid["0"] = uuid_str
+        model = SModel(name_str, uuid_str, False)
+
+        # 2. registry: builds concept/property/reference/child index maps
+        load_registry(reader, self)
+
+        # 3. model properties - used languages, devkits, imports
+        try:
+            self._load_model_properties(reader, version)
+        except _UnknownSubKind as e:
+            import warnings
+
+            warnings.warn(
+                f"[build_from_bytes] {path_hint}: {e} - skipped to MODEL_START"
+            )
+            advance_until_after(reader, MODEL_START)
+            return model
+
+        model.imported_models = {
+            index: imported_model_uuid
+            for index, imported_model_uuid in self.index_2_imported_model_uuid.items()
+            if index != "0"
+        }
+
+        # 4. model start..
+        token = reader.read_u32()
+        if token != MODEL_START:
+            raise RuntimeError(
+                f"Expected MODEL_START (0x{MODEL_START:08X}), "
+                f"got 0x{token:08X} at pos {reader.tell() - 4}"
+            )
+
+        # 5. Node tree: recursive read_children populates model.root_nodes..
+        read_children(reader, self, model, None)
+
+        return model
+
     def _load_header(self, reader: ModelInputStream):
         # Mirrors BinaryPersistence.loadHeader() in:
         # https://github.com/JetBrains/MPS/blob/6236c4073eac3cde78506add6b0fa90601d76009/core/persistence/source/jetbrains/mps/persistence/binary/BinaryPersistence.java

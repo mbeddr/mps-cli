@@ -2,15 +2,16 @@ from tests.test_base import TestBase
 from mpscli.model.builder.SSolutionsRepositoryBuilder import (
     SSolutionsRepositoryBuilder,
 )
+from mpscli.model.builder.SLanguageBuilder import SLanguageBuilder
 
 
 class TestBinaryRepositoryCompleteness(TestBase):
     REPO_PATH = "../mps_test_projects/mps_cli_binary_persistency_generated/"
 
     def _build_repo(self):
-        builder = SSolutionsRepositoryBuilder()
-        builder.USE_CACHE = False
-        return builder.build(self.REPO_PATH)
+        SLanguageBuilder.languages = {}
+        SSolutionsRepositoryBuilder.USE_CACHE = False
+        return SSolutionsRepositoryBuilder().build(self.REPO_PATH)
 
     def test_repository_builds(self):
         repo = self._build_repo()

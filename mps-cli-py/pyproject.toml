@@ -19,6 +19,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "parameterized",
+]
+
 [project.urls]
 "Homepage" = "https://github.com/mbeddr/mps-cli"
 "Bug Tracker" = "https://github.com/mbeddr/mps-cli/issues"

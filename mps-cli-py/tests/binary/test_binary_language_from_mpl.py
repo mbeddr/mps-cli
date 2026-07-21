@@ -11,8 +11,9 @@ TEST_PROJECT = "../mps_test_projects/mps_cli_binary_persistency_language"
 
 
 def _build_repo():
+    # set as class variable before construction so __init__ sees it and skips ParseCache
+    SSolutionsRepositoryBuilder.USE_CACHE = False
     builder = SSolutionsRepositoryBuilder()
-    builder.USE_CACHE = False
     return builder.build(str(TEST_PROJECT))
 
 

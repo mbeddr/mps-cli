@@ -12,8 +12,9 @@ MARK_TWAIN_CONCEPT = "mps.cli.landefs.people.structure.Person"
 
 
 def _build_repo(repo_path):
+    # set as class variable before construction so __init__ sees it and skips ParseCache
+    SSolutionsRepositoryBuilder.USE_CACHE = False
     builder = SSolutionsRepositoryBuilder()
-    builder.USE_CACHE = False
     return builder.build(repo_path)
 
 
