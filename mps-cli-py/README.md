@@ -17,12 +17,12 @@ The core of the Python object model is given by the following classes:
 
 ### Create an MPS node reference URL
 
-Use `create_node_reference_url` with the model UUID, model name, and node UUID from the parsed model. The URL points to `127.0.0.1:63342` by default; pass `port` to use another local MPS port.
+Use `create_node_reference_url` with the containing model and any node from the parsed model. The URL points to `127.0.0.1:63342` by default; pass `port` to use another local MPS port.
 
 ```python
 from mpscli.model.NodeReferenceUrl import create_node_reference_url
 
-url = create_node_reference_url(model.uuid, model.name, node.uuid)
+url = create_node_reference_url(model, node)
 ```
 
 ### Limitations
