@@ -5,7 +5,7 @@ This project provides a Python library which parses MPS files and builds the obj
 ### Features
 The following features are available:
 - load MPS files (*.mpsr, *.mps, *.mpb, *.jar) and expose their content as Python object model 
-  - solutions, models, root nodes, nodes, children, references, properties
+  - solutions, models, root nodes, nodes, children, references, properties, node reference urls
 - extract the meta-information and expose it as Python object model
   - list of languages, their concepts with information about properties, references, children
 
@@ -14,16 +14,6 @@ The core of the Python object model is given by the following classes:
 - `SModel` - represents a model
 - `SSolution` - represents a solution
 - `SRepository` - the repository containing the parsed model and meta-information
-
-### Create an MPS node reference URL
-
-Use `create_node_reference_url` with the containing model and any node from the parsed model. The URL points to `127.0.0.1:63342` by default; pass `port` to use another local MPS port.
-
-```python
-from mpscli.model.NodeReferenceUrl import create_node_reference_url
-
-url = create_node_reference_url(model, node)
-```
 
 ### Limitations
 The library has currently the following limitations:
