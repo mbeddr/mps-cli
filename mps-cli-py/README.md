@@ -15,6 +15,16 @@ The core of the Python object model is given by the following classes:
 - `SSolution` - represents a solution
 - `SRepository` - the repository containing the parsed model and meta-information
 
+### Create an MPS node reference URL
+
+Use `create_node_reference_url` with the model UUID, model name, and node UUID from the parsed model. The URL points to `127.0.0.1:63342` by default; pass `port` to use another local MPS port.
+
+```python
+from mpscli.model.NodeReferenceUrl import create_node_reference_url
+
+url = create_node_reference_url(model.uuid, model.name, node.uuid)
+```
+
 ### Limitations
 The library has currently the following limitations:
 - the recovered language information reflects only the used language in the loaded solutions
